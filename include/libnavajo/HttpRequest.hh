@@ -63,7 +63,7 @@ class HttpRequest
   HttpRequestCookiesMap cookies;
   HttpRequestParametersMap parameters;
   std::string sessionId;
-  MPFD::Parser *mutipartContentParser;
+  MPFD::Parser *multipartContentParser;
   const char *mimeType;
   std::vector<uint8_t> *payload;
 
@@ -403,7 +403,7 @@ class HttpRequest
       this->clientSockData=client;
       this->mimeType=mimeType ;
       this->payload=payload ;
-      this->mutipartContentParser=parser;
+      this->multipartContentParser=parser;
 
       setParams( params );
       
@@ -417,14 +417,14 @@ class HttpRequest
     * is there a multipart content in the request ?    
     * @return true or false
     */    
-    inline bool isMultipartContent() const { return mutipartContentParser != NULL; };
+    inline bool isMultipartContent() const { return multipartContentParser != NULL; };
     
     /**********************************************************************/
     /**
     * get the MPFD parser   
     * @return a pointer to the MPFDparser instance
     */    
-    inline MPFD::Parser *getMPFDparser() { return mutipartContentParser; };
+    inline MPFD::Parser *getMPFDparser() { return multipartContentParser; };
 
     /**********************************************************************/
     /**

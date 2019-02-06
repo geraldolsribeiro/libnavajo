@@ -195,7 +195,7 @@ void WebSocketClient::receivingThread()
             msgLength=ntohll(*tmp);
           }
         }
-        
+
         if ( (msgContent = (unsigned char*)malloc(msgLength*sizeof(unsigned char))) == NULL )
         {
           char logBuffer[500];

@@ -6,7 +6,7 @@
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -31,7 +31,7 @@
   /***********************************************************************/
   /**
   * LogFile - initialize
-  */ 
+  */
 
   void LogFile::initialize()
   {
@@ -49,8 +49,8 @@
   /***********************************************************************/
   /**
   * LogFile - constructor
-  */ 
-  
+  */
+
   LogFile::LogFile(const char *f)
   {
     strncpy (filename, f, 30);
@@ -61,7 +61,7 @@
   /***********************************************************************/
   /**
   * ~LogRecorder - destructor
-  */   
+  */
 
   LogFile::~LogFile()
   {

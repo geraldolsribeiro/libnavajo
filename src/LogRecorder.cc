@@ -6,7 +6,7 @@
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -35,7 +35,7 @@
 
     time( &ltime );
     gmtime_r(&ltime, &today);
-  
+
     std::string ret_str;
     strftime( tmpbuf, 128, "[%Y-%m-%d %H:%M:%S] >  ", &today );
     ret_str=tmpbuf;
@@ -55,8 +55,8 @@
 
     if (l != NVJ_DEBUG || debugMode)
     {
-      for( std::list<LogOutput *>::iterator it=logOutputsList_.begin(); 
-           it!=logOutputsList_.end(); 
+      for( std::list<LogOutput *>::iterator it=logOutputsList_.begin();
+           it!=logOutputsList_.end();
      it++ )
       {
         std::string msg;
@@ -67,11 +67,11 @@
 
         if ((*it)->isWithEndline())
           msg+= std::string("\n") ;
-     
+
         (*it)->append(l, msg, details);
       }
-    }   
-    
+    }
+
     pthread_mutex_unlock( &log_mutex );
 
   }
@@ -93,8 +93,8 @@
   */
   void LogRecorder::removeLogOutputs()
   {
-    for( std::list<LogOutput *>::iterator it=logOutputsList_.begin(); 
-           it!=logOutputsList_.end(); 
+    for( std::list<LogOutput *>::iterator it=logOutputsList_.begin();
+           it!=logOutputsList_.end();
      it++ )
       delete *it;
 
@@ -104,18 +104,18 @@
   /***********************************************************************/
   /**
   * LogRecorder - base constructor
-  */ 
+  */
 
   LogRecorder::LogRecorder()
   {
     debugMode=false;
     pthread_mutex_init(&log_mutex, NULL);
   }
-  
+
   /***********************************************************************/
   /**
   * ~LogRecorder - destructor
-  */   
+  */
   LogRecorder::~LogRecorder()
   {
     removeLogOutputs();

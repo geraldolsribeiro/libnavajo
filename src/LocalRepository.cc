@@ -1,12 +1,12 @@
 //********************************************************
 /**
- * @file  LocalRepository.cc 
+ * @file  LocalRepository.cc
  *
  * @brief Handles local web repository
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -29,7 +29,7 @@ LocalRepository::LocalRepository(const std::string& alias, const std::string& di
 {
   char resolved_path[4096];
 
-  pthread_mutex_init(&_mutex, NULL); 
+  pthread_mutex_init(&_mutex, NULL);
 
   aliasName=alias;
   while (aliasName.size() && aliasName[0]=='/') aliasName.erase(0, 1);
@@ -63,13 +63,13 @@ bool LocalRepository::loadFilename_dir (const std::string& alias, const std::str
 
     dir = opendir (fullPath.c_str());
     if (dir == NULL) return false;
-    while ((entry = readdir (dir)) != NULL ) 
+    while ((entry = readdir (dir)) != NULL )
     {
       if (!strcmp(entry->d_name,".") || !strcmp(entry->d_name,"..") || !strlen(entry->d_name)) continue;
 
       std::string filepath=fullPath+'/'+entry->d_name;
 
-      if (stat(filepath.c_str(), &s) == -1) 
+      if (stat(filepath.c_str(), &s) == -1)
       {
         NVJ_LOG->append(NVJ_ERROR,std::string("LocalRepository - stat error reading file '")+filepath+"': "+std::string(strerror(errno)));
         continue;
@@ -111,7 +111,7 @@ bool LocalRepository::getFile(HttpRequest* request, HttpResponse *response)
 
   if ( url.compare(0, aliasName.size(), aliasName) || !fileExist(url) )
     { pthread_mutex_unlock( &_mutex); return false; };
-    
+
   pthread_mutex_unlock( &_mutex);
 
   std::string resultat, filename=url;
@@ -145,7 +145,7 @@ bool LocalRepository::getFile(HttpRequest* request, HttpResponse *response)
     NVJ_LOG->append(NVJ_ERROR, logBuffer);
     return false;
   }
-  
+
   fclose (pFile);
   response->setContent (webpage, webpageLen);
   return true;

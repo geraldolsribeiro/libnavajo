@@ -6,7 +6,7 @@
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -32,7 +32,7 @@
   */
   void LogStdOutput::append(const NvjLogSeverity& l, const std::string& message, const std::string& details)
   {
-   
+
     switch (l)
     {
       case NVJ_DEBUG:
@@ -51,7 +51,7 @@
         fprintf(stderr, RED "%s\n" RESET, message.c_str());
         break;
       case NVJ_FATAL:
-        fprintf(stderr, RED "%s\n" RESET,message.c_str()); 
+        fprintf(stderr, RED "%s\n" RESET,message.c_str());
         break;
     }
   }
@@ -59,7 +59,7 @@
   /***********************************************************************/
   /**
   *  initialize the logoutput
-  */ 
+  */
 
   void LogStdOutput::initialize()
   {
@@ -69,8 +69,8 @@
   /***********************************************************************/
   /**
   * LogStdOutput - constructor
-  */ 
-  
+  */
+
   LogStdOutput::LogStdOutput()
   {
   }
@@ -78,7 +78,7 @@
   /***********************************************************************/
   /**
   * ~LogRecorder - destructor
-  */   
+  */
 
   LogStdOutput::~LogStdOutput()
   {

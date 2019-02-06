@@ -1,12 +1,12 @@
 //********************************************************
 /**
- * @file  navajoPrecompiler.cc 
+ * @file  navajoPrecompiler.cc
  *
  * @brief Tool to generate a C++ PrecompiledRepository class
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -86,21 +86,21 @@ bool loadFilename_dir (const std::string& path, const std::string& subpath="")
 
     dir = opendir (fullPath.c_str());
     if (dir == NULL) return false;
-    while ((entry = readdir (dir)) != NULL ) 
+    while ((entry = readdir (dir)) != NULL )
     {
       if (!strcmp(entry->d_name,".") || !strcmp(entry->d_name,"..") || !strlen(entry->d_name)) continue;
 
       std::string filepath=fullPath+'/'+entry->d_name;
 
-      if (stat(filepath.c_str(), &s) == -1) 
+      if (stat(filepath.c_str(), &s) == -1)
       {
         perror("stat");
         exit(EXIT_FAILURE);
       }
 
       int type=s.st_mode & S_IFMT;
-      if ( (type == S_IFREG || type == S_IFLNK) 
-          && (std::find(listExcludeDir.begin(), listExcludeDir.end(), spath+entry->d_name) == listExcludeDir.end()) )    
+      if ( (type == S_IFREG || type == S_IFLNK)
+          && (std::find(listExcludeDir.begin(), listExcludeDir.end(), spath+entry->d_name) == listExcludeDir.end()) )
         filenamesVec.push_back(spath+entry->d_name);
 
       if ( type == S_IFDIR
@@ -117,10 +117,10 @@ bool loadFilename_dir (const std::string& path, const std::string& subpath="")
 void parseDirectory( const std::string& dirPath )
 {
   char resolved_path[4096];
-  
+
   if (realpath(dirPath.c_str(), resolved_path) == NULL)
     return ;
-  
+
   if (!loadFilename_dir(resolved_path))
     return ;
 }
@@ -131,7 +131,7 @@ void parseDirectory( const std::string& dirPath )
 * @param argc the number of web files
 * @param argv the filenames (with absolute path)
 * @return 0 upon exit success
-*/ 
+*/
 int main (int argc, char *argv[])
 {
   if (argc <= 1)
@@ -141,8 +141,8 @@ int main (int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  int param = 1; 
-  
+  int param = 1;
+
   std::string directory=argv[param];
   while (directory.length() && directory[directory.length()-1] == '/')
     directory = directory.substr(0,directory.length()-1);
@@ -151,13 +151,13 @@ int main (int argc, char *argv[])
     for (; param < argc; param++)
       listExcludeDir.push_back(std::string(argv[param]));
 
-  parseDirectory(directory); 
+  parseDirectory(directory);
 
   if (!filenamesVec.size())
   {
-    fprintf(stderr, "ERROR: The directory is empty or not found !\n"); 
+    fprintf(stderr, "ERROR: The directory is empty or not found !\n");
     exit(EXIT_FAILURE);
-  }  
+  }
 
   ConversionEntry* conversionTable= (ConversionEntry*) malloc( filenamesVec.size() * sizeof(ConversionEntry));
 
@@ -195,10 +195,10 @@ int main (int argc, char *argv[])
     };
 
     std::string outFilename = filenamesVec[i];
-    std::replace( outFilename.begin(), outFilename.end(), '.', '_'); 
-    std::replace( outFilename.begin(), outFilename.end(), '/', '_'); 
-    std::replace( outFilename.begin(), outFilename.end(), ' ', '_'); 
-    std::replace( outFilename.begin(), outFilename.end(), '-', '_'); 
+    std::replace( outFilename.begin(), outFilename.end(), '.', '_');
+    std::replace( outFilename.begin(), outFilename.end(), '/', '_');
+    std::replace( outFilename.begin(), outFilename.end(), ' ', '_');
+    std::replace( outFilename.begin(), outFilename.end(), '-', '_');
 
     fprintf (stdout, "  static const unsigned char %s[] =\n", outFilename.c_str());
     fprintf (stdout, "  {\n" );
@@ -211,9 +211,9 @@ int main (int argc, char *argv[])
     (*(conversionTable+i)).varName = new std::string(outFilename);
     (*(conversionTable+i)).length = lSize;
   }
-  
+
   fprintf (stdout, "}\n\n");
-  
+
   fprintf (stdout, "PrecompiledRepository::IndexMap PrecompiledRepository::indexMap;\n");
   fprintf (stdout, "std::string PrecompiledRepository::location;\n");
   fprintf (stdout,"\nvoid PrecompiledRepository::initIndexMap()\n{\n");

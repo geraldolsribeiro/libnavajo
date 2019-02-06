@@ -116,8 +116,8 @@ class WebServer
     volatile size_t threadsPoolSize;
     std::string device;
     
-    std::string mutipartTempDirForFileUpload;
-    long mutipartMaxCollectedDataLength;
+    std::string multipartTempDirForFileUpload;
+    long multipartMaxCollectedDataLength;
     
     bool sslEnabled;
     std::string sslCertFile, sslCaFile, sslCertPwd;
@@ -234,7 +234,7 @@ class WebServer
     * Set the path to store uploaded files on disk. Used to set the MPFD function.
     * @param pathdir: path to a writtable directory
     */   
-    inline void setMutipartTempDirForFileUpload(const std::string& pathdir) { mutipartTempDirForFileUpload = pathdir; };
+    inline void setMultipartTempDirForFileUpload(const std::string& pathdir) { multipartTempDirForFileUpload = pathdir; };
 
     /**
     * Set the size of internal MPFD buffer.
@@ -246,7 +246,7 @@ class WebServer
     * without any buffering.
     * @param max: the internal buffer size
     */
-    inline void setMutipartMaxCollectedDataLength(const long& max) { mutipartMaxCollectedDataLength = max; };    
+    inline void setMultipartMaxCollectedDataLength(const long& max) { multipartMaxCollectedDataLength = max; };    
     
     /**
     * Add a web repository (containing web pages)
