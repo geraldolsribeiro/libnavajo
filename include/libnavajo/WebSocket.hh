@@ -1,12 +1,12 @@
 //****************************************************************************
 /**
- * @file  WebSocket.hh 
+ * @file  WebSocket.hh
  *
  * @brief The Http WebSocket class
  *
  * @author T.Descombes (descombes@lpsc.in2p3.fr)
  *
- * @version 1	
+ * @version 1
  * @date 27/01/16
  */
 //****************************************************************************
@@ -66,7 +66,7 @@ class WebSocket
     * @param request: the http request object
     * @param message: the message
     * @param fin: is the current message finished ?
-    */ 
+    */
     virtual void onTextMessage(WebSocketClient* client, const std::string &message, const bool fin)
     { };
 
@@ -76,16 +76,16 @@ class WebSocket
     * @param message: the binary message
     * @param len: the message length
     * @param fin: is the current message finished ?
-    */ 
+    */
     virtual void onBinaryMessage(WebSocketClient* client, const unsigned char* message, size_t len, const bool fin)
     { };
-    
+
     /**
     * Callback on new pong message (should came after a ping message)
     * @param request: the http request object
     * @param message: the message
     * @param len: the message length
-    */     
+    */
     virtual void onPongCtrlFrame(WebSocketClient* client, const unsigned char* message, size_t len)
     { /* should check application data received is the same than in the ping message */ };
 
@@ -95,15 +95,15 @@ class WebSocket
     * @param message: the message
     * @param len: the message length
     * @return true to send an automatic pong reply message
-    */     
+    */
     virtual bool onPingCtrlFrame(WebSocketClient* client, const unsigned char* message, size_t len)
     { return true; };
-    
+
     /**
     * Callback on client close notification
     * @param request: the http request object
     * @return true to send an automatic close reply message
-    */ 
+    */
     virtual bool onCloseCtrlFrame(WebSocketClient* client, const unsigned char* message, size_t len)
     { return true; };
 

@@ -1,12 +1,12 @@
 //****************************************************************************
 /**
- * @file  WebRepository.hh 
+ * @file  WebRepository.hh
  *
  * @brief Web Repository handler (abstract class)
  *
  * @author T.Descombes (descombes@lpsc.in2p3.fr)
  *
- * @version 1	
+ * @version 1
  * @date 27/01/15
  */
 //****************************************************************************

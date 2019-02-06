@@ -6,7 +6,7 @@
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -23,22 +23,22 @@
 
 
   /**
-  * LogFile - LogOutput 
+  * LogFile - LogOutput
   */
   class LogFile : public LogOutput
   {
     public:
       LogFile(const char *filename);
       ~LogFile();
-  
+
       void append(const NvjLogSeverity& l, const std::string& m, const std::string& details="");
       void initialize();
-  
+
     private:
       char filename[30];
       std::ofstream *file;
-  
+
   };
-  
+
 
 #endif

@@ -1,12 +1,12 @@
 //********************************************************
 /**
- * @file  LogRecorder.hh 
+ * @file  LogRecorder.hh
  *
  * @brief Log Manager class
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -41,7 +41,7 @@
       /**
       * getInstance - return/create a static logRecorder object
       * \return theLogRecorder - static log recorder
-      */   
+      */
       inline static LogRecorder *getInstance()
       {
 	      if (theLogRecorder == NULL)
@@ -52,12 +52,12 @@
       /**
       * freeInstance - free the static logRecorder object
       */
-      
+
       static void freeInstance()
-      {  
+      {
 	      if (theLogRecorder != NULL)
 	        delete theLogRecorder;
-		
+
 	      theLogRecorder=NULL;
       }
       void setDebugMode(bool d=true) { debugMode=d; };
@@ -66,7 +66,7 @@
 
       void append(const NvjLogSeverity& l, const std::string& msg, const std::string& details="");
       inline void appendUniq(const NvjLogSeverity& l, const std::string& msg, const std::string& details="")
-      { 
+      {
 	      std::set<std::string>::iterator it;
 	      it=uniqLog.find(msg+details);
 	      if (it==uniqLog.end())
@@ -99,8 +99,8 @@
       std::list<LogOutput *> logOutputsList_;
 
       static LogRecorder *theLogRecorder;
-            
+
   };
-  
+
 
 #endif

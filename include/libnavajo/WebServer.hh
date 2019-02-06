@@ -1,16 +1,16 @@
 //********************************************************
 /**
- * @file  WebServer.hh 
+ * @file  WebServer.hh
  *
  * @brief WebServer
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1	
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
- 
+
 #ifndef WEBSERVER_HH_
 #define WEBSERVER_HH_
 
@@ -84,12 +84,12 @@ class WebServer
     void poolThreadProcessing();
 
     bool httpdAuth;
-    
+
     volatile bool exiting;
     volatile size_t exitedThread;
     volatile int server_sock [ 3 ];
     volatile size_t nbServerSock;
-    
+
     const static char authStr[];
     const static char authBearerStr[];
 
@@ -108,17 +108,17 @@ class WebServer
     static void* startThread(void* );
     void threadProcessing();
     void exit();
-    
+
     static std::string webServerName;
     volatile bool disableIpV4, disableIpV6;
     volatile ushort socketTimeoutInSecond;
     volatile ushort tcpPort;
     volatile size_t threadsPoolSize;
     std::string device;
-    
+
     std::string multipartTempDirForFileUpload;
     long multipartMaxCollectedDataLength;
-    
+
     bool sslEnabled;
     std::string sslCertFile, sslCaFile, sslCertPwd;
     std::vector<std::string> authLoginPwdList;
@@ -140,23 +140,23 @@ class WebServer
 
   public:
     WebServer();
-    
+
     /**
     * Set the web server name in the http header
     * @param name: the new name
-    */ 
+    */
     inline void setWebServerName(const std::string& name) { webServerName = name; }
-    
+
     /**
-    * Set the size of the listener thread pool. 
+    * Set the size of the listener thread pool.
     * @param nbThread: the number of thread available (Default value: 64)
-    */ 
+    */
     inline void setThreadsPoolSize(const size_t nbThread) { threadsPoolSize = nbThread; };
 
     /**
-    * Set the tcp port to listen. 
+    * Set the tcp port to listen.
     * @param p: the port number, from 1 to 65535 (Default value: 8080)
-    */     
+    */
     inline void setServerPort(const ushort p) { tcpPort = p; };
 
     /**
@@ -166,17 +166,17 @@ class WebServer
     inline void setSocketTimeoutInSecond(const ushort dur) { socketTimeoutInSecond=dur; };
 
     /**
-    * Set the device to use (work on linux only). 
+    * Set the device to use (work on linux only).
     * @param d: the device name
-    */   
+    */
     inline void setDevice(const char* d) { device = d; };
-    
+
     /**
     * Enabled or disabled HTTPS
     * @param ssl: boolean. SSL connections are used if ssl is true.
     * @param certFile: the path to cert file
     * @param certPwd: optional certificat password
-    */   
+    */
     inline void setUseSSL(bool ssl, const char* certFile = "", const char* certPwd = "")
         { sslEnabled = ssl; sslCertFile = certFile; sslCertPwd = certPwd; };
 
@@ -194,14 +194,14 @@ class WebServer
     /**
     * Restricted X509 authentification to a DN user list. Add this given DN.
     * @param dn: user certificate DN
-    */ 
+    */
     inline void addAuthPeerDN(const char* dn) { authDnList.push_back(std::string(dn)); };
 
     /**
     * Enabled http authentification for a given login/password list
     * @param login: user login
     * @param pass : user password
-    */ 
+    */
     inline void addLoginPass(const char* login, const char* pass) { authLoginPwdList.push_back(std::string(login)+':'+std::string(pass)); };
 
     /**
@@ -233,84 +233,84 @@ class WebServer
     /**
     * Set the path to store uploaded files on disk. Used to set the MPFD function.
     * @param pathdir: path to a writtable directory
-    */   
+    */
     inline void setMultipartTempDirForFileUpload(const std::string& pathdir) { multipartTempDirForFileUpload = pathdir; };
 
     /**
     * Set the size of internal MPFD buffer.
     * The buffer is used to store temporary information while parsing field
     * names and other data that identified by any boundaries. In theory some
-    * bad man can give you lots of unboundered and eat all your memory. To 
-    * except this situation you should tell Parser maximum buffer size. 
+    * bad man can give you lots of unboundered and eat all your memory. To
+    * except this situation you should tell Parser maximum buffer size.
     * Note that file content is transferred directly to disk (of selected)
     * without any buffering.
     * @param max: the internal buffer size
     */
-    inline void setMultipartMaxCollectedDataLength(const long& max) { multipartMaxCollectedDataLength = max; };    
-    
+    inline void setMultipartMaxCollectedDataLength(const long& max) { multipartMaxCollectedDataLength = max; };
+
     /**
     * Add a web repository (containing web pages)
     * @param repo : a pointer to a WebRepository instance
-    */  
+    */
     void addRepository(WebRepository* repo) { webRepositories.push_back(repo); };
 
     /**
     * Add a websocket
     * @param endpoint : websocket endpoint
     * @param websocket : WebSocket instance
-    */  
+    */
     void addWebSocket(const std::string endPoint, WebSocket* websocket) { webSocketEndPoints[endPoint]=websocket; };
-    
+
     /**
     * IpV4 hosts only
-    */  
+    */
     inline void listenIpV4only() { disableIpV6=true; };
-    
+
     /**
     * IpV6 hosts only
-    */  
+    */
     inline void listenIpV6only() { disableIpV4=true; };
 
     /**
-    * set network access restriction to webserver. 
+    * set network access restriction to webserver.
     * @param ipnet: an IpNetwork of allowed web client to add
-    */   
-    inline void addHostsAllowed(const IpNetwork &ipnet) { hostsAllowed.push_back(ipnet); };    
-    
+    */
+    inline void addHostsAllowed(const IpNetwork &ipnet) { hostsAllowed.push_back(ipnet); };
+
     /**
-    * Get the list of http client peer IP address. 
+    * Get the list of http client peer IP address.
     * @return a map of every IP address and last connection to the webserver
-    */ 
+    */
     inline std::map<IpAddress,time_t>& getPeerIpHistory() { return peerIpHistory; };
 
     /**
     * Get the list of http client DN (work with X509 authentification)
     * @return a map of every DN and last connection to the webserver
-    */ 
+    */
     inline std::map<std::string,time_t>& getPeerDnHistory() { return peerDnHistory; };
- 
+
     /**
     * startService: the webserver starts
-    */ 
+    */
     void startService()
     {
       NVJ_LOG->append(NVJ_INFO, "WebServer: Service is starting !");
       create_thread( &threadWebServer, WebServer::startThread, this );
     };
-    
+
     /**
     * stopService: the webserver stops
-    */ 
-    void stopService() 
+    */
+    void stopService()
     {
       NVJ_LOG->append(NVJ_INFO, "WebServer: Service is stopping !");
       exit();
       threadWebServer=0;
     };
-    
+
     /**
     * wait until the webserver is stopped
-    */ 
+    */
     void wait()
     {
       wait_for_thread(threadWebServer);
@@ -318,7 +318,7 @@ class WebServer
 
     /**
     * is the webserver runnning ?
-    */ 
+    */
     bool isRunning()
     {
       return threadWebServer != 0;

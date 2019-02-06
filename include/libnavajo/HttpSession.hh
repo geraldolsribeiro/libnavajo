@@ -1,12 +1,12 @@
 //****************************************************************************
 /**
- * @file  HttpSession.hh 
+ * @file  HttpSession.hh
  *
  * @brief The Http Sessions Manager class
  *
  * @author T.Descombes (descombes@lpsc.in2p3.fr)
  *
- * @version 1	
+ * @version 1
  * @date 27/01/15
  */
 //****************************************************************************
@@ -42,10 +42,10 @@ class HttpSession
   typedef std::map <std::string, std::map <std::string, SessionAttribute>* > HttpSessionsContainerMap;
 
   static HttpSessionsContainerMap sessions;
-  static pthread_mutex_t sessions_mutex; 
+  static pthread_mutex_t sessions_mutex;
   static time_t lastExpirationSearchTime;
   static time_t sessionLifeTime;
-  
+
   public:
 
     inline static void setSessionLifeTime(const time_t sec) { sessionLifeTime = sec; };
@@ -67,7 +67,7 @@ class HttpSession
       do
       {
         id.clear();
-        for(size_t i = 0; i < idLength; ++i) 
+        for(size_t i = 0; i < idLength; ++i)
           id+=elements[rand()%(nbElements - 1)];
       }
       while (find(id));
@@ -78,7 +78,7 @@ class HttpSession
       time_t *expiration=(time_t *)malloc(sizeof(time_t));
       *expiration=time(NULL)+sessionLifeTime;
       setAttribute(id, "session_expiration", expiration);
-      
+
       // look for expired session (max every minute)
       if (time(NULL) > lastExpirationSearchTime + 60)
       {
@@ -86,7 +86,7 @@ class HttpSession
         lastExpirationSearchTime = time(NULL);
       }
     };
-    
+
     /**********************************************************************/
 
     static void updateExpiration(const std::string& id)
@@ -144,9 +144,9 @@ class HttpSession
         removeAllAttribute(attributesMap);
         delete attributesMap;
         sessions.erase(it++);
-      }    
+      }
     }
-    
+
     static bool find(const std::string& id)
     {
 
@@ -159,9 +159,9 @@ class HttpSession
 
       return res;
     }
-    
+
     /**********************************************************************/
-    
+
     static void remove(const std::string& sid)
     {
       pthread_mutex_lock( &sessions_mutex );
@@ -240,7 +240,7 @@ class HttpSession
     }
 
     /**********************************************************************/
-    
+
     static void removeAllAttribute( std::map <std::string, SessionAttribute>* attributesMap)
     {
       std::map <std::string, SessionAttribute>::iterator iter = attributesMap->begin();
@@ -255,7 +255,7 @@ class HttpSession
     }
 
     /**********************************************************************/
-    
+
     static void removeAttribute( const std::string &sid, const std::string &name )
     {
       pthread_mutex_lock( &sessions_mutex );
@@ -263,8 +263,8 @@ class HttpSession
       if (it == sessions.end()) { pthread_mutex_unlock( &sessions_mutex ); return; }
       std::map <std::string, SessionAttribute>* attributesMap=it->second;
       std::map <std::string, SessionAttribute>::iterator it2 = attributesMap->find(name);
-      if ( it2 != attributesMap->end() ) 
-      { 
+      if ( it2 != attributesMap->end() )
+      {
         if (it2->second.ptr != NULL)
         {
           if (it2->second.type==SessionAttribute::OBJECT)
@@ -274,17 +274,17 @@ class HttpSession
         }
         attributesMap->erase(it2);
       }
-      pthread_mutex_unlock( &sessions_mutex ); 
+      pthread_mutex_unlock( &sessions_mutex );
     }
 
     /**********************************************************************/
-    
+
     static std::vector<std::string> getAttributeNames( const std::string &sid )
     {
       pthread_mutex_lock( &sessions_mutex );
       std::vector<std::string> res;
       HttpSessionsContainerMap::iterator it = sessions.find(sid);
-      if (it != sessions.end()) 
+      if (it != sessions.end())
       {
         std::map <std::string, SessionAttribute>* attributesMap=it->second;
         std::map <std::string, SessionAttribute>::iterator iter = attributesMap->begin();
@@ -294,9 +294,9 @@ class HttpSession
       pthread_mutex_unlock( &sessions_mutex );
       return res;
     }
-    
+
     /**********************************************************************/
-    
+
     static void printAll()
     {
       pthread_mutex_lock( &sessions_mutex );
@@ -309,10 +309,10 @@ class HttpSession
         for(; iter!=attributesMap->end(); ++iter)
           if ( iter->second.ptr != NULL ) printf("\t'%s'\n", iter->first.c_str());
       }
-            pthread_mutex_unlock( &sessions_mutex );    
+            pthread_mutex_unlock( &sessions_mutex );
     }
-    
-    /**********************************************************************/    
+
+    /**********************************************************************/
 
 };
 

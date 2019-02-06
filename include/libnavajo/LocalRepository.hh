@@ -6,11 +6,11 @@
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
- 
+
 #ifndef LOCALREPOSITORY_HH_
 #define LOCALREPOSITORY_HH_
 
@@ -33,7 +33,7 @@ class LocalRepository : public WebRepository
     bool loadFilename_dir(const std::string& alias, const std::string& path, const std::string& subpath="");
     bool fileExist(const std::string& url);
 
-    
+
   public:
     LocalRepository (const std::string& alias, const std::string& dirPath);
     virtual ~LocalRepository () { };

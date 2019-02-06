@@ -6,7 +6,7 @@
  *
  * @author T.Descombes (descombes@lpsc.in2p3.fr)
  *
- * @version 1	
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -34,19 +34,19 @@ class PrecompiledRepository : public WebRepository
 
     typedef std::map<std::string, const WebStaticPage> IndexMap;
     static IndexMap indexMap;
-    static std::string location; 
-    
+    static std::string location;
+
   public:
     PrecompiledRepository(const std::string& l="")
-    { 
+    {
       location=l;
       while (location.size() && location[0]=='/') location.erase(0, 1);
       while (location.size() && location[location.size()-1]=='/') location.erase(location.size() - 1);
       pthread_mutex_init(&_mutex, NULL);
-      if (!indexMap.size()) initIndexMap(); 
+      if (!indexMap.size()) initIndexMap();
     };
     virtual ~PrecompiledRepository() { indexMap.clear(); };
-    
+
     static void initIndexMap();
 
    /**
@@ -72,7 +72,7 @@ class PrecompiledRepository : public WebRepository
       url.erase(0, location.length());
       while (url.size() && url[0]=='/') url.erase(0, 1);
       if (!url.size()) url="index.html";
-      
+
       size_t webpageLen;
       unsigned char *webpage;
       pthread_mutex_lock( &_mutex );

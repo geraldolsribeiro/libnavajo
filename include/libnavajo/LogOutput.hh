@@ -1,12 +1,12 @@
 //********************************************************
 /**
- * @file  LogOutput.hh 
+ * @file  LogOutput.hh
  *
  * @brief Generic log output (abstract class)
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -16,7 +16,7 @@
 
 #include <string>
 
-  typedef enum 
+  typedef enum
   {
         NVJ_DEBUG,
         NVJ_INFO,
@@ -36,7 +36,7 @@
       inline void setWithDateTime(bool b) { withDateTime=b; };
       inline void setWithEndline(bool b) { withEndline=b; };
 
- 
+
     public:
       LogOutput(): withDateTime(true),withEndline(false) { };
       virtual void initialize() = 0;

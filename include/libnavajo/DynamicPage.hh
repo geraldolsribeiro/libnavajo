@@ -6,7 +6,7 @@
  *
  * @author T.Descombes (descombes@lpsc.in2p3.fr)
  *
- * @version 1  
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -28,21 +28,21 @@ class DynamicPage
     virtual ~DynamicPage() {};
 
     virtual bool getPage(HttpRequest* request, HttpResponse *response) = 0;
-    
+
 
     /**********************************************************************/
-     
+
     template<class T> static inline T getValue (const std::string &s)
-    { 
+    {
       if (!s.length())
        throw std::bad_cast();
-       
-      std::istringstream iss(s); 
-      T tmp; iss>>tmp;   
-       
+
+      std::istringstream iss(s);
+      T tmp; iss>>tmp;
+
       if(iss.fail())
         throw std::bad_cast();
-	      
+
       return tmp;
     };
 
@@ -57,7 +57,7 @@ class DynamicPage
     {
       str.erase(std::remove_if(str.begin(),str.end(), isNotPrintable), str.end());
     }
-    
+
     /**********************************************************************/
 
     inline bool noContent( HttpResponse *response )
@@ -67,7 +67,7 @@ class DynamicPage
     }
 
     /**********************************************************************/
-    
+
     inline bool fromString( const std::string& resultat, HttpResponse *response )
     {
       size_t webpageLen;
@@ -80,7 +80,7 @@ class DynamicPage
       return true;
     }
 
-  
+
 };
 
 #endif

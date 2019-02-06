@@ -6,7 +6,7 @@
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -19,7 +19,7 @@
 
 
   /**
-  * LogStdOutput - LogOutput 
+  * LogStdOutput - LogOutput
   */
   class LogStdOutput : public LogOutput
   {
@@ -29,8 +29,8 @@
 
       void append(const NvjLogSeverity& l, const std::string& m, const std::string &details="");
       void initialize();
-  
+
   };
-  
+
 
 #endif
