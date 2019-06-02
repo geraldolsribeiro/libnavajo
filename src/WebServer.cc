@@ -74,7 +74,7 @@ WebServer::WebServer(): sslCtx(NULL), s_server_session_id_context(1),
                         httpdAuth(false), exiting(false), exitedThread(0),
                         nbServerSock(0), disableIpV4(false), disableIpV6(false),
                         socketTimeoutInSecond(DEFAULT_HTTP_SERVER_SOCKET_TIMEOUT), tcpPort(DEFAULT_HTTP_PORT),
-                        threadsPoolSize(64), multipartMaxCollectedDataLength( 1*1024*1024 ),
+                        threadsPoolSize(64), multipartMaxCollectedDataLength( 20*1024 ),
                         sslEnabled(false), authPeerSsl(false)
 {
 
