@@ -17,20 +17,18 @@
 #include "libnavajo/LogOutput.hh"
 
 
+/**
+* LogStdOutput - LogOutput
+*/
+class LogStdOutput : public LogOutput
+{
+public:
+  LogStdOutput();
+  ~LogStdOutput();
 
-  /**
-  * LogStdOutput - LogOutput
-  */
-  class LogStdOutput : public LogOutput
-  {
-    public:
-      LogStdOutput();
-      ~LogStdOutput();
-
-      void append(const NvjLogSeverity& l, const std::string& m, const std::string &details="");
-      void initialize();
-
-  };
+  void append( const NvjLogSeverity &l, const std::string &m, const std::string &details = "" );
+  void initialize();
+};
 
 
 #endif

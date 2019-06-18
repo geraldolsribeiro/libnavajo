@@ -14,31 +14,30 @@
 #ifndef LOGFILE_HH_
 #define LOGFILE_HH_
 
+#include <fstream>
 #include <iostream>
 #include <sstream>
-#include <fstream>
 #include <string>
 
 #include "libnavajo/LogOutput.hh"
 
 
-  /**
-  * LogFile - LogOutput
-  */
-  class LogFile : public LogOutput
-  {
-    public:
-      LogFile(const char *filename);
-      ~LogFile();
+/**
+* LogFile - LogOutput
+*/
+class LogFile : public LogOutput
+{
+public:
+  LogFile( const char *filename );
+  ~LogFile();
 
-      void append(const NvjLogSeverity& l, const std::string& m, const std::string& details="");
-      void initialize();
+  void append( const NvjLogSeverity &l, const std::string &m, const std::string &details = "" );
+  void initialize();
 
-    private:
-      char filename[30];
-      std::ofstream *file;
-
-  };
+private:
+  char           filename[30];
+  std::ofstream *file;
+};
 
 
 #endif

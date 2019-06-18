@@ -14,31 +14,29 @@
 #ifndef LOGSYSLOG_HH_
 #define LOGSYSLOG_HH_
 
+#include <fstream>
 #include <iostream>
 #include <sstream>
-#include <fstream>
 #include <string>
 
 #include "libnavajo/LogOutput.hh"
 
 
-  /**
-  * LogSyslog - LogOutput
-  */
-  class LogSyslog : public LogOutput
-  {
-    public:
-      LogSyslog(const char *id="Navajo");
-      ~LogSyslog();
+/**
+* LogSyslog - LogOutput
+*/
+class LogSyslog : public LogOutput
+{
+public:
+  LogSyslog( const char *id = "Navajo" );
+  ~LogSyslog();
 
-      void append(const NvjLogSeverity& l, const std::string& m, const std::string& details="");
-      void initialize();
+  void append( const NvjLogSeverity &l, const std::string &m, const std::string &details = "" );
+  void initialize();
 
-    private:
-      char ident[30];
-
-
-  };
+private:
+  char ident[30];
+};
 
 
 #endif

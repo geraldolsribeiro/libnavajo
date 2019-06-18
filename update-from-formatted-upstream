@@ -1,0 +1,11 @@
+#!/bin/bash
+
+git checkout master
+git fetch upstream
+git branch -d upstream-master || echo "Branch upstream-master not found"
+git checkout -b upstream-master upstream/master
+find . -name "*.cc" -exec clang-format -i {} \;
+find . -name "*.hh" -exec clang-format -i {} \;
+git commit -am "Code format"
+git checkout master
+

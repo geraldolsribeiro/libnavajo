@@ -12,115 +12,107 @@
 //********************************************************
 
 
-
-#include <time.h>
 #include "libnavajo/LogRecorder.hh"
+#include <time.h>
 
 
-  /**
-  * LogRecorder - static and unique log recorder object
-  */
-  LogRecorder * LogRecorder::theLogRecorder = NULL;
+/**
+* LogRecorder - static and unique log recorder object
+*/
+LogRecorder *LogRecorder::theLogRecorder = NULL;
 
-  /***********************************************************************/
-  /**
-  * getDateStr - return a string with the formatted date
-  * \return string - formatted date
-  */
-  std::string LogRecorder::getDateStr()
+/***********************************************************************/
+/**
+* getDateStr - return a string with the formatted date
+* \return string - formatted date
+*/
+std::string LogRecorder::getDateStr()
+{
+  struct tm today;
+  char      tmpbuf[128];
+  time_t    ltime;
+
+  time( &ltime );
+  gmtime_r( &ltime, &today );
+
+  std::string ret_str;
+  strftime( tmpbuf, 128, "[%Y-%m-%d %H:%M:%S] >  ", &today );
+  ret_str = tmpbuf;
+  return ret_str;
+}
+
+/***********************************************************************/
+/**
+* append - append an entry to the LogRecorder
+* \param l - type of entry
+* \param m - message
+*/
+void LogRecorder::append( const NvjLogSeverity &l, const std::string &m, const std::string &details )
+{
+  pthread_mutex_lock( &log_mutex );
+
+  if( l != NVJ_DEBUG || debugMode )
   {
-    struct tm today;
-    char tmpbuf[128];
-    time_t ltime;
-
-    time( &ltime );
-    gmtime_r(&ltime, &today);
-
-    std::string ret_str;
-    strftime( tmpbuf, 128, "[%Y-%m-%d %H:%M:%S] >  ", &today );
-    ret_str=tmpbuf;
-    return ret_str;
-
-  }
-
-  /***********************************************************************/
-  /**
-  * append - append an entry to the LogRecorder
-  * \param l - type of entry
-  * \param m - message
-  */
-  void LogRecorder::append(const NvjLogSeverity& l, const std::string& m, const std::string& details)
-  {
-    pthread_mutex_lock( &log_mutex );
-
-    if (l != NVJ_DEBUG || debugMode)
+    for( std::list<LogOutput *>::iterator it = logOutputsList_.begin(); it != logOutputsList_.end(); it++ )
     {
-      for( std::list<LogOutput *>::iterator it=logOutputsList_.begin();
-           it!=logOutputsList_.end();
-     it++ )
-      {
-        std::string msg;
+      std::string msg;
 
-        if ((*it)->isWithDateTime())
-          msg=getDateStr() + m;
-        else msg=m;
+      if( ( *it )->isWithDateTime() )
+        msg = getDateStr() + m;
+      else
+        msg = m;
 
-        if ((*it)->isWithEndline())
-          msg+= std::string("\n") ;
+      if( ( *it )->isWithEndline() )
+        msg += std::string( "\n" );
 
-        (*it)->append(l, msg, details);
-      }
+      ( *it )->append( l, msg, details );
     }
-
-    pthread_mutex_unlock( &log_mutex );
-
   }
 
-  /***********************************************************************/
-  /**
-  * addLogOutput - ajout d'une sortie LogOutput où imprimer les logs
-  */
+  pthread_mutex_unlock( &log_mutex );
+}
 
-  void LogRecorder::addLogOutput(LogOutput *output)
-  {
-    output->initialize();
-    logOutputsList_.push_back(output);
-  }
+/***********************************************************************/
+/**
+* addLogOutput - ajout d'une sortie LogOutput où imprimer les logs
+*/
 
-  /***********************************************************************/
-  /**
-  * removeLogOutputs - supprime toutes les sorties LogOutput
-  */
-  void LogRecorder::removeLogOutputs()
-  {
-    for( std::list<LogOutput *>::iterator it=logOutputsList_.begin();
-           it!=logOutputsList_.end();
-     it++ )
-      delete *it;
+void LogRecorder::addLogOutput( LogOutput *output )
+{
+  output->initialize();
+  logOutputsList_.push_back( output );
+}
 
-    logOutputsList_.clear();
-  }
+/***********************************************************************/
+/**
+* removeLogOutputs - supprime toutes les sorties LogOutput
+*/
+void LogRecorder::removeLogOutputs()
+{
+  for( std::list<LogOutput *>::iterator it = logOutputsList_.begin(); it != logOutputsList_.end(); it++ )
+    delete *it;
 
-  /***********************************************************************/
-  /**
-  * LogRecorder - base constructor
-  */
+  logOutputsList_.clear();
+}
 
-  LogRecorder::LogRecorder()
-  {
-    debugMode=false;
-    pthread_mutex_init(&log_mutex, NULL);
-  }
+/***********************************************************************/
+/**
+* LogRecorder - base constructor
+*/
 
-  /***********************************************************************/
-  /**
-  * ~LogRecorder - destructor
-  */
-  LogRecorder::~LogRecorder()
-  {
-    removeLogOutputs();
-  }
+LogRecorder::LogRecorder()
+{
+  debugMode = false;
+  pthread_mutex_init( &log_mutex, NULL );
+}
 
-  /***********************************************************************/
+/***********************************************************************/
+/**
+* ~LogRecorder - destructor
+*/
+LogRecorder::~LogRecorder()
+{
+  removeLogOutputs();
+}
 
-
+/***********************************************************************/

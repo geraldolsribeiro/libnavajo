@@ -16,61 +16,60 @@
 
 #include "libnavajo/LogFile.hh"
 
-  /***********************************************************************/
-  /**
-  * add - add an entry to the LogRecorder
-  * \param l - type of entry
-  * \param m - message
-  */
-  void LogFile::append(const NvjLogSeverity& /*l*/, const std::string& message, const std::string& /*details*/)
+/***********************************************************************/
+/**
+* add - add an entry to the LogRecorder
+* \param l - type of entry
+* \param m - message
+*/
+void LogFile::append( const NvjLogSeverity & /*l*/, const std::string &message, const std::string & /*details*/ )
+{
+  if( file != NULL )
+    ( *file ) << message << std::endl;
+}
+
+/***********************************************************************/
+/**
+* LogFile - initialize
+*/
+
+void LogFile::initialize()
+{
+  file = new std::ofstream;
+  file->open( filename, std::ios::out | std::ios::app );
+
+  if( file->fail() )
   {
-    if (file!=NULL)
-      (*file) << message << std::endl;
+    std::cerr << "Can't open " << filename << std::endl;
+    exit( 1 );
   }
+}
 
-  /***********************************************************************/
-  /**
-  * LogFile - initialize
-  */
 
-  void LogFile::initialize()
+/***********************************************************************/
+/**
+* LogFile - constructor
+*/
+
+LogFile::LogFile( const char *f )
+{
+  strncpy( filename, f, 30 );
+  file = NULL;
+  // setWithEndline(true);
+}
+
+/***********************************************************************/
+/**
+* ~LogRecorder - destructor
+*/
+
+LogFile::~LogFile()
+{
+  if( file != NULL )
   {
-    file=new std::ofstream;
-    file->open(filename, std::ios::out | std::ios::app);
-
-    if (file->fail())
-    {
-        std::cerr <<"Can't open " << filename << std::endl;
-      	exit(1);
-    }
+    file->close();
+    delete file;
   }
+}
 
-
-  /***********************************************************************/
-  /**
-  * LogFile - constructor
-  */
-
-  LogFile::LogFile(const char *f)
-  {
-    strncpy (filename, f, 30);
-    file=NULL;
-    //setWithEndline(true);
-  }
-
-  /***********************************************************************/
-  /**
-  * ~LogRecorder - destructor
-  */
-
-  LogFile::~LogFile()
-  {
-    if (file!=NULL)
-    {
-      file->close();
-      delete file;
-    }
-  }
-
-  /***********************************************************************/
-
+/***********************************************************************/
