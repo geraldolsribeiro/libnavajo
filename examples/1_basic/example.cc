@@ -24,7 +24,6 @@ void exitFunction( int dummy )
     webServer->stopService();
 }
 
-
 class MyDynamicPage : public DynamicPage
 {
   bool getPage( HttpRequest *request, HttpResponse *response )
@@ -65,7 +64,6 @@ class MyDynamicPage : public DynamicPage
   }
 };
 
-
 int main()
 {
   // connect signals
@@ -92,14 +90,17 @@ int main()
   // uncomment to active login/passwd auth
   // webServer->addLoginPass("login","password");
 
-
-  // Fill the web repository with local files, statically compiled files or dynamic files
+  // Fill the web repository with local files, statically compiled files or
+  // dynamic files
   PrecompiledRepository thePrecompRepo( "" );
   webServer->addRepository( &thePrecompRepo );
 
-  LocalRepository myLocalRepo( "/docs", "../../docs/html" ); // if doxygen documentation is generated in "docs" folder,
-                                                             // we will browse it at
-                                                             // http://localhost:8080/docs/index.html
+  LocalRepository myLocalRepo( "/docs", "../../docs/html" ); // if doxygen
+                                                             // documentation is
+                                                             // generated in
+                                                             // "docs" folder,
+  // we will browse it at
+  // http://localhost:8080/docs/index.html
   webServer->addRepository( &myLocalRepo );
 
   MyDynamicPage     page1;

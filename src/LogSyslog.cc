@@ -16,7 +16,6 @@
 #include <string.h>
 #include <syslog.h>
 
-
 /***********************************************************************/
 /**
 * append - append a message
@@ -62,7 +61,6 @@ void LogSyslog::initialize()
   openlog( ident, LOG_PID, LOG_USER );
   setWithDateTime( false );
 }
-
 
 /***********************************************************************/
 /**

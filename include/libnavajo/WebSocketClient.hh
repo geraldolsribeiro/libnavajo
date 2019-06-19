@@ -95,7 +95,6 @@ class WebSocketClient
   void noSessionExpiration( HttpRequest *request );
   void restoreSessionExpiration( HttpRequest *request );
 
-
 public:
   WebSocketClient( WebSocket *ws, HttpRequest *req );
 

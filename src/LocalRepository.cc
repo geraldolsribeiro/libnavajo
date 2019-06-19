@@ -11,7 +11,6 @@
  */
 //********************************************************
 
-
 #include "libnavajo/LocalRepository.hh"
 #include "libnavajo/LogRecorder.hh"
 #include <dirent.h>
@@ -21,7 +20,6 @@
 #include <streambuf>
 #include <string.h>
 #include <sys/stat.h>
-
 
 /**********************************************************************/
 

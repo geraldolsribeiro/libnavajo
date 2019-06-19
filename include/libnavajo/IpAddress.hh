@@ -21,7 +21,6 @@
 #include <string>
 #include <vector>
 
-
 #ifdef WIN32
 
 #include "pthread.h"
@@ -47,19 +46,15 @@
 
 #endif
 
-
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #define INET6_ADDRLEN 16
-
 
 /***********************************************************************
  * IpAdress struct definition
  * for IPv4 and IPv6 address
  */
-
 
 class IpAddress
 {
@@ -233,7 +228,6 @@ public:
     return ( !error );
   };
 
-
   inline static IpAddress *fromHostname( const std::string &hostname, bool preferIpv4 = true )
   {
     int              status;
@@ -327,9 +321,7 @@ public:
     mask = m;
   };
 
-
   // TODO: IpNetwork(const std::string& value)
-
 
   inline bool operator<( const IpNetwork &A ) const
   {
@@ -541,7 +533,6 @@ public:
     }
   }
 };
-
 
 /**
   * Is this IP address belonging to this list of networks ?

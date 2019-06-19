@@ -70,7 +70,6 @@ typedef struct
 std::vector<std::string> filenamesVec;
 std::vector<std::string> listExcludeDir;
 
-
 /**********************************************************************/
 
 bool loadFilename_dir( const std::string &path, const std::string &subpath = "" )
@@ -233,7 +232,9 @@ int main( int argc, char *argv[] )
   {
     fprintf(
         stdout,
-        "    indexMap.insert(IndexMap::value_type(\"%s\",PrecompiledRepository::WebStaticPage((const unsigned "
+        "    "
+        "indexMap.insert(IndexMap::value_type(\"%s\","
+        "PrecompiledRepository::WebStaticPage((const unsigned "
         "char*)&webRepository::%s, sizeof webRepository::%s)));\n",
         ( *( conversionTable + i ) ).URL->c_str(),
         ( *( conversionTable + i ) ).varName->c_str(),

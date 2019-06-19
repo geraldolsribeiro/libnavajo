@@ -13,7 +13,6 @@
  */
 //********************************************************
 
-
 #include <sys/stat.h>
 
 #include <ctype.h>
@@ -64,7 +63,6 @@ time_t HttpSession::sessionLifeTime          = 20 * 60;
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
 #endif
-
 
 /*********************************************************************/
 
@@ -204,7 +202,8 @@ bool WebServer::isUserAllowed( const std::string &pwdb64, std::string &login )
 * Http Bearer token authentication
 * @param tokb64: the token string in base64 format
 * @param resourceUrl: the token string in base64 format
-* @param respHeader: headers to add in HTTP response in case of failed authentication, on tail of WWW-Authenticate
+* @param respHeader: headers to add in HTTP response in case of failed
+* authentication, on tail of WWW-Authenticate
 * attribute
 * @return true if token is allowed
 */
@@ -260,9 +259,13 @@ bool WebServer::isTokenAllowed( const std::string &tokb64, const std::string &re
 
   if( !expiration )
   {
-    logAuth    = "WebServer: Authentication failed, expiration date not found for token '" + tokb64 + "'";
+    logAuth
+        = "WebServer: Authentication failed, expiration date not found for "
+          "token '"
+          + tokb64 + "'";
     respHeader = "realm=\"" + authBearerRealm;
-    respHeader += "\",error=\"invalid_token\", error_description=\"no expiration in token\"";
+    respHeader += "\",error=\"invalid_token\", error_description=\"no "
+                  "expiration in token\"";
     goto end;
   }
 
@@ -289,7 +292,8 @@ bool WebServer::isTokenAllowed( const std::string &tokb64, const std::string &re
     }
   }
 
-  // All checks passed successfully, store the token to speed up processing of next request
+  // All checks passed successfully, store the token to speed up processing of
+  // next request
   // proposing same token
   authOK                    = true;
   logAuthLvl                = NVJ_INFO;
@@ -324,7 +328,6 @@ size_t WebServer::recvLine( int client, char *bufLine, size_t nsize )
 
   return bufLineLen;
 }
-
 
 /***********************************************************************
 * accept_request:  Process a request
@@ -439,7 +442,10 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
           bufLineLen = r;
           break;
         case SSL_ERROR_ZERO_RETURN:
-          NVJ_LOG->append( NVJ_DEBUG, "WebServer::accept_request - BIO_gets() failed with SSL_ERROR_ZERO_RETURN - 1" );
+          NVJ_LOG->append(
+              NVJ_DEBUG,
+              "WebServer::accept_request - BIO_gets() "
+              "failed with SSL_ERROR_ZERO_RETURN - 1" );
           goto FREE_RETURN_TRUE;
         }
       }
@@ -464,7 +470,6 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         j                               = 0;
         while( isspace( (int)( bufLine[j] ) ) && j < (unsigned)bufLineLen )
           j++;
-
 
         // decode login/passwd
         if( strncmp( bufLine + j, authStr, sizeof authStr - 1 ) == 0 )
@@ -728,7 +733,9 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
     snprintf(
         logBuffer,
         BUFSIZE,
-        "Request : url='%s'  reqType='%d'  param='%s'  requestCookies='%s'  (httpVers=%s keepAlive=%d zipSupport=%d "
+        "Request : url='%s'  reqType='%d'  param='%s' "
+        " requestCookies='%s'  (httpVers=%s "
+        "keepAlive=%d zipSupport=%d "
         "closing=%d)\n",
         urlBuffer,
         requestMethod,
@@ -784,7 +791,9 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
             break;
           case SSL_ERROR_ZERO_RETURN:
             NVJ_LOG->append(
-                NVJ_DEBUG, "WebServer::accept_request - BIO_gets() failed with SSL_ERROR_ZERO_RETURN - 2" );
+                NVJ_DEBUG,
+                "WebServer::accept_request - BIO_gets() "
+                "failed with SSL_ERROR_ZERO_RETURN - 2" );
             goto FREE_RETURN_TRUE;
           }
         }
@@ -830,7 +839,9 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
               {
                 NVJ_LOG->append(
                     NVJ_DEBUG,
-                    "WebServer::accept_request -  payload.reserve() failed with exception: "
+                    "WebServer::accept_request -  "
+                    "payload.reserve() failed with "
+                    "exception: "
                         + std::string( e.what() ) );
                 break;
               }
@@ -1115,7 +1126,6 @@ FREE_RETURN_TRUE:
   if( multipartContentParser != NULL )
     delete multipartContentParser;
 
-
   return true;
 }
 
@@ -1304,7 +1314,9 @@ std::string WebServer::getHttpHeader(
       header += "\r\n";
     }
     else
-      header += std::string( "WWW-Authenticate: Basic realm=\"Restricted area: please enter Login/Password\"\r\n" );
+      header += std::string(
+          "WWW-Authenticate: Basic realm=\"Restricted area: "
+          "please enter Login/Password\"\r\n" );
   }
 
   if( response != NULL )
@@ -1356,7 +1368,6 @@ std::string WebServer::getHttpHeader(
   return header;
 }
 
-
 /**********************************************************************
 * getNoContentErrorMsg: send a 204 No Content Message
 * \return the http message to send
@@ -1393,8 +1404,10 @@ std::string WebServer::getBadRequestErrorMsg()
 std::string WebServer::getNotFoundErrorMsg()
 {
   std::string errorMessage
-      = "<HTML><HEAD><TITLE>Object not found!</TITLE><body><h1>Object not found!</h1>\n"
-        "<p>\n\n\nThe requested URL was not found on this server.\n\n\n\n    If you entered the URL manually please "
+      = "<HTML><HEAD><TITLE>Object not found!</TITLE><body><h1>Object not "
+        "found!</h1>\n"
+        "<p>\n\n\nThe requested URL was not found on this server.\n\n\n\n    If "
+        "you entered the URL manually please "
         "check your spelling and try again.\n\n\n</p>\n"
         "<h2>Error 404</h2></body></HTML>\n";
 
@@ -1411,15 +1424,16 @@ std::string WebServer::getNotFoundErrorMsg()
 std::string WebServer::getInternalServerErrorMsg()
 {
   std::string errorMessage
-      = "<HTML><HEAD><TITLE>Internal Server Error!</TITLE><body><h1>Internal Server Error!</h1>\n"
-        "<p>\n\n\nSomething happens.\n\n\n\n    If you entered the URL manually please check your spelling and try "
+      = "<HTML><HEAD><TITLE>Internal Server Error!</TITLE><body><h1>Internal "
+        "Server Error!</h1>\n"
+        "<p>\n\n\nSomething happens.\n\n\n\n    If you entered the URL manually "
+        "please check your spelling and try "
         "again.\n\n\n</p>\n"
         "<h2>Error 500</h2></body></HTML>\n";
   std::string header = getHttpHeader( "500 Internal Server Error", errorMessage.length(), false );
 
   return header + errorMessage;
 }
-
 
 /***********************************************************************
 * sendInternalServerError: send a 501 Method Not Implemented
@@ -1429,16 +1443,19 @@ std::string WebServer::getInternalServerErrorMsg()
 std::string WebServer::getNotImplementedErrorMsg()
 {
   std::string errorMessage
-      = "<HTML><HEAD><TITLE>Cannot process request!</TITLE><body><h1>Cannot process request!</h1>\n"
-        "<p>\n\n\n   The server does not support the action requested by the browser.\n\n\n\n"
-        "If you entered the URL manually please check your spelling and try again.\n\n\n</p>\n"
+      = "<HTML><HEAD><TITLE>Cannot process "
+        "request!</TITLE><body><h1>Cannot process "
+        "request!</h1>\n"
+        "<p>\n\n\n   The server does not support the "
+        "action requested by the browser.\n\n\n\n"
+        "If you entered the URL manually please check "
+        "your spelling and try again.\n\n\n</p>\n"
         "<h2>Error 501</h2></body></HTML>\n";
 
   std::string header = getHttpHeader( "501 Method Not Implemented", errorMessage.length(), false );
 
   return header + errorMessage;
 }
-
 
 /***********************************************************************
 * init: Initialize server listening socket
@@ -1498,7 +1515,10 @@ u_short WebServer::init()
       // Disable IPv4 mapped addresses.
       setSocketIp6Only( server_sock[nbServerSock] );
 #else
-      NVJ_LOG->append( NVJ_WARNING, "WebServer: Cannot set IPV6_V6ONLY socket option.  Closing IPv6 socket." );
+      NVJ_LOG->append(
+          NVJ_WARNING,
+          "WebServer: Cannot set IPV6_V6ONLY socket "
+          "option.  Closing IPv6 socket." );
       close( server_sock[nbServerSock] );
       continue;
 #endif
@@ -1519,7 +1539,6 @@ u_short WebServer::init()
 
   return ( tcpPort );
 }
-
 
 /***********************************************************************
 * exit: Stop http server
@@ -1606,7 +1625,6 @@ int WebServer::verify_callback( int preverify_ok, X509_STORE_CTX *ctx )
 
   return 1;
 }
-
 
 /***********************************************************************
 * initialize_ctx:
@@ -1780,7 +1798,6 @@ void WebServer::poolThreadProcessing()
   exitedThread++;
 }
 
-
 /***********************************************************************
 * initPoolThreads:
 ************************************************************************/
@@ -1796,7 +1813,6 @@ void WebServer::initPoolThreads()
   exitedThread = 0;
 }
 
-
 /***********************************************************************
 * startThread: Launch http server
 * @param p - port server to use. If port is 0, port value will be modified
@@ -1810,7 +1826,6 @@ void *WebServer::startThread( void *t )
   pthread_exit( NULL );
   return NULL;
 }
-
 
 void WebServer::threadProcessing()
 {
@@ -1897,7 +1912,10 @@ void WebServer::threadProcessing()
       updatePeerIpHistory( webClientAddr );
       if( client_sock == -1 )
         NVJ_LOG->appendUniq(
-            NVJ_ERROR, "WebServer : An error occurred when attempting to access the socket (accept == -1)" );
+            NVJ_ERROR,
+            "WebServer : An error occurred when "
+            "attempting to access the socket "
+            "(accept == -1)" );
       else
       {
         if( socketTimeoutInSecond )

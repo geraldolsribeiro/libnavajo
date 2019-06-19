@@ -29,7 +29,6 @@ public:
 
   virtual bool getPage( HttpRequest *request, HttpResponse *response ) = 0;
 
-
   /**********************************************************************/
 
   template <class T>

@@ -166,7 +166,9 @@ unsigned long MPFD::Field::GetFileContentSize()
       }
       else
       {
-        throw MPFD::Exception( "Trying to get file content size, but uploaded files are stored in filesystem." );
+        throw MPFD::Exception(
+            "Trying to get file content size, but uploaded "
+            "files are stored in filesystem." );
       }
     }
     else
@@ -192,7 +194,9 @@ char *MPFD::Field::GetFileContent()
       }
       else
       {
-        throw MPFD::Exception( "Trying to get file content, but uploaded files are stored in filesystem." );
+        throw MPFD::Exception(
+            "Trying to get file content, but uploaded files "
+            "are stored in filesystem." );
       }
     }
     else
@@ -244,7 +248,9 @@ std::string MPFD::Field::GetTempFileName()
       }
       else
       {
-        throw MPFD::Exception( "Trying to get file temp name, but uplaoded files are stored in memory." );
+        throw MPFD::Exception(
+            "Trying to get file temp name, but uplaoded "
+            "files are stored in memory." );
       }
     }
     else

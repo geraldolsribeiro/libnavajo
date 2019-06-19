@@ -14,7 +14,6 @@
 #ifndef HTTPRESPONSE_HH_
 #define HTTPRESPONSE_HH_
 
-
 class HttpResponse
 {
   unsigned char *          responseContent;
@@ -388,7 +387,6 @@ public:
     return httpSpecificHeaders;
   }
 };
-
 
 //****************************************************************************
 

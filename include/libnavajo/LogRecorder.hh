@@ -35,7 +35,6 @@ class LogRecorder
   bool                  debugMode;
   std::set<std::string> uniqLog; // Only one entry !
 
-
 public:
   /**
   * getInstance - return/create a static logRecorder object
@@ -94,7 +93,6 @@ public:
     uniqLog.clear();
   };
 
-
 protected:
   LogRecorder();
   ~LogRecorder();
@@ -104,6 +102,5 @@ protected:
 
   static LogRecorder *theLogRecorder;
 };
-
 
 #endif

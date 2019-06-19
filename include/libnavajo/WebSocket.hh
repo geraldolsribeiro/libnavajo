@@ -117,7 +117,6 @@ public:
     return true;
   };
 
-
   /**
   * Send Text Message to all connected clients
   * @param message: the message content

@@ -20,7 +20,6 @@
 
 #include "libnavajo/WebRepository.hh"
 
-
 class PrecompiledRepository : public WebRepository
 {
   pthread_mutex_t _mutex;
@@ -63,7 +62,8 @@ public:
   inline void freeFile( unsigned char *webpage ){};
 
   /**
-   * Try to resolve an http request by requesting the PrecompiledRepository. Inherited from class WebRepository
+   * Try to resolve an http request by requesting the PrecompiledRepository.
+   * Inherited from class WebRepository
    * called from WebServer::accept_request() method
    * @param request: a pointer to the current request
    * @param response: a pointer to the new generated response

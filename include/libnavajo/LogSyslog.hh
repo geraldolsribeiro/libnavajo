@@ -21,7 +21,6 @@
 
 #include "libnavajo/LogOutput.hh"
 
-
 /**
 * LogSyslog - LogOutput
 */
@@ -37,6 +36,5 @@ public:
 private:
   char ident[30];
 };
-
 
 #endif

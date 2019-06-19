@@ -42,7 +42,6 @@ class HttpSession
     };
   } SessionAttribute;
 
-
   typedef std::map<std::string, std::map<std::string, SessionAttribute> *> HttpSessionsContainerMap;
 
   static HttpSessionsContainerMap sessions;
@@ -351,6 +350,5 @@ public:
 };
 
 //****************************************************************************
-
 
 #endif

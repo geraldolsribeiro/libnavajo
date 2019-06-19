@@ -20,26 +20,26 @@
 #include <set>
 #include <string>
 
-
 class LocalRepository : public WebRepository
 {
   pthread_mutex_t _mutex;
 
   std::set<std::string> filenamesSet; // list of available files
-  // pair<std::string,std::string> aliasesSet; // alias name | Path to local directory
+  // pair<std::string,std::string> aliasesSet; // alias name | Path to local
+  // directory
   std::string aliasName;
   std::string fullPathToLocalDir;
 
   bool loadFilename_dir( const std::string &alias, const std::string &path, const std::string &subpath = "" );
   bool fileExist( const std::string &url );
 
-
 public:
   LocalRepository( const std::string &alias, const std::string &dirPath );
   virtual ~LocalRepository(){};
 
   /**
-  * Try to resolve an http request by requesting the LocalRepository. Inherited from class WebRepository
+  * Try to resolve an http request by requesting the LocalRepository. Inherited
+  * from class WebRepository
   * called from WebServer::accept_request() method
   * @param request: a pointer to the current request
   * @param response: a pointer to the new generated response

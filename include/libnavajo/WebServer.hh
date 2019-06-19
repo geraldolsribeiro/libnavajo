@@ -14,7 +14,6 @@
 #ifndef WEBSERVER_HH_
 #define WEBSERVER_HH_
 
-
 #include <stdio.h>
 #include <sys/types.h>
 #ifdef LINUX
@@ -32,7 +31,6 @@
 #include "libnavajo/LogRecorder.hh"
 #include "libnavajo/WebRepository.hh"
 #include "libnavajo/nvjThread.h"
-
 
 class WebSocket;
 class WebServer
@@ -180,7 +178,8 @@ public:
 
   /**
   * Set the socket server timeout in seconds
-  * @param dur: the socket timeout in seconds. 0 for no timeout, or from 1 to 65535 (Default value: 30)
+  * @param dur: the socket timeout in seconds. 0 for no timeout, or from 1 to
+  * 65535 (Default value: 30)
   */
   inline void setSocketTimeoutInSecond( const ushort dur )
   {
@@ -252,19 +251,26 @@ public:
   /**
   * Set http Bearer token decode callback function
   * @param realm: realm attribute defining scope of resources being accessed
-  * @param decodeCallback: function callback for decoding base64 token and verify signature,
-  * tokb64 is the base64 encoded token, secret is the key used for verify token signature, decoded is the token base64
+  * @param decodeCallback: function callback for decoding base64 token and
+  * verify signature,
+  * tokb64 is the base64 encoded token, secret is the key used for verify token
+  * signature, decoded is the token base64
   * decoded
   * without the signature part, returns 0 on success, any other value on fail
   * @param secret: key used for checking token authentication
-  * @param expirationCallback: function callback for retriving token expiration date, MUST be provided, returns numbers
+  * @param expirationCallback: function callback for retriving token expiration
+  * date, MUST be provided, returns numbers
   * of
   * seconds since epoch
-  * @param scopesCheckCallback: function callback for checking any extra field present in token, optionnal and can be
+  * @param scopesCheckCallback: function callback for checking any extra field
+  * present in token, optionnal and can be
   * set to NULL,
-  * if provided, tokenDecoded is the token base64 decoded as provided by decodeCallback, resourceUrl is the url of the
-  * resource being accessed (some scopes may require different value to get access to specific resources), errDescr will
-  * be updated with a description of the error to insert in HTTP header error code insufficient_scope, return true on
+  * if provided, tokenDecoded is the token base64 decoded as provided by
+  * decodeCallback, resourceUrl is the url of the
+  * resource being accessed (some scopes may require different value to get
+  * access to specific resources), errDescr will
+  * be updated with a description of the error to insert in HTTP header error
+  * code insufficient_scope, return true on
   * sucess
   */
   inline void setAuthBearerDecodeCallbacks(

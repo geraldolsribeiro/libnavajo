@@ -16,7 +16,6 @@
 
 #include "libnavajo/LogOutput.hh"
 
-
 /**
 * LogStdOutput - LogOutput
 */
@@ -29,6 +28,5 @@ public:
   void append( const NvjLogSeverity &l, const std::string &m, const std::string &details = "" );
   void initialize();
 };
-
 
 #endif

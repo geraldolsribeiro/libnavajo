@@ -19,7 +19,6 @@
 
 #define BUFSIZE 32768
 
-
 /***********************************************************************/
 
 WebSocketClient::WebSocketClient( WebSocket *ws, HttpRequest *req ) : websocket( ws ), request( req ), closing( false )
@@ -90,7 +89,6 @@ void WebSocketClient::receivingThread()
   };
 
   ClientSockData *client = request->getClientSockData();
-
 
   if( websocket->getWebsocketTimeoutInMilliSecond()
       && !setSocketSndRcvTimeout( client->socketId, 0, websocket->getWebsocketTimeoutInMilliSecond() ) )
@@ -246,7 +244,8 @@ void WebSocketClient::receivingThread()
       snprintf(
           buf,
           300,
-          "WebSocket: new message received (len=%llu fin=%d rsv=%d opcode=%d mask=%d)",
+          "WebSocket: new message received (len=%llu fin=%d "
+          "rsv=%d opcode=%d mask=%d)",
           static_cast<unsigned long long>( msgLength ),
           fin,
           rsv,
@@ -316,7 +315,12 @@ void WebSocketClient::receivingThread()
           break;
         default:
           char buf[300];
-          snprintf( buf, 300, "WebSocket: message received with unknown opcode (%d) has been ignored", opcode );
+          snprintf(
+              buf,
+              300,
+              "WebSocket: message received with unknown opcode "
+              "(%d) has been ignored",
+              opcode );
           NVJ_LOG->append( NVJ_INFO, buf );
           break;
         }
@@ -433,7 +437,6 @@ bool WebSocketClient::sendMessage( const MessageContent *msgContent )
     msg    = msgContent->message;
     msgLen = msgContent->length;
   }
-
 
   if( msgLen < 126 )
     headerBuffer[1] = msgLen;

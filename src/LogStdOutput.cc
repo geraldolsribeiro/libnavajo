@@ -23,7 +23,6 @@
 #define WHT "\x1B[37m"
 #define RESET "\x1B[0m"
 
-
 /***********************************************************************/
 /**
 * append - append a message
@@ -68,7 +67,6 @@ void LogStdOutput::append( const NvjLogSeverity &l, const std::string &message, 
 void LogStdOutput::initialize()
 {
 }
-
 
 /***********************************************************************/
 /**

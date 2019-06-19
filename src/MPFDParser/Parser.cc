@@ -59,7 +59,6 @@ void MPFD::Parser::SetContentType( const std::string type )
         std::string( "Content type is not \"multipart/form-data\"\nIt is \"" ) + type + std::string( "\"" ) );
   }
 
-
   std::size_t bp = type.find( "boundary=" );
 
   if( bp == std::string::npos )
@@ -213,7 +212,9 @@ void MPFD::Parser::_ParseHeaders( std::string headers )
   {
     throw Exception(
         std::string(
-            "Accepted headers of field does not contain \"Content-Disposition: form-data;\"\nThe headers are: \"" )
+            "Accepted headers of field does not contain "
+            "\"Content-Disposition: form-data;\"\nThe "
+            "headers are: \"" )
         + headers
         + std::string( "\"" ) );
   }
@@ -223,7 +224,10 @@ void MPFD::Parser::_ParseHeaders( std::string headers )
   if( name_pos == std::string::npos )
   {
     throw Exception(
-        std::string( "Accepted headers of field does not contain \"name=\".\nThe headers are: \"" ) + headers
+        std::string(
+            "Accepted headers of field does not contain "
+            "\"name=\".\nThe headers are: \"" )
+        + headers
         + std::string( "\"" ) );
   }
   else
@@ -232,7 +236,10 @@ void MPFD::Parser::_ParseHeaders( std::string headers )
     if( name_end_pos == std::string::npos )
     {
       throw Exception(
-          std::string( "Cannot find closing quote of \"name=\" attribute.\nThe headers are: \"" ) + headers
+          std::string(
+              "Cannot find closing quote of \"name=\" "
+              "attribute.\nThe headers are: \"" )
+          + headers
           + std::string( "\"" ) );
     }
     else
@@ -240,7 +247,6 @@ void MPFD::Parser::_ParseHeaders( std::string headers )
       ProcessingFieldName         = headers.substr( name_pos + 6, name_end_pos - ( name_pos + 6 ) );
       Fields[ProcessingFieldName] = new Field();
     }
-
 
     // find filename if exists
     std::size_t filename_pos = headers.find( "filename=\"" );
@@ -258,7 +264,10 @@ void MPFD::Parser::_ParseHeaders( std::string headers )
       if( filename_end_pos == std::string::npos )
       {
         throw Exception(
-            std::string( "Cannot find closing quote of \"filename=\" attribute.\nThe headers are: \"" ) + headers
+            std::string(
+                "Cannot find closing quote of \"filename=\" "
+                "attribute.\nThe headers are: \"" )
+            + headers
             + std::string( "\"" ) );
       }
       else

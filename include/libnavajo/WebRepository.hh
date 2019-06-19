@@ -17,7 +17,6 @@
 #include "HttpRequest.hh"
 #include "HttpResponse.hh"
 
-
 class WebRepository
 {
 

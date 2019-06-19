@@ -19,7 +19,6 @@
 
 #include "libnavajo/WebRepository.hh"
 
-
 class DynamicRepository : public WebRepository
 {
 
@@ -46,7 +45,6 @@ public:
   {
     ::free( webpage );
   };
-
 
   /**
   * Add new page to the repository
@@ -93,7 +91,8 @@ public:
   }
 
   /**
-  * Try to resolve an http request by requesting the DynamicRepository. Inherited from class WebRepository
+  * Try to resolve an http request by requesting the DynamicRepository.
+  * Inherited from class WebRepository
   * called from WebServer::accept_request() method
   * @param request: a pointer to the current request
   * @param response: a pointer to the new generated response

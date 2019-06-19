@@ -3,7 +3,6 @@
 //
 // Contacts and other info are on the WEB page:  grigory.info/MPFDParser
 
-
 #include "MPFDParser/Exception.h"
 
 MPFD::Exception::Exception( std::string error )

@@ -19,7 +19,6 @@
 
 WebServer *webServer = NULL;
 
-
 void exitFunction( int dummy )
 {
   if( webServer != NULL )
@@ -47,7 +46,6 @@ class MyWebSocket : public WebSocket
   };
 } myWebSocket;
 
-
 int main()
 {
   // connect signals
@@ -61,10 +59,8 @@ int main()
 
   webServer->setServerPort( 8080 );
 
-
   // uncomment to switch to https
   // webServer->setUseSSL(true, "../myCert.pem");
-
 
   // uncomment to active X509 auth
   // webServer->setAuthPeerSSL(true, "cachain.pem");
@@ -76,8 +72,8 @@ int main()
   // uncomment to active login/passwd auth
   // webServer->addLoginPass("login","password");
 
-
-  // Fill the web repository with local files, statically compiled files or dynamic files
+  // Fill the web repository with local files, statically compiled files or
+  // dynamic files
   PrecompiledRepository thePrecompRepo( "" );
   webServer->addRepository( &thePrecompRepo );
 

@@ -121,7 +121,6 @@ class MyDynamicRepository : public DynamicRepository
 
   } uploader;
 
-
   class ListUploadedFiles : public DynamicPage
   {
     bool getPage( HttpRequest *request, HttpResponse *response )

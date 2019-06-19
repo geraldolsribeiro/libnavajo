@@ -18,7 +18,6 @@
 
 typedef enum { NVJ_DEBUG, NVJ_INFO, NVJ_WARNING, NVJ_ALERT, NVJ_ERROR, NVJ_FATAL } NvjLogSeverity;
 
-
 class LogOutput
 {
   bool withDateTime;
@@ -34,7 +33,6 @@ protected:
     withEndline = b;
   };
 
-
 public:
   LogOutput() : withDateTime( true ), withEndline( false ){};
   virtual void initialize() = 0;
@@ -49,6 +47,5 @@ public:
     return withEndline;
   };
 };
-
 
 #endif

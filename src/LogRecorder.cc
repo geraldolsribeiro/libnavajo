@@ -11,10 +11,8 @@
  */
 //********************************************************
 
-
 #include "libnavajo/LogRecorder.hh"
 #include <time.h>
-
 
 /**
 * LogRecorder - static and unique log recorder object

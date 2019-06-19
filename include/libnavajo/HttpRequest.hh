@@ -191,7 +191,6 @@ class HttpRequest
     initSessionId();
   };
 
-
 public:
   /**********************************************************************/
   /**
@@ -509,7 +508,8 @@ public:
     url = newUrl;
   };
 
-  // GLSR: torna pública a configuração de parâmetros permitindo realizar forwardTo com novos parâmetros
+  // GLSR: torna pública a configuração de parâmetros permitindo realizar
+  // forwardTo com novos parâmetros
   inline void setParams( const char *params )
   {
     if( params != NULL && strlen( params ) )
