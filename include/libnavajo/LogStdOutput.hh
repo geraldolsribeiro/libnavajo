@@ -17,10 +17,9 @@
 #include "libnavajo/LogOutput.hh"
 
 /**
-* LogStdOutput - LogOutput
-*/
-class LogStdOutput : public LogOutput
-{
+ * LogStdOutput - LogOutput
+ */
+class LogStdOutput : public LogOutput {
 public:
   LogStdOutput();
   ~LogStdOutput();

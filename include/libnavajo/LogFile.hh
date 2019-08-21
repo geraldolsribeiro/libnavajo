@@ -22,10 +22,9 @@
 #include "libnavajo/LogOutput.hh"
 
 /**
-* LogFile - LogOutput
-*/
-class LogFile : public LogOutput
-{
+ * LogFile - LogOutput
+ */
+class LogFile : public LogOutput {
 public:
   LogFile( const char *filename );
   ~LogFile();

@@ -24,14 +24,12 @@ void dump_buffer( FILE *f, unsigned n, const unsigned char *buf )
 {
   int cptLine = 0;
   fputs( "    ", f );
-  while( n-- > 0 )
-  {
+  while( n-- > 0 ) {
     cptLine++;
     fprintf( f, "0x%02X", *buf++ );
     if( n > 0 )
       fprintf( f, ", " );
-    if( cptLine == 16 )
-    {
+    if( cptLine == 16 ) {
       fputs( "\n    ", f );
       cptLine = 0;
     }
@@ -42,12 +40,10 @@ char *str_replace_first( char *buffer, const char *s, const char *by )
 {
   char *p = strstr( buffer, s ), *ret = NULL;
 
-  if( p != NULL )
-  {
+  if( p != NULL ) {
     size_t len_p = strlen( p ), len_s = strlen( s ), len_by = strlen( by );
 
-    if( len_s != len_by )
-    {
+    if( len_s != len_by ) {
       /* ajuster la taille de la partie 's' pur pouvoir placer by */
       memmove( p + len_by, p + len_s, len_p );
     }
@@ -60,8 +56,7 @@ char *str_replace_first( char *buffer, const char *s, const char *by )
   return ret;
 }
 
-typedef struct
-{
+typedef struct {
   std::string *URL;
   std::string *varName;
   size_t       length;
@@ -87,15 +82,13 @@ bool loadFilename_dir( const std::string &path, const std::string &subpath = "" 
   dir = opendir( fullPath.c_str() );
   if( dir == NULL )
     return false;
-  while( ( entry = readdir( dir ) ) != NULL )
-  {
+  while( ( entry = readdir( dir ) ) != NULL ) {
     if( !strcmp( entry->d_name, "." ) || !strcmp( entry->d_name, ".." ) || !strlen( entry->d_name ) )
       continue;
 
     std::string filepath = fullPath + '/' + entry->d_name;
 
-    if( stat( filepath.c_str(), &s ) == -1 )
-    {
+    if( stat( filepath.c_str(), &s ) == -1 ) {
       perror( "stat" );
       exit( EXIT_FAILURE );
     }
@@ -106,8 +99,9 @@ bool loadFilename_dir( const std::string &path, const std::string &subpath = "" 
              == listExcludeDir.end() ) )
       filenamesVec.push_back( spath + entry->d_name );
 
-    if( type == S_IFDIR && ( std::find( listExcludeDir.begin(), listExcludeDir.end(), spath + entry->d_name )
-                             == listExcludeDir.end() ) )
+    if( type == S_IFDIR
+        && ( std::find( listExcludeDir.begin(), listExcludeDir.end(), spath + entry->d_name )
+             == listExcludeDir.end() ) )
       loadFilename_dir( path, spath + entry->d_name );
   }
 
@@ -130,15 +124,14 @@ void parseDirectory( const std::string &dirPath )
 
 /**********************************************************************/
 /**
-* @brief  Main function
-* @param argc the number of web files
-* @param argv the filenames (with absolute path)
-* @return 0 upon exit success
-*/
+ * @brief  Main function
+ * @param argc the number of web files
+ * @param argv the filenames (with absolute path)
+ * @return 0 upon exit success
+ */
 int main( int argc, char *argv[] )
 {
-  if( argc <= 1 )
-  {
+  if( argc <= 1 ) {
     printf( "Usage: %s htmlRepository [--exclude [file directory ...]] \n", argv[0] );
     fflush( NULL );
     exit( EXIT_FAILURE );
@@ -156,8 +149,7 @@ int main( int argc, char *argv[] )
 
   parseDirectory( directory );
 
-  if( !filenamesVec.size() )
-  {
+  if( !filenamesVec.size() ) {
     fprintf( stderr, "ERROR: The directory is empty or not found !\n" );
     exit( EXIT_FAILURE );
   }
@@ -167,8 +159,7 @@ int main( int argc, char *argv[] )
   fprintf( stdout, "#include \"libnavajo/PrecompiledRepository.hh\"\n\n" );
   fprintf( stdout, "namespace webRepository\n{\n" );
 
-  for( size_t i = 0; i < filenamesVec.size(); i++ )
-  {
+  for( size_t i = 0; i < filenamesVec.size(); i++ ) {
     FILE *         pFile;
     size_t         lSize;
     unsigned char *buffer;
@@ -176,8 +167,7 @@ int main( int argc, char *argv[] )
     std::string filename = directory + '/' + filenamesVec[i];
 
     pFile = fopen( filename.c_str(), "rb" );
-    if( pFile == NULL )
-    {
+    if( pFile == NULL ) {
       fprintf( stderr, "ERROR: can't read file: %s\n", filenamesVec[i].c_str() );
       exit( EXIT_FAILURE );
     }
@@ -189,16 +179,14 @@ int main( int argc, char *argv[] )
 
     // allocate memory to contain the whole file.
     buffer = (unsigned char *)malloc( ( lSize + 1 ) * sizeof( unsigned char ) );
-    if( buffer == NULL )
-    {
+    if( buffer == NULL ) {
       fprintf( stderr, "ERROR: can't malloc reading file: %s\n", filenamesVec[i].c_str() );
       fclose( pFile );
       exit( EXIT_FAILURE );
     }
 
     // copy the file into the buffer.
-    if( fread( buffer, 1, lSize, pFile ) != lSize )
-    {
+    if( fread( buffer, 1, lSize, pFile ) != lSize ) {
       fprintf( stderr, "\nCan't read file %s ... ABORT !\n", filenamesVec[i].c_str() );
       fclose( pFile );
       exit( EXIT_FAILURE );
@@ -228,8 +216,7 @@ int main( int argc, char *argv[] )
   fprintf( stdout, "std::string PrecompiledRepository::location;\n" );
   fprintf( stdout, "\nvoid PrecompiledRepository::initIndexMap()\n{\n" );
 
-  for( size_t i = 0; i < filenamesVec.size(); i++ )
-  {
+  for( size_t i = 0; i < filenamesVec.size(); i++ ) {
     fprintf(
         stdout,
         "    "

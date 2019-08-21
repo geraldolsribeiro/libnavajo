@@ -20,8 +20,7 @@
 #include <set>
 #include <string>
 
-class LocalRepository : public WebRepository
-{
+class LocalRepository : public WebRepository {
   pthread_mutex_t _mutex;
 
   std::set<std::string> filenamesSet; // list of available files
@@ -38,13 +37,13 @@ public:
   virtual ~LocalRepository(){};
 
   /**
-  * Try to resolve an http request by requesting the LocalRepository. Inherited
-  * from class WebRepository
-  * called from WebServer::accept_request() method
-  * @param request: a pointer to the current request
-  * @param response: a pointer to the new generated response
-  * \return true if the repository contains the requested resource
-  */
+   * Try to resolve an http request by requesting the LocalRepository. Inherited
+   * from class WebRepository
+   * called from WebServer::accept_request() method
+   * @param request: a pointer to the current request
+   * @param response: a pointer to the new generated response
+   * \return true if the repository contains the requested resource
+   */
   virtual bool getFile( HttpRequest *request, HttpResponse *response );
 
   /**

@@ -19,12 +19,11 @@
 
 #include "libnavajo/WebRepository.hh"
 
-class DynamicRepository : public WebRepository
-{
+class DynamicRepository : public WebRepository {
 
-  pthread_mutex_t _mutex;
+  pthread_mutex_t                              _mutex;
   typedef std::map<std::string, DynamicPage *> IndexMap;
-  IndexMap indexMap;
+  IndexMap                                     indexMap;
 
 public:
   DynamicRepository()
@@ -37,20 +36,20 @@ public:
   };
 
   /**
-  * Free resources after use. Inherited from class WebRepository
-  * called from WebServer::accept_request() method
-  * @param webpage: a pointer to the generated page
-  */
+   * Free resources after use. Inherited from class WebRepository
+   * called from WebServer::accept_request() method
+   * @param webpage: a pointer to the generated page
+   */
   inline void freeFile( unsigned char *webpage )
   {
     ::free( webpage );
   };
 
   /**
-  * Add new page to the repository
-  * @param name: the url (from the document root)
-  * @param page: the DynamicPage instance responsible for content generation
-  */
+   * Add new page to the repository
+   * @param name: the url (from the document root)
+   * @param page: the DynamicPage instance responsible for content generation
+   */
   inline void add( const std::string url, DynamicPage *page )
   {
     size_t i = 0;
@@ -62,10 +61,10 @@ public:
   };
 
   /**
-  * Remove page from the repository
-  * @param urlToRemove: the url (from the document root)
-  * @param deleteDynamicPage: true if the related DynamicPage must be deleted
-  */
+   * Remove page from the repository
+   * @param urlToRemove: the url (from the document root)
+   * @param deleteDynamicPage: true if the related DynamicPage must be deleted
+   */
   inline void remove( const std::string urlToRemove, bool deleteDynamicPage = false )
   {
     std::string url( urlToRemove );
@@ -73,13 +72,11 @@ public:
       url.erase( 0, 1 );
     pthread_mutex_lock( &_mutex );
     IndexMap::iterator i = indexMap.find( url );
-    if( i == indexMap.end() )
-    {
+    if( i == indexMap.end() ) {
       pthread_mutex_unlock( &_mutex );
       return;
     }
-    else
-    {
+    else {
       pthread_mutex_unlock( &_mutex );
       if( deleteDynamicPage )
         delete i->second;
@@ -91,13 +88,13 @@ public:
   }
 
   /**
-  * Try to resolve an http request by requesting the DynamicRepository.
-  * Inherited from class WebRepository
-  * called from WebServer::accept_request() method
-  * @param request: a pointer to the current request
-  * @param response: a pointer to the new generated response
-  * \return true if the repository contains the requested resource
-  */
+   * Try to resolve an http request by requesting the DynamicRepository.
+   * Inherited from class WebRepository
+   * called from WebServer::accept_request() method
+   * @param request: a pointer to the current request
+   * @param response: a pointer to the new generated response
+   * \return true if the repository contains the requested resource
+   */
   inline virtual bool getFile( HttpRequest *request, HttpResponse *response )
   {
     std::string url = request->getUrl();
@@ -105,13 +102,11 @@ public:
       url.erase( 0, 1 );
     pthread_mutex_lock( &_mutex );
     IndexMap::const_iterator i = indexMap.find( url );
-    if( i == indexMap.end() )
-    {
+    if( i == indexMap.end() ) {
       pthread_mutex_unlock( &_mutex );
       return false;
     }
-    else
-    {
+    else {
       pthread_mutex_unlock( &_mutex );
       bool res = i->second->getPage( request, response );
       if( request->getSessionId().size() )

@@ -35,8 +35,7 @@ LocalRepository::LocalRepository( const std::string &alias, const std::string &d
   while( aliasName.size() && aliasName[aliasName.size() - 1] == '/' )
     aliasName.erase( aliasName.size() - 1 );
 
-  if( realpath( dirPath.c_str(), resolved_path ) != NULL )
-  {
+  if( realpath( dirPath.c_str(), resolved_path ) != NULL ) {
     fullPathToLocalDir = resolved_path;
     loadFilename_dir( aliasName, fullPathToLocalDir );
   }
@@ -64,25 +63,22 @@ bool LocalRepository::loadFilename_dir( const std::string &alias, const std::str
   dir = opendir( fullPath.c_str() );
   if( dir == NULL )
     return false;
-  while( ( entry = readdir( dir ) ) != NULL )
-  {
+  while( ( entry = readdir( dir ) ) != NULL ) {
     if( !strcmp( entry->d_name, "." ) || !strcmp( entry->d_name, ".." ) || !strlen( entry->d_name ) )
       continue;
 
     std::string filepath = fullPath + '/' + entry->d_name;
 
-    if( stat( filepath.c_str(), &s ) == -1 )
-    {
+    if( stat( filepath.c_str(), &s ) == -1 ) {
       NVJ_LOG->append(
           NVJ_ERROR,
-          std::string( "LocalRepository - stat error reading file '" ) + filepath + "': "
-              + std::string( strerror( errno ) ) );
+          std::string( "LocalRepository - stat error reading file '" ) + filepath
+              + "': " + std::string( strerror( errno ) ) );
       continue;
     }
 
     int type = s.st_mode & S_IFMT;
-    if( type == S_IFREG || type == S_IFLNK )
-    {
+    if( type == S_IFREG || type == S_IFLNK ) {
       std::string filename = alias + subpath + "/" + entry->d_name;
       while( filename.size() && filename[0] == '/' )
         filename.erase( 0, 1 );
@@ -114,8 +110,7 @@ bool LocalRepository::getFile( HttpRequest *request, HttpResponse *response )
   unsigned char *webpage;
   pthread_mutex_lock( &_mutex );
 
-  if( url.compare( 0, aliasName.size(), aliasName ) || !fileExist( url ) )
-  {
+  if( url.compare( 0, aliasName.size(), aliasName ) || !fileExist( url ) ) {
     pthread_mutex_unlock( &_mutex );
     return false;
   };
@@ -130,8 +125,7 @@ bool LocalRepository::getFile( HttpRequest *request, HttpResponse *response )
     filename = fullPathToLocalDir + '/' + filename;
 
   FILE *pFile = fopen( filename.c_str(), "rb" );
-  if( pFile == NULL )
-  {
+  if( pFile == NULL ) {
     char logBuffer[150];
     snprintf( logBuffer, 150, "Webserver : Error opening file '%s'", filename.c_str() );
     NVJ_LOG->append( NVJ_ERROR, logBuffer );
@@ -146,8 +140,7 @@ bool LocalRepository::getFile( HttpRequest *request, HttpResponse *response )
   if( ( webpage = (unsigned char *)malloc( webpageLen + 1 * sizeof( char ) ) ) == NULL )
     return false;
   size_t nb = fread( webpage, 1, webpageLen, pFile );
-  if( nb != webpageLen )
-  {
+  if( nb != webpageLen ) {
     char logBuffer[150];
     snprintf( logBuffer, 150, "Webserver : Error accessing file '%s'", filename.c_str() );
     NVJ_LOG->append( NVJ_ERROR, logBuffer );

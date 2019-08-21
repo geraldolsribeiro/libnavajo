@@ -25,8 +25,7 @@ void exitFunction( int dummy )
     webServer->stopService();
 }
 
-class MyWebSocket : public WebSocket
-{
+class MyWebSocket : public WebSocket {
   bool onOpening( HttpRequest *request )
   {
     printf(

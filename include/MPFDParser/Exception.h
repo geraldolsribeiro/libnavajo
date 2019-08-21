@@ -25,6 +25,6 @@ public:
 private:
   std::string Error;
 };
-}
+} // namespace MPFD
 
 #endif /* _EXCEPTION_H */

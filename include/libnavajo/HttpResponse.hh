@@ -14,8 +14,7 @@
 #ifndef HTTPRESPONSE_HH_
 #define HTTPRESPONSE_HH_
 
-class HttpResponse
-{
+class HttpResponse {
   unsigned char *          responseContent;
   size_t                   responseContentLength;
   std::vector<std::string> responseCookies;
@@ -43,17 +42,16 @@ public:
 
   /************************************************************************/
   /**
-  * set the response body
-  * @param content: The content's buffer
-  * @param length: The content's length
-  */
+   * set the response body
+   * @param content: The content's buffer
+   * @param length: The content's length
+   */
   inline void setContent( unsigned char *const content, const size_t length )
   {
     responseContent       = content;
     responseContentLength = length;
 
-    if( httpReturnCode == unsetHttpReturnCodeMessage )
-    {
+    if( httpReturnCode == unsetHttpReturnCodeMessage ) {
       if( length )
         setHttpReturnCode( 200 );
       else
@@ -63,12 +61,12 @@ public:
 
   /************************************************************************/
   /**
-  * Returns the response body of the HTTP method
-  * @param content: The content's buffer
-  * @param length: The content's length
-  * @param cookies: The cookies entries
-  * @param zip: set to true if the content is compressed (else: false)
-  */
+   * Returns the response body of the HTTP method
+   * @param content: The content's buffer
+   * @param length: The content's length
+   * @param cookies: The cookies entries
+   * @param zip: set to true if the content is compressed (else: false)
+   */
   inline void getContent( unsigned char **content, size_t *length, bool *zip ) const
   {
     *content = responseContent;
@@ -78,9 +76,9 @@ public:
 
   /************************************************************************/
   /**
-  * Set if the content is compressed (zip) or not
-  * @param b: true if the content is compressed, false if not.
-  */
+   * Set if the content is compressed (zip) or not
+   * @param b: true if the content is compressed, false if not.
+   */
   inline void setIsZipped( bool b = true )
   {
     zippedFile = b;
@@ -88,8 +86,8 @@ public:
 
   /************************************************************************/
   /**
-  * return true if the content is compressed (zip)
-  */
+   * return true if the content is compressed (zip)
+   */
   inline bool isZipped() const
   {
     return zippedFile;
@@ -97,18 +95,18 @@ public:
 
   /************************************************************************/
   /**
-  * insert a cookie entry (rfc6265)
-  *   format: "<name>=<value>[; <Max-Age>=<age>][; expires=<date>]
-  *      [; domain=<domain_name>][; path=<some_path>][; secure][; HttpOnly]"
-  * @param name: the cookie's name
-  * @param value: the cookie's value
-  * @param maxage: the cookie's max-age
-  * @param expiresTime: the cookie's expiration date
-  * @param path: the cookie's path
-  * @param domain: the cookie's domain
-  * @param secure: the cookie's secure flag
-  * @param httpOnly: the cookie's httpOnly flag
-  */
+   * insert a cookie entry (rfc6265)
+   *   format: "<name>=<value>[; <Max-Age>=<age>][; expires=<date>]
+   *      [; domain=<domain_name>][; path=<some_path>][; secure][; HttpOnly]"
+   * @param name: the cookie's name
+   * @param value: the cookie's value
+   * @param maxage: the cookie's max-age
+   * @param expiresTime: the cookie's expiration date
+   * @param path: the cookie's path
+   * @param domain: the cookie's domain
+   * @param secure: the cookie's secure flag
+   * @param httpOnly: the cookie's httpOnly flag
+   */
 
   inline void addCookie(
       const std::string &name,
@@ -122,15 +120,13 @@ public:
   {
     std::string cookieEntry = name + '=' + value;
 
-    if( maxage )
-    {
+    if( maxage ) {
       std::stringstream maxageSs;
       maxageSs << maxage;
       cookieEntry += "; Max-Age=" + maxageSs.str();
     }
 
-    if( expiresTime )
-    {
+    if( expiresTime ) {
       char      expBuf[100];
       struct tm timeinfo;
       gmtime_r( &expiresTime, &timeinfo );
@@ -155,9 +151,9 @@ public:
 
   /************************************************************************/
   /**
-  * insert the session's cookie
-  * @param sid: the session id
-  */
+   * insert the session's cookie
+   * @param sid: the session id
+   */
   inline void addSessionCookie( const std::string &sid )
   {
     addCookie( "SID", sid, HttpSession::getSessionLifeTime(), 0, "", "", false, true );
@@ -165,9 +161,9 @@ public:
 
   /************************************************************************/
   /**
-  * get the http response's cookies
-  * @return the cookies vector
-  */
+   * get the http response's cookies
+   * @return the cookies vector
+   */
   inline std::vector<std::string> &getCookies()
   {
     return responseCookies;
@@ -175,9 +171,9 @@ public:
 
   /************************************************************************/
   /**
-  * set a new mime type (by default, mime type is automatically set)
-  * @param mime: the new mime type
-  */
+   * set a new mime type (by default, mime type is automatically set)
+   * @param mime: the new mime type
+   */
   inline void setMimeType( const std::string &mime )
   {
     mimeType = mime;
@@ -185,9 +181,9 @@ public:
 
   /************************************************************************/
   /**
-  * get the current mime type
-  * @return the mime type
-  */
+   * get the current mime type
+   * @return the mime type
+   */
   inline const std::string &getMimeType() const
   {
     return mimeType;
@@ -195,9 +191,9 @@ public:
 
   /************************************************************************/
   /**
-  * Request redirection to a new url
-  * @param url: the new url
-  */
+   * Request redirection to a new url
+   * @param url: the new url
+   */
   void forwardTo( const std::string &url )
   {
     forwardToUrl = url;
@@ -205,9 +201,9 @@ public:
 
   /************************************************************************/
   /**
-  * get the new url
-  * @return the new url
-  */
+   * get the new url
+   * @return the new url
+   */
   std::string getForwardedUrl() const
   {
     return forwardToUrl;
@@ -215,10 +211,10 @@ public:
 
   /************************************************************************/
   /**
-  * allow Cross Site Request
-  * @param cors: enabled or not
-  * @param cred: enabled credentials or not
-  */
+   * allow Cross Site Request
+   * @param cors: enabled or not
+   * @param cred: enabled credentials or not
+   */
   void setCORS( bool cors = true, bool cred = false, std::string domain = "*" )
   {
     this->cors = cors;
@@ -227,9 +223,9 @@ public:
   }
 
   /**
-  * is Cross Site Request allowed ?
-  * @return boolean
-  */
+   * is Cross Site Request allowed ?
+   * @return boolean
+   */
   bool isCORS()
   {
     return cors;
@@ -247,9 +243,9 @@ public:
 
   /************************************************************************/
   /**
-  * set Http Return Code
-  * @param value: the http return code
-  */
+   * set Http Return Code
+   * @param value: the http return code
+   */
 
   void setHttpReturnCode( const unsigned value )
   {
@@ -264,10 +260,10 @@ public:
 
   /************************************************************************/
   /**
-  * set Http Return Code
-  * @param value: the http return code
-  * @param message: the http return code message
-  */
+   * set Http Return Code
+   * @param value: the http return code
+   * @param message: the http return code message
+   */
   void setHttpReturnCode( const unsigned value, const std::string message )
   {
     httpReturnCode        = value;
@@ -276,8 +272,8 @@ public:
 
   /************************************************************************/
   /**
-  * generate the http return code string
-  */
+   * generate the http return code string
+   */
   std::string getHttpReturnCodeStr()
   {
     if( httpReturnCode == unsetHttpReturnCodeMessage )
@@ -290,9 +286,9 @@ public:
 
   /************************************************************************/
   /**
-  * initialize standart Http Return Codes
-  * @param value: the http return code
-  */
+   * initialize standart Http Return Codes
+   * @param value: the http return code
+   */
   void initializeHttpReturnCode() const
   {
     if( httpReturnCodes.size() )

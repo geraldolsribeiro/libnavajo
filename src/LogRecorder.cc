@@ -15,15 +15,15 @@
 #include <time.h>
 
 /**
-* LogRecorder - static and unique log recorder object
-*/
+ * LogRecorder - static and unique log recorder object
+ */
 LogRecorder *LogRecorder::theLogRecorder = NULL;
 
 /***********************************************************************/
 /**
-* getDateStr - return a string with the formatted date
-* \return string - formatted date
-*/
+ * getDateStr - return a string with the formatted date
+ * \return string - formatted date
+ */
 std::string LogRecorder::getDateStr()
 {
   struct tm today;
@@ -41,18 +41,16 @@ std::string LogRecorder::getDateStr()
 
 /***********************************************************************/
 /**
-* append - append an entry to the LogRecorder
-* \param l - type of entry
-* \param m - message
-*/
+ * append - append an entry to the LogRecorder
+ * \param l - type of entry
+ * \param m - message
+ */
 void LogRecorder::append( const NvjLogSeverity &l, const std::string &m, const std::string &details )
 {
   pthread_mutex_lock( &log_mutex );
 
-  if( l != NVJ_DEBUG || debugMode )
-  {
-    for( std::list<LogOutput *>::iterator it = logOutputsList_.begin(); it != logOutputsList_.end(); it++ )
-    {
+  if( l != NVJ_DEBUG || debugMode ) {
+    for( std::list<LogOutput *>::iterator it = logOutputsList_.begin(); it != logOutputsList_.end(); it++ ) {
       std::string msg;
 
       if( ( *it )->isWithDateTime() )
@@ -72,8 +70,8 @@ void LogRecorder::append( const NvjLogSeverity &l, const std::string &m, const s
 
 /***********************************************************************/
 /**
-* addLogOutput - ajout d'une sortie LogOutput où imprimer les logs
-*/
+ * addLogOutput - ajout d'une sortie LogOutput où imprimer les logs
+ */
 
 void LogRecorder::addLogOutput( LogOutput *output )
 {
@@ -83,8 +81,8 @@ void LogRecorder::addLogOutput( LogOutput *output )
 
 /***********************************************************************/
 /**
-* removeLogOutputs - supprime toutes les sorties LogOutput
-*/
+ * removeLogOutputs - supprime toutes les sorties LogOutput
+ */
 void LogRecorder::removeLogOutputs()
 {
   for( std::list<LogOutput *>::iterator it = logOutputsList_.begin(); it != logOutputsList_.end(); it++ )
@@ -95,8 +93,8 @@ void LogRecorder::removeLogOutputs()
 
 /***********************************************************************/
 /**
-* LogRecorder - base constructor
-*/
+ * LogRecorder - base constructor
+ */
 
 LogRecorder::LogRecorder()
 {
@@ -106,8 +104,8 @@ LogRecorder::LogRecorder()
 
 /***********************************************************************/
 /**
-* ~LogRecorder - destructor
-*/
+ * ~LogRecorder - destructor
+ */
 LogRecorder::~LogRecorder()
 {
   removeLogOutputs();

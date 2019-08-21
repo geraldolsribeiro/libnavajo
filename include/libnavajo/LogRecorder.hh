@@ -26,10 +26,9 @@
 #define NVJ_printf LogRecorder::getInstance()->printf
 
 /**
-* LogRecorder - generic class to handle log trace
-*/
-class LogRecorder
-{
+ * LogRecorder - generic class to handle log trace
+ */
+class LogRecorder {
 
   pthread_mutex_t       log_mutex;
   bool                  debugMode;
@@ -37,9 +36,9 @@ class LogRecorder
 
 public:
   /**
-  * getInstance - return/create a static logRecorder object
-  * \return theLogRecorder - static log recorder
-  */
+   * getInstance - return/create a static logRecorder object
+   * \return theLogRecorder - static log recorder
+   */
   inline static LogRecorder *getInstance()
   {
     if( theLogRecorder == NULL )
@@ -48,8 +47,8 @@ public:
   };
 
   /**
-  * freeInstance - free the static logRecorder object
-  */
+   * freeInstance - free the static logRecorder object
+   */
 
   static void freeInstance()
   {
@@ -65,13 +64,12 @@ public:
   void addLogOutput( LogOutput * );
   void removeLogOutputs();
 
-  void append( const NvjLogSeverity &l, const std::string &msg, const std::string &details = "" );
+  void        append( const NvjLogSeverity &l, const std::string &msg, const std::string &details = "" );
   inline void appendUniq( const NvjLogSeverity &l, const std::string &msg, const std::string &details = "" )
   {
     std::set<std::string>::iterator it;
     it = uniqLog.find( msg + details );
-    if( it == uniqLog.end() )
-    {
+    if( it == uniqLog.end() ) {
       uniqLog.insert( msg + details );
       append( l, msg, details );
     }

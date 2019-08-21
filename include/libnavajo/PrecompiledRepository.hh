@@ -20,20 +20,18 @@
 
 #include "libnavajo/WebRepository.hh"
 
-class PrecompiledRepository : public WebRepository
-{
+class PrecompiledRepository : public WebRepository {
   pthread_mutex_t _mutex;
 
-  struct WebStaticPage
-  {
+  struct WebStaticPage {
     const unsigned char *data;
     size_t               length;
     WebStaticPage( const unsigned char *d, size_t l ) : data( d ), length( l ){};
   };
 
   typedef std::map<std::string, const WebStaticPage> IndexMap;
-  static IndexMap    indexMap;
-  static std::string location;
+  static IndexMap                                    indexMap;
+  static std::string                                 location;
 
 public:
   PrecompiledRepository( const std::string &l = "" )
@@ -85,11 +83,9 @@ public:
     unsigned char *webpage;
     pthread_mutex_lock( &_mutex );
     IndexMap::const_iterator i = indexMap.find( url );
-    if( i == indexMap.end() )
-    {
+    if( i == indexMap.end() ) {
       i = indexMap.find( url + ".gz" );
-      if( i == indexMap.end() )
-      {
+      if( i == indexMap.end() ) {
         pthread_mutex_unlock( &_mutex );
         return false;
       }

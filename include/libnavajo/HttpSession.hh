@@ -21,21 +21,14 @@
 
 #include <stdlib.h>
 
-class SessionAttributeObject
-{
+class SessionAttributeObject {
 public:
   virtual ~SessionAttributeObject(){};
 };
 
-class HttpSession
-{
-  typedef struct
-  {
-    enum
-    {
-      BASIC,
-      OBJECT
-    } type;
+class HttpSession {
+  typedef struct {
+    enum { BASIC, OBJECT } type;
     union {
       void *                  ptr;
       SessionAttributeObject *obj;
@@ -72,8 +65,7 @@ public:
 
     id.reserve( idLength );
 
-    do
-    {
+    do {
       id.clear();
       for( size_t i = 0; i < idLength; ++i )
         id += elements[rand() % ( nbElements - 1 )];
@@ -87,8 +79,7 @@ public:
     setAttribute( id, "session_expiration", expiration );
 
     // look for expired session (max every minute)
-    if( time( NULL ) > lastExpirationSearchTime + 60 )
-    {
+    if( time( NULL ) > lastExpirationSearchTime + 60 ) {
       removeExpiredSession();
       lastExpirationSearchTime = time( NULL );
     }
@@ -119,16 +110,14 @@ public:
 
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::iterator it = sessions.begin();
-    for( ; it != sessions.end(); )
-    {
+    for( ; it != sessions.end(); ) {
       std::map<std::string, SessionAttribute> *         attributesMap = it->second;
       std::map<std::string, SessionAttribute>::iterator it2           = attributesMap->find( "session_expiration" );
-      time_t *expiration = NULL;
+      time_t *                                          expiration    = NULL;
       if( it2 != attributesMap->end() )
         expiration = (time_t *)it2->second.ptr;
 
-      if( expiration != NULL && *expiration && *expiration > time( NULL ) )
-      {
+      if( expiration != NULL && *expiration && *expiration > time( NULL ) ) {
         it++;
         continue;
       }
@@ -146,8 +135,7 @@ public:
   {
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::iterator it = sessions.begin();
-    for( ; it != sessions.end(); )
-    {
+    for( ; it != sessions.end(); ) {
       std::map<std::string, SessionAttribute> *attributesMap = it->second;
       removeAllAttribute( attributesMap );
       delete attributesMap;
@@ -174,8 +162,7 @@ public:
   {
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::iterator it = sessions.find( sid );
-    if( it == sessions.end() )
-    {
+    if( it == sessions.end() ) {
       pthread_mutex_unlock( &sessions_mutex );
       return;
     };
@@ -193,8 +180,7 @@ public:
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::const_iterator it = sessions.find( sid );
 
-    if( it == sessions.end() )
-    {
+    if( it == sessions.end() ) {
       pthread_mutex_unlock( &sessions_mutex );
       return;
     };
@@ -213,8 +199,7 @@ public:
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::const_iterator it = sessions.find( sid );
 
-    if( it == sessions.end() )
-    {
+    if( it == sessions.end() ) {
       pthread_mutex_unlock( &sessions_mutex );
       return;
     };
@@ -232,8 +217,7 @@ public:
   {
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::iterator it = sessions.find( sid );
-    if( it == sessions.end() )
-    {
+    if( it == sessions.end() ) {
       pthread_mutex_unlock( &sessions_mutex );
       return NULL;
     }
@@ -253,8 +237,7 @@ public:
   {
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::iterator it = sessions.find( sid );
-    if( it == sessions.end() )
-    {
+    if( it == sessions.end() ) {
       pthread_mutex_unlock( &sessions_mutex );
       return NULL;
     }
@@ -274,8 +257,7 @@ public:
   {
     std::map<std::string, SessionAttribute>::iterator iter = attributesMap->begin();
     for( ; iter != attributesMap->end(); ++iter )
-      if( iter->second.ptr != NULL )
-      {
+      if( iter->second.ptr != NULL ) {
         if( iter->second.type == SessionAttribute::OBJECT )
           delete iter->second.obj;
         else
@@ -289,17 +271,14 @@ public:
   {
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::iterator it = sessions.find( sid );
-    if( it == sessions.end() )
-    {
+    if( it == sessions.end() ) {
       pthread_mutex_unlock( &sessions_mutex );
       return;
     }
     std::map<std::string, SessionAttribute> *         attributesMap = it->second;
     std::map<std::string, SessionAttribute>::iterator it2           = attributesMap->find( name );
-    if( it2 != attributesMap->end() )
-    {
-      if( it2->second.ptr != NULL )
-      {
+    if( it2 != attributesMap->end() ) {
+      if( it2->second.ptr != NULL ) {
         if( it2->second.type == SessionAttribute::OBJECT )
           delete it2->second.obj;
         else
@@ -317,8 +296,7 @@ public:
     pthread_mutex_lock( &sessions_mutex );
     std::vector<std::string>           res;
     HttpSessionsContainerMap::iterator it = sessions.find( sid );
-    if( it != sessions.end() )
-    {
+    if( it != sessions.end() ) {
       std::map<std::string, SessionAttribute> *         attributesMap = it->second;
       std::map<std::string, SessionAttribute>::iterator iter          = attributesMap->begin();
       for( ; iter != attributesMap->end(); ++iter )
@@ -334,8 +312,7 @@ public:
   {
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::iterator it = sessions.begin();
-    for( ; it != sessions.end(); ++it )
-    {
+    for( ; it != sessions.end(); ++it ) {
       std::map<std::string, SessionAttribute> *attributesMap = it->second;
       printf( "Session SID : '%s' \n", it->first.c_str() );
       std::map<std::string, SessionAttribute>::iterator iter = attributesMap->begin();

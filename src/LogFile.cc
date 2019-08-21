@@ -18,10 +18,10 @@
 
 /***********************************************************************/
 /**
-* add - add an entry to the LogRecorder
-* \param l - type of entry
-* \param m - message
-*/
+ * add - add an entry to the LogRecorder
+ * \param l - type of entry
+ * \param m - message
+ */
 void LogFile::append( const NvjLogSeverity & /*l*/, const std::string &message, const std::string & /*details*/ )
 {
   if( file != NULL )
@@ -30,16 +30,15 @@ void LogFile::append( const NvjLogSeverity & /*l*/, const std::string &message, 
 
 /***********************************************************************/
 /**
-* LogFile - initialize
-*/
+ * LogFile - initialize
+ */
 
 void LogFile::initialize()
 {
   file = new std::ofstream;
   file->open( filename, std::ios::out | std::ios::app );
 
-  if( file->fail() )
-  {
+  if( file->fail() ) {
     std::cerr << "Can't open " << filename << std::endl;
     exit( 1 );
   }
@@ -47,8 +46,8 @@ void LogFile::initialize()
 
 /***********************************************************************/
 /**
-* LogFile - constructor
-*/
+ * LogFile - constructor
+ */
 
 LogFile::LogFile( const char *f )
 {
@@ -59,13 +58,12 @@ LogFile::LogFile( const char *f )
 
 /***********************************************************************/
 /**
-* ~LogRecorder - destructor
-*/
+ * ~LogRecorder - destructor
+ */
 
 LogFile::~LogFile()
 {
-  if( file != NULL )
-  {
+  if( file != NULL ) {
     file->close();
     delete file;
   }

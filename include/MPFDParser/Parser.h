@@ -35,7 +35,7 @@ public:
   void SetUploadedFilesStorage( int where );
 
   std::map<std::string, Field *> GetFieldsMap();
-  Field *GetField( std::string Name );
+  Field *                        GetField( std::string Name );
 
 private:
   int WhereToStoreUploadedFiles;
@@ -58,12 +58,12 @@ private:
   long        DataCollectorLength, MaxDataCollectorLength;
   bool        FindStartingBoundaryAndTruncData();
   void        _ProcessData();
-  void _ParseHeaders( std::string headers );
-  bool WaitForHeadersEndAndParseThem();
-  void TruncateDataCollectorFromTheBeginning( long n );
-  long BoundaryPositionInDataCollector();
-  bool ProcessContentOfTheField();
+  void        _ParseHeaders( std::string headers );
+  bool        WaitForHeadersEndAndParseThem();
+  void        TruncateDataCollectorFromTheBeginning( long n );
+  long        BoundaryPositionInDataCollector();
+  bool        ProcessContentOfTheField();
 };
-}
+} // namespace MPFD
 
 #endif /* _PARSER_H */

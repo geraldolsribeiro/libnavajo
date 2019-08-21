@@ -18,16 +18,15 @@
 
 /***********************************************************************/
 /**
-* append - append a message
-* \param l - LogSeverity
-* \param m - message
-*/
+ * append - append a message
+ * \param l - LogSeverity
+ * \param m - message
+ */
 void LogSyslog::append( const NvjLogSeverity &l, const std::string &message, const std::string & /*details*/ )
 {
 
   int type;
-  switch( l )
-  {
+  switch( l ) {
   case NVJ_DEBUG:
     type = LOG_DEBUG;
     break;
@@ -53,8 +52,8 @@ void LogSyslog::append( const NvjLogSeverity &l, const std::string &message, con
 
 /***********************************************************************/
 /**
-*  initialize the logoutput
-*/
+ *  initialize the logoutput
+ */
 
 void LogSyslog::initialize()
 {
@@ -64,8 +63,8 @@ void LogSyslog::initialize()
 
 /***********************************************************************/
 /**
-* LogSyslog - constructor
-*/
+ * LogSyslog - constructor
+ */
 
 LogSyslog::LogSyslog( const char *id )
 {
@@ -74,8 +73,8 @@ LogSyslog::LogSyslog( const char *id )
 
 /***********************************************************************/
 /**
-* ~LogRecorder - destructor
-*/
+ * ~LogRecorder - destructor
+ */
 
 LogSyslog::~LogSyslog()
 {

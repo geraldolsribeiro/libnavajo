@@ -36,10 +36,8 @@ inline std::string escape_json( const std::string &s )
 {
   std::ostringstream o;
 
-  for( size_t i = 0; i < s.length(); i++ )
-  {
-    switch( s[i] )
-    {
+  for( size_t i = 0; i < s.length(); i++ ) {
+    switch( s[i] ) {
     case '"':
       o << "\\\"";
       break;
@@ -62,8 +60,7 @@ inline std::string escape_json( const std::string &s )
       o << "\\t";
       break;
     default:
-      if( '\x00' <= s[i] && s[i] <= '\x1f' )
-      {
+      if( '\x00' <= s[i] && s[i] <= '\x1f' ) {
         o << "\\u" << std::hex << std::setw( 4 ) << std::setfill( '0' ) << (int)s[i];
       }
       else
@@ -75,11 +72,9 @@ inline std::string escape_json( const std::string &s )
 
 /***********************************************************************/
 
-class MyDynamicRepository : public DynamicRepository
-{
+class MyDynamicRepository : public DynamicRepository {
 
-  class Uploader : public DynamicPage
-  {
+  class Uploader : public DynamicPage {
     bool getPage( HttpRequest *request, HttpResponse *response )
     {
       if( !request->isMultipartContent() )
@@ -89,19 +84,16 @@ class MyDynamicRepository : public DynamicRepository
 
       std::map<std::string, MPFD::Field *>           fields = parser->GetFieldsMap();
       std::map<std::string, MPFD::Field *>::iterator it;
-      for( it = fields.begin(); it != fields.end(); it++ )
-      {
+      for( it = fields.begin(); it != fields.end(); it++ ) {
         if( fields[it->first]->GetType() == MPFD::Field::TextType )
           NVJ_LOG->append(
               NVJ_INFO,
               "Got text field: [" + it->first + "], value: [" + fields[it->first]->GetTextTypeContent() + "]" );
-        else
-        {
+        else {
           NVJ_LOG->append(
               NVJ_INFO,
               "Got file field: [" + it->first + "] Filename:[" + fields[it->first]->GetFileName() + "] TempFilename:["
-                  + fields[it->first]->GetTempFileName()
-                  + "]\n" );
+                  + fields[it->first]->GetTempFileName() + "]\n" );
 
           // Copy files to upload directory
           std::ifstream src( fields[it->first]->GetTempFileName().c_str(), std::ios::binary );
@@ -121,15 +113,13 @@ class MyDynamicRepository : public DynamicRepository
 
   } uploader;
 
-  class ListUploadedFiles : public DynamicPage
-  {
+  class ListUploadedFiles : public DynamicPage {
     bool getPage( HttpRequest *request, HttpResponse *response )
     {
       std::string                     json      = "{ \"data\" : [";
       std::set<std::string> *         filenames = myUploadRepo->getFilenames();
       std::set<std::string>::iterator it        = filenames->begin();
-      while( it != filenames->end() )
-      {
+      while( it != filenames->end() ) {
         json += std::string( "\"" ) + escape_json( it->c_str() ) + '\"';
         if( ++it != filenames->end() )
           json += ", ";

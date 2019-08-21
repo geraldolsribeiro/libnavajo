@@ -24,7 +24,7 @@ public:
   virtual ~Field();
 
   void SetType( int type );
-  int GetType();
+  int  GetType();
 
   void AcceptSomeData( char *data, long length );
 
@@ -33,10 +33,10 @@ public:
   void SetUploadedFilesStorage( int where );
   void SetTempDir( std::string dir );
 
-  void SetFileName( std::string name );
+  void        SetFileName( std::string name );
   std::string GetFileName();
 
-  void SetFileContentType( std::string type );
+  void        SetFileContentType( std::string type );
   std::string GetFileMimeType();
 
   char *        GetFileContent();
@@ -60,5 +60,5 @@ private:
   char *        FieldContent;
   std::ofstream file;
 };
-}
+} // namespace MPFD
 #endif /* _FIELD_H */

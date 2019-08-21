@@ -56,8 +56,7 @@
  * for IPv4 and IPv6 address
  */
 
-class IpAddress
-{
+class IpAddress {
 public:
   typedef union {
     in_addr_t v4;
@@ -180,14 +179,12 @@ public:
   inline std::string str() const
   {
     std::string res = "";
-    if( ipversion == 4 )
-    {
+    if( ipversion == 4 ) {
       struct in_addr iplocal;
       iplocal.s_addr = ip.v4;
       res += inet_ntoa( iplocal );
     }
-    else
-    { // IPv6
+    else { // IPv6
       char ipStr[INET6_ADDRSTRLEN];
       if( inet_ntop( AF_INET6, &( ip.v6 ), ipStr, INET6_ADDRSTRLEN ) == NULL )
         res += "ERROR !";
@@ -208,16 +205,14 @@ public:
 
     pthread_mutex_lock( &resolvIP_mutex );
 
-    if( ipversion == 4 )
-    {
+    if( ipversion == 4 ) {
       sin.sin_family = AF_INET;
       struct in_addr addr;
       addr.s_addr  = ip.v4;
       sin.sin_addr = addr;
       error        = getnameinfo( (sockaddr *)&sin, sizeof sin, hname, maxlength, NULL, 0, NI_NAMEREQD );
     }
-    else
-    { // IPv6
+    else { // IPv6
       sin6.sin6_family = AF_INET6;
       sin6.sin6_addr   = ip.v6;
       error            = getnameinfo( (sockaddr *)&sin6, sizeof sin6, hname, maxlength, NULL, 0, NI_NAMEREQD );
@@ -243,16 +238,13 @@ public:
     if( ( status = getaddrinfo( hostname.c_str(), NULL, &hints, &servinfo ) ) != 0 )
       return NULL;
 
-    for( p = servinfo; p != NULL; p = p->ai_next )
-    {
-      if( p->ai_family == AF_INET )
-      {
+    for( p = servinfo; p != NULL; p = p->ai_next ) {
+      if( p->ai_family == AF_INET ) {
         struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
         if( newIp4 == NULL )
           newIp4 = new IpAddress( (in_addr_t)ipv4->sin_addr.s_addr );
       }
-      else
-      {
+      else {
         struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
         if( newIp6 == NULL )
           newIp6 = new IpAddress( ipv6->sin6_addr );
@@ -261,15 +253,13 @@ public:
 
     freeaddrinfo( servinfo );
 
-    if( newIp4 != NULL && !newIp4->isNull() && preferIpv4 )
-    {
+    if( newIp4 != NULL && !newIp4->isNull() && preferIpv4 ) {
       if( newIp6 != NULL )
         delete newIp6;
       return newIp4;
     }
 
-    if( newIp6 != NULL && !newIp6->isNull() )
-    {
+    if( newIp6 != NULL && !newIp6->isNull() ) {
       if( newIp4 != NULL )
         delete newIp4;
       return newIp6;
@@ -301,8 +291,7 @@ public:
  * IpNetwork struct definition
  */
 
-class IpNetwork
-{
+class IpNetwork {
 public:
   IpAddress addr;
   u_int8_t  mask;
@@ -328,8 +317,7 @@ public:
     if( A.addr.ipversion != addr.ipversion )
       return addr.ipversion < A.addr.ipversion;
 
-    if( A.addr.ipversion == 4 )
-    {
+    if( A.addr.ipversion == 4 ) {
       if( addr.ipversion != 4 )
         return false; // IpV6 > IpV4
 
@@ -344,8 +332,7 @@ public:
       return ( addr.ip.v4 & netmask ) < ( A.addr.ip.v4 & Anetmask );
     }
 
-    if( A.addr.ipversion == 6 )
-    {
+    if( A.addr.ipversion == 6 ) {
       if( addr.ipversion != 6 )
         return true; // IpV6 > IpV4
 
@@ -353,10 +340,8 @@ public:
       int      i       = 0;
       u_int8_t netmask = 0, Anetmask = 0;
 
-      for( ; i < INET6_ADDRLEN - 1 && res; i++ )
-      {
-        for( u_int8_t j = i * 8; j < ( i + 1 ) * 8; j++ )
-        {
+      for( ; i < INET6_ADDRLEN - 1 && res; i++ ) {
+        for( u_int8_t j = i * 8; j < ( i + 1 ) * 8; j++ ) {
           if( j < A.mask )
             Anetmask |= 1 << ( 8 - ( j - i * 8 ) );
           if( j < mask )
@@ -381,20 +366,18 @@ public:
   };
 
   /**
-    * Is this IP address belonging to this network?
-    * @param ip is an ip address
-    * @param net is a vector of IpNetwork
-    * @return true if it belongs to local network, false otherwise
-    */
+   * Is this IP address belonging to this network?
+   * @param ip is an ip address
+   * @param net is a vector of IpNetwork
+   * @return true if it belongs to local network, false otherwise
+   */
 
   inline bool isInside( const IpAddress &ip ) const
   {
     bool res = false;
 
-    if( ip.ipversion == 4 )
-    {
-      if( addr.ipversion == 4 )
-      {
+    if( ip.ipversion == 4 ) {
+      if( addr.ipversion == 4 ) {
         u_int32_t netmask = 0;
         for( u_int8_t j = 0; j < mask; j++ )
           netmask |= 1 << ( 31 - j );
@@ -403,15 +386,12 @@ public:
       }
     }
 
-    if( ip.ipversion == 6 )
-    {
-      if( addr.ipversion == 6 )
-      {
+    if( ip.ipversion == 6 ) {
+      if( addr.ipversion == 6 ) {
         res   = true;
         int i = 0;
 
-        for( ; i < INET6_ADDRLEN && res; i++ )
-        {
+        for( ; i < INET6_ADDRLEN && res; i++ ) {
           u_int8_t netmask = 0;
           for( u_int8_t j = i * 8; j < ( i + 1 ) * 8; j++ )
             if( j < mask )
@@ -430,16 +410,14 @@ public:
     IpNetwork * ipNet = NULL;
     std::string ipstr;
     size_t      found = value.find_first_of( '/' );
-    if( found == std::string::npos )
-    {
+    if( found == std::string::npos ) {
       IpAddress *addr = IpAddress::fromString( value );
       if( addr == NULL )
         return NULL;
       ipNet = new IpNetwork( *addr );
       delete addr;
     }
-    else
-    {
+    else {
       ipstr = value.substr( 0, found );
 
       IpAddress *addr = IpAddress::fromString( ipstr );
@@ -453,8 +431,7 @@ public:
       // Mask
       if( maskStr.find_first_of( '.' ) != std::string::npos ) // mask is formating like "w.x.y.z"
       {
-        if( addr->ipversion == 6 )
-        {
+        if( addr->ipversion == 6 ) {
           delete addr;
           return NULL;
         }
@@ -466,18 +443,15 @@ public:
           delete addr;
           return NULL;
         }
-        else
-        {
+        else {
           u_int32_t netmask      = ntohl( tmp.s_addr );
           bool      thisistheend = false;
           maskDec                = 0;
           for( u_int8_t j = 0; j < 32; j++ )
-            if( ( netmask >> ( 31 - j ) ) & 1 )
-            {
+            if( ( netmask >> ( 31 - j ) ) & 1 ) {
               if( !thisistheend )
                 maskDec++;
-              else
-              {
+              else {
                 delete addr;
                 return NULL;
               }
@@ -486,8 +460,7 @@ public:
               thisistheend = true;
         }
       }
-      else
-      {
+      else {
         size_t s = 0, e = 0, j = 0;
 
         while( ( maskStr[s] == ' ' || maskStr[s] == '\t' ) && s < maskStr.length() )
@@ -511,8 +484,7 @@ public:
         maskDec = atoi( maskStr.substr( s, e - s + 1 ).c_str() );
       }
 
-      if( ( maskDec > 32 && addr->ipversion == 4 ) || ( maskDec > 128 && addr->ipversion == 6 ) )
-      {
+      if( ( maskDec > 32 && addr->ipversion == 4 ) || ( maskDec > 128 && addr->ipversion == 6 ) ) {
         delete addr;
         return NULL;
       }
@@ -526,8 +498,7 @@ public:
   IpNetwork( const std::string &value )
   {
     IpNetwork *net = fromString( value );
-    if( net != NULL )
-    {
+    if( net != NULL ) {
       *this = *net;
       delete net;
     }
@@ -535,11 +506,11 @@ public:
 };
 
 /**
-  * Is this IP address belonging to this list of networks ?
-  * @param ip is an ip address
-  * @param net is a vector of IpNetwork
-  * @return true if it belongs to local network, false otherwise
-  */
+ * Is this IP address belonging to this list of networks ?
+ * @param ip is an ip address
+ * @param net is a vector of IpNetwork
+ * @return true if it belongs to local network, false otherwise
+ */
 
 inline static bool isIpBelongToIpNetwork( const IpAddress &ip, const std::vector<IpNetwork> &net )
 {
@@ -551,6 +522,6 @@ inline static bool isIpBelongToIpNetwork( const IpAddress &ip, const std::vector
   return res;
 };
 
-/***********************************************************************/
+  /***********************************************************************/
 
 #endif

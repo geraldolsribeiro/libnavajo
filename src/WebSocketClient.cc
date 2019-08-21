@@ -12,8 +12,8 @@
  */
 //********************************************************
 
-#include "libnavajo/WebSocket.hh"
 #include "libnavajo/WebServer.hh"
+#include "libnavajo/WebSocket.hh"
 #include "libnavajo/htonll.h"
 #include "libnavajo/nvjSocket.h"
 
@@ -38,8 +38,7 @@ void WebSocketClient::sendingThread()
 {
   pthread_mutex_lock( &sendingQueueMutex );
 
-  for( ;; )
-  {
+  for( ;; ) {
     while( sendingQueue.empty() && !closing )
       pthread_cond_wait( &sendingNotification, &sendingQueueMutex );
 
@@ -53,8 +52,7 @@ void WebSocketClient::sendingThread()
     struct timeb t;
     ftime( &t );
     long long msgLatency = (long long)( t.time - msg->date.time ) * 1000 + (long long)( t.millitm - msg->date.millitm );
-    if( msgLatency > snd_maxLatency || !sendMessage( msg ) )
-    {
+    if( msgLatency > snd_maxLatency || !sendMessage( msg ) ) {
       free( msg->message );
       free( msg );
       closeSend();
@@ -80,19 +78,13 @@ void WebSocketClient::receivingThread()
 
   unsigned char  msgKeys[4];
   unsigned char *msgContent = NULL;
-  enum MsgDecodSteps
-  {
-    FIRSTBYTE,
-    LENGTH,
-    MASK,
-    CONTENT
-  };
+  enum MsgDecodSteps { FIRSTBYTE, LENGTH, MASK, CONTENT };
 
   ClientSockData *client = request->getClientSockData();
 
   if( websocket->getWebsocketTimeoutInMilliSecond()
-      && !setSocketSndRcvTimeout( client->socketId, 0, websocket->getWebsocketTimeoutInMilliSecond() ) )
-  { // Reduce socket timeout
+      && !setSocketSndRcvTimeout(
+             client->socketId, 0, websocket->getWebsocketTimeoutInMilliSecond() ) ) { // Reduce socket timeout
     NVJ_LOG->appendUniq( NVJ_ERROR, "WebSocketClient : setSocketSndRcvTimeout error" );
     closeRecv();
     return;
@@ -112,22 +104,18 @@ void WebSocketClient::receivingThread()
   MsgDecodSteps step       = FIRSTBYTE;
   memset( msgKeys, 0, 4 * sizeof( unsigned char ) );
 
-  for( ; !closing; )
-  {
+  for( ; !closing; ) {
     int    n      = 0;
     size_t it     = 0;
     size_t length = readLength;
 
-    if( length > BUFSIZE )
-    {
+    if( length > BUFSIZE ) {
       length = BUFSIZE;
       readLength -= BUFSIZE;
     }
 
-    do
-    {
-      if( client->bio != NULL && client->ssl != NULL )
-      {
+    do {
+      if( client->bio != NULL && client->ssl != NULL ) {
         n = BIO_read( client->bio, bufferRecv + it, length - it );
 
         if( SSL_get_error( client->ssl, n ) == SSL_ERROR_ZERO_RETURN )
@@ -135,12 +123,10 @@ void WebSocketClient::receivingThread()
         if( ( n == 0 ) || ( n == -1 ) )
           continue;
       }
-      else
-      {
+      else {
         n = recv( client->socketId, bufferRecv + it, length - it, 0 );
 
-        if( n <= 0 )
-        {
+        if( n <= 0 ) {
           if( errno == ENOTCONN || errno == EBADF || errno == ECONNRESET )
             closing = true;
           continue;
@@ -154,8 +140,7 @@ void WebSocketClient::receivingThread()
       continue;
 
     // Decode message header
-    switch( step )
-    {
+    switch( step ) {
     case FIRSTBYTE:
       fin    = ( bufferRecv[0] & 0x80 ) >> 7;
       rsv    = ( bufferRecv[0] & 0x70 ) >> 4;
@@ -166,51 +151,42 @@ void WebSocketClient::receivingThread()
       break;
 
     case LENGTH:
-      if( !msgLength )
-      {
+      if( !msgLength ) {
         msgMask = ( bufferRecv[0] & 0x80 ) >> 7;
-        if( !msgMask )
-        {
+        if( !msgMask ) {
           closeRecv();
           return;
         }
 
         msgLength = bufferRecv[0] & 0x7f;
-        if( !msgLength )
-        {
+        if( !msgLength ) {
           NVJ_LOG->append( NVJ_WARNING, "Websocket: Message length is null. Closing socket." );
           msgLength  = 0;
           msgContent = NULL;
           step       = CONTENT;
           continue;
         }
-        if( msgLength == 126 )
-        {
+        if( msgLength == 126 ) {
           readLength = 2;
           break;
         }
-        if( msgLength == 127 )
-        {
+        if( msgLength == 127 ) {
           readLength = 8;
           break;
         }
       }
-      else
-      {
-        if( msgLength == 126 )
-        {
+      else {
+        if( msgLength == 126 ) {
           u_int16_t *tmp = (u_int16_t *)bufferRecv;
           msgLength      = ntohs( *tmp );
         }
-        if( msgLength == 127 )
-        {
+        if( msgLength == 127 ) {
           u_int64_t *tmp = (u_int64_t *)bufferRecv;
           msgLength      = ntohll( *tmp );
         }
       }
 
-      if( ( msgContent = (unsigned char *)malloc( msgLength * sizeof( unsigned char ) ) ) == NULL )
-      {
+      if( ( msgContent = (unsigned char *)malloc( msgLength * sizeof( unsigned char ) ) ) == NULL ) {
         char logBuffer[500];
         snprintf(
             logBuffer,
@@ -221,13 +197,11 @@ void WebSocketClient::receivingThread()
         msgContent = NULL;
       }
       msgContentIt = 0;
-      if( msgMask )
-      {
+      if( msgMask ) {
         step       = MASK;
         readLength = 4;
       }
-      else
-      {
+      else {
         step       = CONTENT;
         readLength = msgLength;
       }
@@ -252,10 +226,8 @@ void WebSocketClient::receivingThread()
           opcode,
           msgMask );
       NVJ_LOG->append( NVJ_DEBUG, buf );
-      if( msgContent != NULL )
-      {
-        for( size_t i = 0; i < length; i++ )
-        {
+      if( msgContent != NULL ) {
+        for( size_t i = 0; i < length; i++ ) {
           if( msgMask )
             msgContent[msgContentIt] = bufferRecv[i] ^ msgKeys[msgContentIt % 4];
           else
@@ -265,12 +237,9 @@ void WebSocketClient::receivingThread()
         }
       }
 
-      if( msgContentIt == msgLength )
-      {
-        if( msgContent != NULL && ( client->compression == ZLIB ) && ( rsv & 4 ) )
-        {
-          try
-          {
+      if( msgContentIt == msgLength ) {
+        if( msgContent != NULL && ( client->compression == ZLIB ) && ( rsv & 4 ) ) {
+          try {
             unsigned char *msg    = NULL;
             size_t         msgLen = nvj_gunzip_websocket_v2(
                 &msg, msgContent, msgLength, true, gzipcontext.z_dictionary_inflate, &( gzipcontext.dictInfLength ) );
@@ -280,15 +249,13 @@ void WebSocketClient::receivingThread()
 
             msgContent[msgLength] = '\0';
           }
-          catch( std::exception &e )
-          {
+          catch( std::exception &e ) {
             NVJ_LOG->append( NVJ_ERROR, std::string( " Websocket: nvj_gzip raised an exception: " ) + e.what() );
             msgLength = 0;
           }
         }
 
-        switch( opcode )
-        {
+        switch( opcode ) {
         case 0x1:
           if( msgLength )
             websocket->onTextMessage( this, std::string( (char *)msgContent, msgLength ), fin );
@@ -299,8 +266,7 @@ void WebSocketClient::receivingThread()
           websocket->onBinaryMessage( this, msgContent, msgLength, fin );
           break;
         case 0x8:
-          if( websocket->onCloseCtrlFrame( this, msgContent, msgLength ) )
-          {
+          if( websocket->onCloseCtrlFrame( this, msgContent, msgLength ) ) {
             sendCloseCtrlFrame( msgContent, msgLength );
             closeRecv();
             return;
@@ -419,37 +385,30 @@ bool WebSocketClient::sendMessage( const MessageContent *msgContent )
     return false;
 
   headerBuffer[0] = 0x80 | ( msgContent->opcode & 0xf ); // FIN & OPCODE:0x1
-  if( client->compression == ZLIB )
-  {
+  if( client->compression == ZLIB ) {
     headerBuffer[0] |= 0x40; // Set RSV1
-    try
-    {
+    try {
       msgLen = nvj_gzip_websocket_v2( &msg, msgContent->message, msgContent->length, &( gzipcontext.strm_deflate ) );
     }
-    catch( ... )
-    {
+    catch( ... ) {
       NVJ_LOG->append( NVJ_ERROR, " Websocket: nvj_gzip raised an exception" );
       return false;
     }
   }
-  else
-  {
+  else {
     msg    = msgContent->message;
     msgLen = msgContent->length;
   }
 
   if( msgLen < 126 )
     headerBuffer[1] = msgLen;
-  else
-  {
-    if( msgLen < 0xFFFF )
-    {
+  else {
+    if( msgLen < 0xFFFF ) {
       headerBuffer[1]                    = 126;
       *(u_int16_t *)( headerBuffer + 2 ) = htons( (u_int16_t)msgLen );
       headerLen += 2;
     }
-    else
-    {
+    else {
       headerBuffer[1]                    = 127;
       *(u_int64_t *)( headerBuffer + 2 ) = htonll( (u_int64_t)msgLen );
       headerLen += 8;

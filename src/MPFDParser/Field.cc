@@ -19,15 +19,12 @@ MPFD::Field::Field()
 MPFD::Field::~Field()
 {
 
-  if( FieldContent )
-  {
+  if( FieldContent ) {
     delete FieldContent;
   }
 
-  if( type == FileType )
-  {
-    if( file.is_open() )
-    {
+  if( type == FileType ) {
+    if( file.is_open() ) {
       file.close();
       remove( ( TempDir + "/" + TempFile ).c_str() );
     }
@@ -36,38 +33,31 @@ MPFD::Field::~Field()
 
 void MPFD::Field::SetType( int type )
 {
-  if( ( type == TextType ) || ( type == FileType ) )
-  {
+  if( ( type == TextType ) || ( type == FileType ) ) {
     this->type = type;
   }
-  else
-  {
+  else {
     throw MPFD::Exception( "Trying to set type of field, but type is incorrect." );
   }
 }
 
 int MPFD::Field::GetType()
 {
-  if( type > 0 )
-  {
+  if( type > 0 ) {
     return type;
   }
-  else
-  {
+  else {
     throw MPFD::Exception( "Trying to get type of field, but no type was set." );
   }
 }
 
 void MPFD::Field::AcceptSomeData( char *data, long length )
 {
-  if( type == TextType )
-  {
-    if( FieldContent == NULL )
-    {
+  if( type == TextType ) {
+    if( FieldContent == NULL ) {
       FieldContent = new char[length + 1];
     }
-    else
-    {
+    else {
       FieldContent = (char *)realloc( FieldContent, FieldContentLength + length + 1 );
     }
 
@@ -76,23 +66,17 @@ void MPFD::Field::AcceptSomeData( char *data, long length )
 
     FieldContent[FieldContentLength] = 0;
   }
-  else if( type == FileType )
-  {
-    if( WhereToStoreUploadedFiles == Parser::StoreUploadedFilesInFilesystem )
-    {
-      if( TempDir.length() > 0 )
-      {
+  else if( type == FileType ) {
+    if( WhereToStoreUploadedFiles == Parser::StoreUploadedFilesInFilesystem ) {
+      if( TempDir.length() > 0 ) {
 
-        if( !file.is_open() )
-        {
+        if( !file.is_open() ) {
           pthread_mutex_lock( &fileCreation_mutex );
           int           i = 1;
           std::ifstream testfile;
           std::string   tempfile;
-          do
-          {
-            if( testfile.is_open() )
-            {
+          do {
+            if( testfile.is_open() ) {
               testfile.close();
             }
 
@@ -110,37 +94,30 @@ void MPFD::Field::AcceptSomeData( char *data, long length )
           pthread_mutex_unlock( &fileCreation_mutex );
         }
 
-        if( file.is_open() )
-        {
+        if( file.is_open() ) {
           file.write( data, length );
           file.flush();
         }
-        else
-        {
+        else {
           throw Exception( std::string( "Cannot write to file " ) + TempDir + "/" + TempFile );
         }
       }
-      else
-      {
+      else {
         throw MPFD::Exception( "Trying to AcceptSomeData for a file but no TempDir is set." );
       }
     }
-    else
-    { // If files are stored in memory
-      if( FieldContent == NULL )
-      {
+    else { // If files are stored in memory
+      if( FieldContent == NULL ) {
         FieldContent = new char[length];
       }
-      else
-      {
+      else {
         FieldContent = (char *)realloc( FieldContent, FieldContentLength + length );
       }
       memcpy( FieldContent + FieldContentLength, data, length );
       FieldContentLength += length;
     }
   }
-  else
-  {
+  else {
     throw MPFD::Exception( "Trying to AcceptSomeData but no type was set." );
   }
 }
@@ -152,27 +129,21 @@ void MPFD::Field::SetTempDir( std::string dir )
 
 unsigned long MPFD::Field::GetFileContentSize()
 {
-  if( type == 0 )
-  {
+  if( type == 0 ) {
     throw MPFD::Exception( "Trying to get file content size, but no type was set." );
   }
-  else
-  {
-    if( type == FileType )
-    {
-      if( WhereToStoreUploadedFiles == Parser::StoreUploadedFilesInMemory )
-      {
+  else {
+    if( type == FileType ) {
+      if( WhereToStoreUploadedFiles == Parser::StoreUploadedFilesInMemory ) {
         return FieldContentLength;
       }
-      else
-      {
+      else {
         throw MPFD::Exception(
             "Trying to get file content size, but uploaded "
             "files are stored in filesystem." );
       }
     }
-    else
-    {
+    else {
       throw MPFD::Exception( "Trying to get file content size, but the type is not file." );
     }
   }
@@ -180,27 +151,21 @@ unsigned long MPFD::Field::GetFileContentSize()
 
 char *MPFD::Field::GetFileContent()
 {
-  if( type == 0 )
-  {
+  if( type == 0 ) {
     throw MPFD::Exception( "Trying to get file content, but no type was set." );
   }
-  else
-  {
-    if( type == FileType )
-    {
-      if( WhereToStoreUploadedFiles == Parser::StoreUploadedFilesInMemory )
-      {
+  else {
+    if( type == FileType ) {
+      if( WhereToStoreUploadedFiles == Parser::StoreUploadedFilesInMemory ) {
         return FieldContent;
       }
-      else
-      {
+      else {
         throw MPFD::Exception(
             "Trying to get file content, but uploaded files "
             "are stored in filesystem." );
       }
     }
-    else
-    {
+    else {
       throw MPFD::Exception( "Trying to get file content, but the type is not file." );
     }
   }
@@ -208,24 +173,18 @@ char *MPFD::Field::GetFileContent()
 
 std::string MPFD::Field::GetTextTypeContent()
 {
-  if( type == 0 )
-  {
+  if( type == 0 ) {
     throw MPFD::Exception( "Trying to get text content of the field, but no type was set." );
   }
-  else
-  {
-    if( type != TextType )
-    {
+  else {
+    if( type != TextType ) {
       throw MPFD::Exception( "Trying to get content of the field, but the type is not text." );
     }
-    else
-    {
-      if( FieldContent == NULL )
-      {
+    else {
+      if( FieldContent == NULL ) {
         return std::string();
       }
-      else
-      {
+      else {
         return std::string( FieldContent );
       }
     }
@@ -234,27 +193,21 @@ std::string MPFD::Field::GetTextTypeContent()
 
 std::string MPFD::Field::GetTempFileName()
 {
-  if( type == 0 )
-  {
+  if( type == 0 ) {
     throw MPFD::Exception( "Trying to get file temp name, but no type was set." );
   }
-  else
-  {
-    if( type == FileType )
-    {
-      if( WhereToStoreUploadedFiles == Parser::StoreUploadedFilesInFilesystem )
-      {
+  else {
+    if( type == FileType ) {
+      if( WhereToStoreUploadedFiles == Parser::StoreUploadedFilesInFilesystem ) {
         return std::string( TempDir + "/" + TempFile );
       }
-      else
-      {
+      else {
         throw MPFD::Exception(
             "Trying to get file temp name, but uplaoded "
             "files are stored in memory." );
       }
     }
-    else
-    {
+    else {
       throw MPFD::Exception( "Trying to get file temp name, but the type is not file." );
     }
   }
@@ -262,18 +215,14 @@ std::string MPFD::Field::GetTempFileName()
 
 std::string MPFD::Field::GetFileName()
 {
-  if( type == 0 )
-  {
+  if( type == 0 ) {
     throw MPFD::Exception( "Trying to get file name, but no type was set." );
   }
-  else
-  {
-    if( type == FileType )
-    {
+  else {
+    if( type == FileType ) {
       return FileName;
     }
-    else
-    {
+    else {
       throw MPFD::Exception( "Trying to get file name, but the type is not file." );
     }
   }
@@ -296,18 +245,14 @@ void MPFD::Field::SetFileContentType( std::string type )
 
 std::string MPFD::Field::GetFileMimeType()
 {
-  if( type == 0 )
-  {
+  if( type == 0 ) {
     throw MPFD::Exception( "Trying to get mime type of file, but no type was set." );
   }
-  else
-  {
-    if( type != FileType )
-    {
+  else {
+    if( type != FileType ) {
       throw MPFD::Exception( "Trying to get mime type of the field, but the type is not File." );
     }
-    else
-    {
+    else {
       return std::string( FileContentType );
     }
   }

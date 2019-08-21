@@ -22,10 +22,9 @@
 #include "libnavajo/LogOutput.hh"
 
 /**
-* LogSyslog - LogOutput
-*/
-class LogSyslog : public LogOutput
-{
+ * LogSyslog - LogOutput
+ */
+class LogSyslog : public LogOutput {
 public:
   LogSyslog( const char *id = "Navajo" );
   ~LogSyslog();

@@ -42,10 +42,8 @@ int getCpuLoad( void )
   if( ( proc_stat_fd = fopen( "/proc/stat", "r" ) ) == NULL )
     return -1;
 
-  while( ( fgets( buf, sizeof( buf ), proc_stat_fd ) ) != NULL )
-  {
-    if( !strncmp( "cpu ", buf, 4 ) )
-    {
+  while( ( fgets( buf, sizeof( buf ), proc_stat_fd ) ) != NULL ) {
+    if( !strncmp( "cpu ", buf, 4 ) ) {
       unsigned long user = 0, nice = 0, sys = 0, idle = 0, iowait = 0, irq = 0, softirq = 0;
       int n = sscanf( buf + 5, "%lu %lu %lu %lu %lu %lu %lu", &user, &nice, &sys, &idle, &iowait, &irq, &softirq );
       if( n < 5 )
@@ -73,10 +71,8 @@ int getCpuLoad( void )
 
 /***********************************************************************/
 
-class MyDynamicRepository : public DynamicRepository
-{
-  class MyDynamicPage : public DynamicPage
-  {
+class MyDynamicRepository : public DynamicRepository {
+  class MyDynamicPage : public DynamicPage {
   protected:
     bool isValidSession( HttpRequest *request )
     {
@@ -85,15 +81,13 @@ class MyDynamicRepository : public DynamicRepository
     }
   };
 
-  class Auth : public MyDynamicPage
-  {
+  class Auth : public MyDynamicPage {
     bool getPage( HttpRequest *request, HttpResponse *response )
     {
       std::string login, password;
       // User libnavajo/libnavajo is allowed
       if( request->getParameter( "login", login ) && request->getParameter( "pass", password )
-          && ( login == "libnavajo" && password == "libnavajo" ) )
-      {
+          && ( login == "libnavajo" && password == "libnavajo" ) ) {
         char *username = (char *)malloc( ( login.length() + 1 ) * sizeof( char ) );
         strcpy( username, login.c_str() );
         request->setSessionAttribute( "username", (void *)username );
@@ -103,8 +97,7 @@ class MyDynamicRepository : public DynamicRepository
     }
   } auth;
 
-  class CpuValue : public MyDynamicPage
-  {
+  class CpuValue : public MyDynamicPage {
     bool getPage( HttpRequest *request, HttpResponse *response )
     {
       if( !isValidSession( request ) )
@@ -116,14 +109,12 @@ class MyDynamicRepository : public DynamicRepository
     }
   } cpuValue;
 
-  class Controller : public MyDynamicPage
-  {
+  class Controller : public MyDynamicPage {
     bool getPage( HttpRequest *request, HttpResponse *response )
     {
       std::string param;
 
-      if( request->getParameter( "pageId", param ) && param == "LOGIN" && isValidSession( request ) )
-      {
+      if( request->getParameter( "pageId", param ) && param == "LOGIN" && isValidSession( request ) ) {
         response->forwardTo( "gauge.html" );
         return true;
       }

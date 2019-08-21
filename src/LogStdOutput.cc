@@ -25,15 +25,14 @@
 
 /***********************************************************************/
 /**
-* append - append a message
-* \param l - LogSeverity
-* \param m - message
-*/
+ * append - append a message
+ * \param l - LogSeverity
+ * \param m - message
+ */
 void LogStdOutput::append( const NvjLogSeverity &l, const std::string &message, const std::string & /*details*/ )
 {
 
-  switch( l )
-  {
+  switch( l ) {
   case NVJ_DEBUG:
     fprintf( stdout, CYN "%s\n" RESET, message.c_str() );
     fflush( NULL );
@@ -61,8 +60,8 @@ void LogStdOutput::append( const NvjLogSeverity &l, const std::string &message, 
 
 /***********************************************************************/
 /**
-*  initialize the logoutput
-*/
+ *  initialize the logoutput
+ */
 
 void LogStdOutput::initialize()
 {
@@ -70,8 +69,8 @@ void LogStdOutput::initialize()
 
 /***********************************************************************/
 /**
-* LogStdOutput - constructor
-*/
+ * LogStdOutput - constructor
+ */
 
 LogStdOutput::LogStdOutput()
 {
@@ -79,8 +78,8 @@ LogStdOutput::LogStdOutput()
 
 /***********************************************************************/
 /**
-* ~LogRecorder - destructor
-*/
+ * ~LogRecorder - destructor
+ */
 
 LogStdOutput::~LogStdOutput()
 {

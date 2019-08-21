@@ -55,10 +55,8 @@ bool checkMessage( HttpRequest *request, const std::string msg )
 
 /***********************************************************************/
 
-class MyDynamicRepository : public DynamicRepository
-{
-  class Connect : public DynamicPage
-  {
+class MyDynamicRepository : public DynamicRepository {
+  class Connect : public DynamicPage {
     bool getPage( HttpRequest *request, HttpResponse *response )
     {
 #ifdef DEBUG_TRACES
@@ -67,8 +65,7 @@ class MyDynamicRepository : public DynamicRepository
       std::string login, password;
       // User libnavajo/libnavajo is allowed !
       if( request->getParameter( "login", login ) && request->getParameter( "pass", password )
-          && ( login == "libnavajo" && password == "libnavajo" ) )
-      {
+          && ( login == "libnavajo" && password == "libnavajo" ) ) {
         char *username = (char *)malloc( ( login.length() + 1 ) * sizeof( char ) );
         strcpy( username, login.c_str() );
         request->setSessionAttribute( "username", (void *)username );
@@ -85,8 +82,7 @@ class MyDynamicRepository : public DynamicRepository
     }
   } connect;
 
-  class Disconnect : public DynamicPage
-  {
+  class Disconnect : public DynamicPage {
     bool getPage( HttpRequest *request, HttpResponse *response )
     {
       request->removeSession();
@@ -104,8 +100,7 @@ public:
 
 /***********************************************************************/
 
-class MyWebSocket : public WebSocket
-{
+class MyWebSocket : public WebSocket {
   bool onOpening( HttpRequest *request )
   {
     printf(

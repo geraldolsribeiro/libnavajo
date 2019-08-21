@@ -39,8 +39,7 @@ typedef enum {
 } HttpRequestMethod;
 
 typedef enum { GZIP, ZLIB, NONE } CompressionMode;
-typedef struct
-{
+typedef struct {
   int             socketId;
   IpAddress       ip;
   CompressionMode compression;
@@ -50,8 +49,7 @@ typedef struct
   //  pthread_mutex_t client_mutex;
 } ClientSockData;
 
-class HttpRequest
-{
+class HttpRequest {
   typedef std::map<std::string, std::string> HttpRequestParametersMap;
   typedef std::map<std::string, std::string> HttpRequestCookiesMap;
 
@@ -69,24 +67,21 @@ class HttpRequest
 
   /**********************************************************************/
   /**
-  * decode all http parameters and fill the parameters Map
-  * @param p: raw string containing all the http parameters
-  */
+   * decode all http parameters and fill the parameters Map
+   * @param p: raw string containing all the http parameters
+   */
   inline void decodParams( const std::string &p )
   {
     size_t      start = 0, end = 0;
     std::string paramstr = p;
 
-    while( ( end = paramstr.find_first_of( "%+", start ) ) != std::string::npos )
-    {
+    while( ( end = paramstr.find_first_of( "%+", start ) ) != std::string::npos ) {
       size_t len = paramstr.length() - end - 1;
-      switch( paramstr[end] )
-      {
+      switch( paramstr[end] ) {
       case '%':
         if( paramstr[end + 1] == '%' && len )
           paramstr = paramstr.erase( end + 1, 1 );
-        else
-        {
+        else {
           if( len < 2 )
             break;
 
@@ -111,8 +106,7 @@ class HttpRequest
     start            = 0;
     end              = 0;
     bool islastParam = false;
-    while( !islastParam )
-    {
+    while( !islastParam ) {
       islastParam = ( end = paramstr.find( '&', start ) ) == std::string::npos;
       if( islastParam )
         end = paramstr.size();
@@ -120,25 +114,20 @@ class HttpRequest
       std::string theParam = paramstr.substr( start, end - start );
 
       size_t posEq = 0;
-      if( ( posEq            = theParam.find( '=' ) ) == std::string::npos )
+      if( ( posEq = theParam.find( '=' ) ) == std::string::npos )
         parameters[theParam] = "";
-      else
-      {
+      else {
         std::string key   = theParam.substr( 0, posEq );
         std::string value = theParam.substr( posEq + 1 );
-        if( parameters.count( key ) == 0 )
-        {
+        if( parameters.count( key ) == 0 ) {
           parameters[key] = value;
         }
-        else
-        {
+        else {
           std::string arrayKey = key + "[]";
-          if( parameters.count( arrayKey ) == 1 )
-          {
+          if( parameters.count( arrayKey ) == 1 ) {
             parameters[arrayKey] += "|" + value;
           }
-          else
-          {
+          else {
             parameters[arrayKey] = parameters[key] + "|" + value;
           }
           parameters[key] = value;
@@ -151,21 +140,18 @@ class HttpRequest
 
   /**********************************************************************/
   /**
-  * decode all http cookies and fill the cookies Map
-  * @param c: raw string containing all the cockies definitions
-  */
+   * decode all http cookies and fill the cookies Map
+   * @param c: raw string containing all the cockies definitions
+   */
   inline void decodCookies( const std::string &c )
   {
     std::stringstream ss( c );
     std::string       theCookie;
-    while( std::getline( ss, theCookie, ';' ) )
-    {
+    while( std::getline( ss, theCookie, ';' ) ) {
       size_t posEq = 0;
-      if( ( posEq = theCookie.find( '=' ) ) != std::string::npos )
-      {
+      if( ( posEq = theCookie.find( '=' ) ) != std::string::npos ) {
         size_t firstC = 0;
-        while( !iswgraph( theCookie[firstC] ) && firstC < posEq )
-        {
+        while( !iswgraph( theCookie[firstC] ) && firstC < posEq ) {
           firstC++;
         };
 
@@ -178,9 +164,9 @@ class HttpRequest
 
   /**********************************************************************/
   /**
-  * check the SID cookie and set the sessionID attribute if the session is valid
-  * (called by constructor)
-  */
+   * check the SID cookie and set the sessionID attribute if the session is valid
+   * (called by constructor)
+   */
   inline void getSession()
   {
     sessionId = getCookie( "SID" );
@@ -194,9 +180,9 @@ class HttpRequest
 public:
   /**********************************************************************/
   /**
-  * get cookie value
-  * @param name: the cookie name
-  */
+   * get cookie value
+   * @param name: the cookie name
+   */
   inline std::string getCookie( const std::string &name ) const
   {
     std::string res = "";
@@ -206,18 +192,16 @@ public:
 
   /**********************************************************************/
   /**
-  * get cookie value
-  * @param name: the cookie name
-  * @param value: the cookie value
-  * @return true is the cookie exist
-  */
+   * get cookie value
+   * @param name: the cookie name
+   * @param value: the cookie value
+   * @return true is the cookie exist
+   */
   inline bool getCookie( const std::string &name, std::string &value ) const
   {
-    if( !cookies.empty() )
-    {
+    if( !cookies.empty() ) {
       HttpRequestCookiesMap::const_iterator it;
-      if( ( it = cookies.find( name ) ) != cookies.end() )
-      {
+      if( ( it = cookies.find( name ) ) != cookies.end() ) {
         value = it->second;
         return true;
       }
@@ -227,9 +211,9 @@ public:
 
   /**********************************************************************/
   /**
-  * get cookies list
-  * @return a vector containing all cookies names
-  */
+   * get cookies list
+   * @return a vector containing all cookies names
+   */
   inline std::vector<std::string> getCookiesNames() const
   {
     std::vector<std::string> res;
@@ -240,18 +224,16 @@ public:
 
   /**********************************************************************/
   /**
-  * get parameter value
-  * @param name: the parameter name
-  * @param value: the parameter value
-  * @return true is the parameter exist
-  */
+   * get parameter value
+   * @param name: the parameter name
+   * @param value: the parameter value
+   * @return true is the parameter exist
+   */
   inline bool getParameter( const std::string &name, std::string &value ) const
   {
-    if( !parameters.empty() )
-    {
+    if( !parameters.empty() ) {
       HttpRequestParametersMap::const_iterator it;
-      if( ( it = parameters.find( name ) ) != parameters.end() )
-      {
+      if( ( it = parameters.find( name ) ) != parameters.end() ) {
         value = it->second;
         return true;
       }
@@ -261,10 +243,10 @@ public:
 
   /**********************************************************************/
   /**
-  * get parameter value
-  * @param name: the parameter name
-  * @return the parameter value
-  */
+   * get parameter value
+   * @param name: the parameter name
+   * @return the parameter value
+   */
   inline std::string getParameter( const std::string &name ) const
   {
     std::string res = "";
@@ -274,10 +256,10 @@ public:
 
   /**********************************************************************/
   /**
-  * does the parameter exist ?
-  * @param name: the parameter name
-  * @return true is the parameter exist
-  */
+   * does the parameter exist ?
+   * @param name: the parameter name
+   * @return true is the parameter exist
+   */
   inline bool hasParameter( const std::string &name ) const
   {
     std::string tmp;
@@ -286,9 +268,9 @@ public:
 
   /**********************************************************************/
   /**
-  * get parameters list
-  * @return a vector containing all parameters names
-  */
+   * get parameters list
+   * @return a vector containing all parameters names
+   */
   inline std::vector<std::string> getParameterNames() const
   {
     std::vector<std::string> res;
@@ -299,8 +281,8 @@ public:
 
   /**********************************************************************/
   /**
-  * is there a valid session cookie
-  */
+   * is there a valid session cookie
+   */
   inline bool isSessionValid()
   {
     return sessionId != "";
@@ -308,16 +290,16 @@ public:
 
   /**********************************************************************/
   /**
-  * create a session cookie
-  */
+   * create a session cookie
+   */
   inline void createSession()
   {
     HttpSession::create( sessionId );
   }
 
   /**
-  * remove the session cookie
-  */
+   * remove the session cookie
+   */
   inline void removeSession()
   {
     if( sessionId == "" )
@@ -326,10 +308,10 @@ public:
   }
 
   /**
-  * add an attribute to the session
-  * @param name: the attribute name
-  * @param value: the attribute value
-  */
+   * add an attribute to the session
+   * @param name: the attribute name
+   * @param value: the attribute value
+   */
   void setSessionAttribute( const std::string &name, void *value )
   {
     if( sessionId == "" )
@@ -338,10 +320,10 @@ public:
   }
 
   /**
-  * add an object attribute to the session
-  * @param name: the attribute name
-  * @param value: the object instance
-  */
+   * add an object attribute to the session
+   * @param name: the attribute name
+   * @param value: the object instance
+   */
   void setSessionObjectAttribute( const std::string &name, SessionAttributeObject *value )
   {
     if( sessionId == "" )
@@ -350,10 +332,10 @@ public:
   }
 
   /**
-  * get an attribute of the server session
-  * @param name: the attribute name
-  * @return the attribute value or NULL if not found
-  */
+   * get an attribute of the server session
+   * @param name: the attribute name
+   * @return the attribute value or NULL if not found
+   */
   void *getSessionAttribute( const std::string &name )
   {
     if( sessionId == "" )
@@ -362,10 +344,10 @@ public:
   }
 
   /**
-  * get an object attribute of the server session
-  * @param name: the attribute name
-  * @return the object instance or NULL if not found
-  */
+   * get an object attribute of the server session
+   * @param name: the attribute name
+   * @return the object instance or NULL if not found
+   */
   SessionAttributeObject *getSessionObjectAttribute( const std::string &name )
   {
     if( sessionId == "" )
@@ -374,9 +356,9 @@ public:
   }
 
   /**
-  * get the list of the attribute's Names of the server session
-  * @return a vector containing all attribute's names
-  */
+   * get the list of the attribute's Names of the server session
+   * @return a vector containing all attribute's names
+   */
   inline std::vector<std::string> getSessionAttributeNames()
   {
     if( sessionId == "" )
@@ -386,9 +368,9 @@ public:
   }
 
   /**
-  * remove an attribute of the server session (if found)
-  * @param name: the attribute name
-  */
+   * remove an attribute of the server session (if found)
+   * @param name: the attribute name
+   */
   inline void getSessionRemoveAttribute( const std::string &name )
   {
     if( sessionId != "" )
@@ -396,17 +378,17 @@ public:
   }
 
   /**
-  * initialize sessionId value
-  */
+   * initialize sessionId value
+   */
   inline void initSessionId()
   {
     sessionId = "";
   };
 
   /**
-  * get sessionId value
-  * @return the sessionId value
-  */
+   * get sessionId value
+   * @return the sessionId value
+   */
   std::string getSessionId() const
   {
     return sessionId;
@@ -414,12 +396,12 @@ public:
 
   /**********************************************************************/
   /**
-  * HttpRequest constructor
-  * @param type:  the Http Request Type ( GET/POST/...)
-  * @param url:  the requested url
-  * @param params:  raw http parameters string
-  * @cookies params: raw http cookies string
-  */
+   * HttpRequest constructor
+   * @param type:  the Http Request Type ( GET/POST/...)
+   * @param url:  the requested url
+   * @param params:  raw http parameters string
+   * @cookies params: raw http cookies string
+   */
   HttpRequest(
       const HttpRequestMethod type,
       const char *            url,
@@ -450,9 +432,9 @@ public:
 
   /**********************************************************************/
   /**
-  * is there a multipart content in the request ?
-  * @return true or false
-  */
+   * is there a multipart content in the request ?
+   * @return true or false
+   */
   inline bool isMultipartContent() const
   {
     return multipartContentParser != NULL;
@@ -460,9 +442,9 @@ public:
 
   /**********************************************************************/
   /**
-  * get the MPFD parser
-  * @return a pointer to the MPFDparser instance
-  */
+   * get the MPFD parser
+   * @return a pointer to the MPFDparser instance
+   */
   inline MPFD::Parser *getMPFDparser()
   {
     return multipartContentParser;
@@ -470,9 +452,9 @@ public:
 
   /**********************************************************************/
   /**
-  * get the MIME content-type (if defined)
-  * @return the MIME content-type string
-  */
+   * get the MIME content-type (if defined)
+   * @return the MIME content-type string
+   */
   inline const char *getMimeType() const
   {
     return mimeType;
@@ -480,9 +462,9 @@ public:
 
   /**********************************************************************/
   /**
-  * get the Request Payload (if it exists)
-  * @return raw byte content
-  */
+   * get the Request Payload (if it exists)
+   * @return raw byte content
+   */
   inline std::vector<uint8_t> &getPayload()
   {
     return *payload;
@@ -490,9 +472,9 @@ public:
 
   /**********************************************************************/
   /**
-  * get url
-  * @return the requested url
-  */
+   * get url
+   * @return the requested url
+   */
   inline const char *getUrl() const
   {
     return url;
@@ -500,9 +482,9 @@ public:
 
   /**********************************************************************/
   /**
-  * set new url
-  * @param name: the attribute name
-  * */
+   * set new url
+   * @param name: the attribute name
+   * */
   inline void setUrl( const char *newUrl )
   {
     url = newUrl;
@@ -512,17 +494,16 @@ public:
   // forwardTo com novos parâmetros
   inline void setParams( const char *params )
   {
-    if( params != NULL && strlen( params ) )
-    {
+    if( params != NULL && strlen( params ) ) {
       decodParams( params );
     }
   }
 
   /**********************************************************************/
   /**
-  * get request type
-  * @return the Http Request Type ( GET/POST/...)
-  */
+   * get request type
+   * @return the Http Request Type ( GET/POST/...)
+   */
   inline HttpRequestMethod getRequestType() const
   {
     return httpMethod;
@@ -530,9 +511,9 @@ public:
 
   /**********************************************************************/
   /**
-  * set new Request Type
-  * @param name: the HttpRequestMethod
-  * */
+   * set new Request Type
+   * @param name: the HttpRequestMethod
+   * */
   inline void setRequestType( HttpRequestMethod newMethod )
   {
     httpMethod = newMethod;
@@ -540,9 +521,9 @@ public:
 
   /**********************************************************************/
   /**
-  * get request origin
-  * @return the Http Request Origin
-  */
+   * get request origin
+   * @return the Http Request Origin
+   */
   inline const char *getRequestOrigin() const
   {
     return origin;
@@ -550,9 +531,9 @@ public:
 
   /**********************************************************************/
   /**
-  * get peer IP address
-  * @return the ip address
-  */
+   * get peer IP address
+   * @return the ip address
+   */
   inline IpAddress &getPeerIpAddress()
   {
     return clientSockData->ip;
@@ -560,9 +541,9 @@ public:
 
   /**********************************************************************/
   /**
-  * get http authentification username
-  * @return the login
-  */
+   * get http authentification username
+   * @return the login
+   */
   inline std::string &getHttpAuthUsername()
   {
     return httpAuthUsername;
@@ -570,9 +551,9 @@ public:
 
   /**********************************************************************/
   /**
-  * get peer x509 dn
-  * @return the DN of the peer certificate
-  */
+   * get peer x509 dn
+   * @return the DN of the peer certificate
+   */
   inline std::string &getX509PeerDN()
   {
     return *( clientSockData->peerDN );
@@ -580,9 +561,9 @@ public:
 
   /**********************************************************************/
   /**
-  * is it a x509 authentification request ?
-  * @return true if x509 auth
-  */
+   * is it a x509 authentification request ?
+   * @return true if x509 auth
+   */
   inline bool isX509auth()
   {
     return clientSockData->peerDN != NULL;
@@ -590,9 +571,9 @@ public:
 
   /**********************************************************************/
   /**
-  * get compression mode
-  * @return the compression mode requested
-  */
+   * get compression mode
+   * @return the compression mode requested
+   */
   inline CompressionMode getCompressionMode()
   {
     return clientSockData->compression;
@@ -600,9 +581,9 @@ public:
 
   /**********************************************************************/
   /**
-  * get the http request client socket data
-  * @return the clientSockData
-  */
+   * get the http request client socket data
+   * @return the clientSockData
+   */
   ClientSockData *getClientSockData()
   {
     return clientSockData;

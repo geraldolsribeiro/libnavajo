@@ -21,10 +21,8 @@
 #include <sys/timeb.h>
 
 class WebSocket;
-class WebSocketClient
-{
-  typedef struct
-  {
+class WebSocketClient {
+  typedef struct {
     u_int8_t       opcode;
     unsigned char *message;
     size_t         length;
@@ -32,8 +30,7 @@ class WebSocketClient
     timeb          date;
   } MessageContent;
 
-  typedef struct
-  {
+  typedef struct {
     unsigned char z_dictionary_inflate[32768];
     unsigned int  dictInfLength;
     z_stream      strm_deflate;
@@ -43,7 +40,7 @@ class WebSocketClient
   std::queue<MessageContent *> sendingQueue;
   pthread_mutex_t              sendingQueueMutex;
   pthread_cond_t               sendingNotification;
-  void addSendingQueue( MessageContent *msgContent );
+  void                         addSendingQueue( MessageContent *msgContent );
 
   WebSocket *   websocket;
   HttpRequest * request;
@@ -81,8 +78,7 @@ class WebSocketClient
 
   void freeSendingQueue()
   {
-    while( !sendingQueue.empty() )
-    {
+    while( !sendingQueue.empty() ) {
       MessageContent *msg = sendingQueue.front();
       free( msg->message );
       free( msg );
@@ -109,58 +105,58 @@ public:
   }
 
   /**
-  * Send Text Message on the websocket
-  * @param message: the text message
-  * @param fin: is-it the final fragment of the message ?
-  */
+   * Send Text Message on the websocket
+   * @param message: the text message
+   * @param fin: is-it the final fragment of the message ?
+   */
   void sendTextMessage( const std::string &message, bool fin = true );
 
   /**
-  * Send Binary Message on the websocket
-  * @param message: the content
-  * @param length: the message length
-  * @param fin: is-it the final fragment of the message ?
-  */
+   * Send Binary Message on the websocket
+   * @param message: the content
+   * @param length: the message length
+   * @param fin: is-it the final fragment of the message ?
+   */
   void sendBinaryMessage( const unsigned char *message, size_t length, bool fin = true );
 
   /**
-  * Send Close Message Notification on the websocket
-  * @param message: the closure reason message
-  * @param length: the message length
-  */
+   * Send Close Message Notification on the websocket
+   * @param message: the closure reason message
+   * @param length: the message length
+   */
   void sendCloseCtrlFrame( const unsigned char *message, size_t length );
 
   /**
-  * Send Close Message Notification on the websocket
-  * @param message: the closure reason message
-  */
+   * Send Close Message Notification on the websocket
+   * @param message: the closure reason message
+   */
   void sendCloseCtrlFrame( const std::string &reasonMsg = "" );
 
   /**
-  * Send Ping Message Notification on the websocket
-  * @param request: the http request object
-  * @param message: the content
-  * @param length: the message length
-  */
+   * Send Ping Message Notification on the websocket
+   * @param request: the http request object
+   * @param message: the content
+   * @param length: the message length
+   */
   void sendPingCtrlFrame( const unsigned char *message, size_t length );
 
   /**
-  * Send Ping Message Notification on the websocket
-  * @param message: the content
-  */
+   * Send Ping Message Notification on the websocket
+   * @param message: the content
+   */
   void sendPingCtrlFrame( const std::string &message );
 
   /**
-  * Send Pong Message Notification on the websocket
-  * @param message: the content
-  * @param length: the message length
-  */
+   * Send Pong Message Notification on the websocket
+   * @param message: the content
+   * @param length: the message length
+   */
   void sendPongCtrlFrame( const unsigned char *message, size_t length );
 
   /**
-  * Send Pong Message Notification on the websocket
-  * @param message: the content
-  */
+   * Send Pong Message Notification on the websocket
+   * @param message: the content
+   */
   void sendPongCtrlFrame( const std::string &message );
 
   HttpRequest *getHttpRequest()

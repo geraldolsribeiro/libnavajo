@@ -17,11 +17,9 @@
 #include <algorithm>
 #include <ctype.h>
 #include <string>
-#include <string>
 #include <typeinfo>
 
-class DynamicPage
-{
+class DynamicPage {
 
 public:
   DynamicPage(){};

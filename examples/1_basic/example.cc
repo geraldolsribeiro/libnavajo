@@ -24,16 +24,14 @@ void exitFunction( int dummy )
     webServer->stopService();
 }
 
-class MyDynamicPage : public DynamicPage
-{
+class MyDynamicPage : public DynamicPage {
   bool getPage( HttpRequest *request, HttpResponse *response )
   {
     // example using session's object
     int *cptExample = NULL;
 
     void *myAttribute = request->getSessionAttribute( "myAttribute" );
-    if( myAttribute == NULL )
-    {
+    if( myAttribute == NULL ) {
       cptExample  = (int *)malloc( sizeof( int ) );
       *cptExample = 0;
       request->setSessionAttribute( "myAttribute", (void *)cptExample );
@@ -46,8 +44,7 @@ class MyDynamicPage : public DynamicPage
 
     std::string content = "<HTML><BODY>";
     std::string param;
-    if( request->getParameter( "param1", param ) )
-    {
+    if( request->getParameter( "param1", param ) ) {
       // int pint=getValue<int>(param);
       content += "param1 has been set to " + param;
     }
