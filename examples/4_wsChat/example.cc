@@ -47,7 +47,7 @@ void setSessionIsConnected( HttpRequest *request, const bool b )
 
 /***********************************************************************/
 
-bool checkMessage( HttpRequest *request, const std::string msg )
+bool checkMessage( HttpRequest *request, const std::string & msg )
 {
   char *username = (char *)request->getSessionAttribute( "username" );
   return msg.length() > strlen( username ) && ( strncmp( msg.c_str(), username, strlen( username ) ) == 0 );

@@ -57,7 +57,7 @@ class WebServer {
 
   bool isUserAllowed( const std::string &logpassb64, std::string &username );
   bool isTokenAllowed( const std::string &tokb64, const std::string &resourceUrl, std::string &respHeader );
-  bool isAuthorizedDN( const std::string str );
+  bool isAuthorizedDN( const std::string &str );
 
   size_t             recvLine( int client, char *bufLine, size_t );
   bool               accept_request( ClientSockData *client, bool authSSL );
@@ -275,7 +275,7 @@ public:
   inline void setAuthBearerDecodeCallbacks(
       std::string &realm,
       int ( *decodeCallback )( const std::string &tokb64, std::string &secret, std::string &decoded ),
-      std::string secret,
+      std::string &secret,
       time_t ( *expirationCallback )( std::string &tokenDecoded ),
       int ( *scopesCheckCallback )(
           const std::string &tokenDecoded,
@@ -328,7 +328,7 @@ public:
    * @param endpoint : websocket endpoint
    * @param websocket : WebSocket instance
    */
-  void addWebSocket( const std::string endPoint, WebSocket *websocket )
+  void addWebSocket( const std::string &endPoint, WebSocket *websocket )
   {
     webSocketEndPoints[endPoint] = websocket;
   };

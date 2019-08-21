@@ -44,14 +44,14 @@ public:
    * @param response: a pointer to the new generated response
    * \return true if the repository contains the requested resource
    */
-  virtual bool getFile( HttpRequest *request, HttpResponse *response );
+  virtual bool getFile( HttpRequest *request, HttpResponse *response ) override;
 
   /**
    * Free resources after use. Inherited from class WebRepository
    * called from WebServer::accept_request() method
    * @param webpage: a pointer to the generated page
    */
-  virtual void freeFile( unsigned char *webpage )
+  virtual void freeFile( unsigned char *webpage ) override
   {
     ::free( webpage );
   };

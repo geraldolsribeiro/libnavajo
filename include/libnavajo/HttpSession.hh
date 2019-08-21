@@ -118,13 +118,13 @@ public:
         expiration = (time_t *)it2->second.ptr;
 
       if( expiration != NULL && *expiration && *expiration > time( NULL ) ) {
-        it++;
+        ++it;
         continue;
       }
 
       removeAllAttribute( attributesMap );
       delete attributesMap;
-      sessions.erase( it++ );
+      sessions.erase( ++it );
     }
     pthread_mutex_unlock( &sessions_mutex );
   }
@@ -139,7 +139,7 @@ public:
       std::map<std::string, SessionAttribute> *attributesMap = it->second;
       removeAllAttribute( attributesMap );
       delete attributesMap;
-      sessions.erase( it++ );
+      sessions.erase( ++it );
     }
   }
 

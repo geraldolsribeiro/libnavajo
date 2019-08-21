@@ -88,7 +88,7 @@ class MyDynamicRepository : public DynamicRepository {
 
       std::map<std::string, MPFD::Field *>           fields = parser->GetFieldsMap();
       std::map<std::string, MPFD::Field *>::iterator it;
-      for( it = fields.begin(); it != fields.end(); it++ ) {
+      for( it = fields.begin(); it != fields.end(); ++it ) {
         if( fields[it->first]->GetType() == MPFD::Field::TextType )
           NVJ_LOG->append(
               NVJ_INFO,
@@ -147,7 +147,7 @@ class MyDynamicRepository : public DynamicRepository {
 
       std::map<std::string, MPFD::Field *>           fields = parser->GetFieldsMap();
       std::map<std::string, MPFD::Field *>::iterator it;
-      for( it = fields.begin(); it != fields.end(); it++ ) {
+      for( it = fields.begin(); it != fields.end(); ++it ) {
         if( fields[it->first]->GetType() == MPFD::Field::TextType ) {
           content += "\nFIELD_NAME[";
           content += it->first;

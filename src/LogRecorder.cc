@@ -50,7 +50,7 @@ void LogRecorder::append( const NvjLogSeverity &l, const std::string &m, const s
   pthread_mutex_lock( &log_mutex );
 
   if( l != NVJ_DEBUG || debugMode ) {
-    for( std::list<LogOutput *>::iterator it = logOutputsList_.begin(); it != logOutputsList_.end(); it++ ) {
+    for( std::list<LogOutput *>::iterator it = logOutputsList_.begin(); it != logOutputsList_.end(); ++it ) {
       std::string msg;
 
       if( ( *it )->isWithDateTime() )
@@ -85,7 +85,7 @@ void LogRecorder::addLogOutput( LogOutput *output )
  */
 void LogRecorder::removeLogOutputs()
 {
-  for( std::list<LogOutput *>::iterator it = logOutputsList_.begin(); it != logOutputsList_.end(); it++ )
+  for( std::list<LogOutput *>::iterator it = logOutputsList_.begin(); it != logOutputsList_.end(); ++it )
     delete *it;
 
   logOutputsList_.clear();

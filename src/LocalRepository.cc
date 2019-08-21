@@ -117,7 +117,7 @@ bool LocalRepository::getFile( HttpRequest *request, HttpResponse *response )
 
   pthread_mutex_unlock( &_mutex );
 
-  std::string resultat, filename = url;
+  std::string filename = url;
 
   if( aliasName.size() )
     filename.replace( 0, aliasName.size(), fullPathToLocalDir );
@@ -137,13 +137,17 @@ bool LocalRepository::getFile( HttpRequest *request, HttpResponse *response )
   webpageLen = ftell( pFile );
   rewind( pFile );
 
-  if( ( webpage = (unsigned char *)malloc( webpageLen + 1 * sizeof( char ) ) ) == NULL )
+  if( ( webpage = (unsigned char *)malloc( webpageLen + 1 * sizeof( char ) ) ) == NULL ) {
+    fclose( pFile );
     return false;
+  }
   size_t nb = fread( webpage, 1, webpageLen, pFile );
   if( nb != webpageLen ) {
     char logBuffer[150];
     snprintf( logBuffer, 150, "Webserver : Error accessing file '%s'", filename.c_str() );
     NVJ_LOG->append( NVJ_ERROR, logBuffer );
+    free( webpage );
+    fclose( pFile );
     return false;
   }
 

@@ -304,11 +304,7 @@ public:
     else
       mask = 128;
   };
-  IpNetwork( const IpAddress &a, const u_int8_t &m )
-  {
-    addr = a;
-    mask = m;
-  };
+  IpNetwork( const IpAddress &a, const u_int8_t &m ) : addr( a ), mask( m ){};
 
   // TODO: IpNetwork(const std::string& value)
 
@@ -516,7 +512,7 @@ inline static bool isIpBelongToIpNetwork( const IpAddress &ip, const std::vector
 {
   bool res = false;
 
-  for( std::vector<IpNetwork>::const_iterator i = net.begin(); i != net.end() && !res; i++ )
+  for( std::vector<IpNetwork>::const_iterator i = net.begin(); i != net.end() && !res; ++i )
     res = i->isInside( ip );
 
   return res;

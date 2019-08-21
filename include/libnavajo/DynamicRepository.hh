@@ -50,7 +50,7 @@ public:
    * @param name: the url (from the document root)
    * @param page: the DynamicPage instance responsible for content generation
    */
-  inline void add( const std::string url, DynamicPage *page )
+  inline void add( const std::string &url, DynamicPage *page )
   {
     size_t i = 0;
     while( url.size() && url[i] == '/' )
@@ -65,7 +65,7 @@ public:
    * @param urlToRemove: the url (from the document root)
    * @param deleteDynamicPage: true if the related DynamicPage must be deleted
    */
-  inline void remove( const std::string urlToRemove, bool deleteDynamicPage = false )
+  inline void remove( const std::string &urlToRemove, bool deleteDynamicPage = false )
   {
     std::string url( urlToRemove );
     while( url.size() && url[0] == '/' )

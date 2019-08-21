@@ -172,7 +172,7 @@ bool WebServer::isUserAllowed( const std::string &pwdb64, std::string &login )
   std::vector<std::string> httpAuthLoginPwd = authLoginPwdList;
   if( httpAuthLoginPwd.size() ) {
     std::string logPass = login + ':' + pwd;
-    for( std::vector<std::string>::iterator it = httpAuthLoginPwd.begin(); it != httpAuthLoginPwd.end(); it++ )
+    for( std::vector<std::string>::iterator it = httpAuthLoginPwd.begin(); it != httpAuthLoginPwd.end(); ++it )
       if( logPass == *it )
         authOK = true;
   }
@@ -437,7 +437,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         else
           *( bufLine + bufLineLen - 2 ) = '\0';
         j = 0;
-        while( isspace( (int)( bufLine[j] ) ) && j < (unsigned)bufLineLen )
+        while( j < (unsigned)bufLineLen && isspace( (int)( bufLine[j] ) ) )
           j++;
 
         // decode login/passwd
@@ -574,7 +574,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         }
 
         if( isQueryStr ) {
-          while( isspace( (int)( bufLine[j] ) ) && j < (unsigned)bufLineLen )
+          while( j < (unsigned)bufLineLen && isspace( (int)( bufLine[j] ) ) )
             j++;
 
           // Decode URL
@@ -598,7 +598,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
             requestParams[i] = '\0';
           }
 
-          while( isspace( (int)( bufLine[j] ) ) && j < (unsigned)bufLineLen )
+          while( j < (unsigned)bufLineLen && isspace( (int)( bufLine[j] ) ) )
             j++;
           if( strncmp( bufLine + j, "HTTP/", 5 ) == 0 ) {
             strncpy( httpVers, bufLine + j + 5, 3 );
@@ -884,7 +884,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         fileFound = false;
       }
       else
-        repo++;
+        ++repo;
     }
 
     if( !fileFound ) {
@@ -898,7 +898,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
       goto FREE_RETURN_TRUE;
     }
     else {
-      repo--;
+      --repo;
       response.getContent( &webpage, &webpageLen, &zippedFile );
 
       if( webpage == NULL || !webpageLen ) {
@@ -967,7 +967,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
       }
     }
 
-    if( keepAlive && ( --nbFileKeepAlive <= 0 ) )
+    if( keepAlive && ( --nbFileKeepAlive == 0 ) )
       closing = true;
 
     if( sizeZip > 0 && ( client->compression == GZIP ) ) {
@@ -1549,10 +1549,10 @@ void WebServer::initialize_ctx( const char *certfile, const char *cafile, const 
 
 /**********************************************************************/
 
-bool WebServer::isAuthorizedDN( const std::string str )
+bool WebServer::isAuthorizedDN( const std::string & str )
 {
   bool res = false;
-  for( std::vector<std::string>::const_iterator i = authDnList.begin(); i != authDnList.end() && !res; i++ )
+  for( std::vector<std::string>::const_iterator i = authDnList.begin(); i != authDnList.end() && !res; ++i )
     res = ( *i == str );
   return res;
 }
