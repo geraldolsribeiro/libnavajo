@@ -32,7 +32,7 @@ class HttpResponse {
   static std::map<unsigned, const char *> httpReturnCodes;
 
 public:
-  HttpResponse( const std::string & mime = "" )
+  HttpResponse( const std::string mime = "" )
       : responseContent( NULL ), responseContentLength( 0 ), zippedFile( false ), mimeType( mime ), forwardToUrl( "" ),
         cors( false ), corsCred( false ), corsDomain( "" ), httpReturnCode( unsetHttpReturnCodeMessage ),
         httpReturnCodeMessage( "Unspecified" ), httpSpecificHeaders( "" )
@@ -264,7 +264,7 @@ public:
    * @param value: the http return code
    * @param message: the http return code message
    */
-  void setHttpReturnCode( const unsigned value, const std::string & message )
+  void setHttpReturnCode( const unsigned value, const std::string message )
   {
     httpReturnCode        = value;
     httpReturnCodeMessage = message;

@@ -1,14 +1,3 @@
-#if 0
-#include "../tmp/MPFDParser-1.1.1/Exception.h"
-#include "../tmp/MPFDParser-1.1.1/Field.h"
-#include "../tmp/MPFDParser-1.1.1/Parser.h"
-
-#include "../tmp/MPFDParser-1.1.1/Parser.cpp"
-#include "../tmp/MPFDParser-1.1.1/Field.cpp"
-#include "../tmp/MPFDParser-1.1.1/Exception.cpp"
-
-#else
-
 #include "../include/MPFDParser/Exception.h"
 #include "../include/MPFDParser/Field.h"
 #include "../include/MPFDParser/Parser.h"
@@ -16,7 +5,6 @@
 #include "../src/MPFDParser/Parser.cc"
 #include "../src/MPFDParser/Field.cc"
 #include "../src/MPFDParser/Exception.cc"
-#endif
 
 int main()
 {
@@ -59,7 +47,7 @@ int main()
       }
     }
   }
-  catch( MPFD::Exception e ) {
+  catch( MPFD::Exception & e ) {
     std::cout << "Exception " << e.GetError() << std::endl;
     // Parsing input error
     //FinishConnectionProcessing();

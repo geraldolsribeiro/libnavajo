@@ -19,6 +19,9 @@
 #include <string>
 #include <typeinfo>
 
+#include <libnavajo/HttpRequest.hh>
+#include <libnavajo/HttpResponse.hh>
+
 class DynamicPage {
 
 public:
