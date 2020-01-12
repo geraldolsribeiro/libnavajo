@@ -51,7 +51,8 @@ public:
    * called from WebServer::accept_request() method
    * @param webpage: a pointer to the generated page
    */
-  virtual void freeFile( unsigned char *webpage ) override
+  // GLSR FIXME override
+  virtual void freeFile( unsigned char *webpage )
   {
     ::free( webpage );
   };

@@ -1549,7 +1549,7 @@ void WebServer::initialize_ctx( const char *certfile, const char *cafile, const 
 
 /**********************************************************************/
 
-bool WebServer::isAuthorizedDN( const std::string &str )
+bool WebServer::isAuthorizedDN( const std::string str ) // GLSR FIXME
 {
   bool res = false;
   for( std::vector<std::string>::const_iterator i = authDnList.begin(); i != authDnList.end() && !res; ++i )
