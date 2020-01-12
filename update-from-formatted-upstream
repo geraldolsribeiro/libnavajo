@@ -6,8 +6,8 @@
 git checkout master
 git fetch upstream
 
-git branch -d upstream-master-formatted || echo "Branch upstream-master not found"
-git branch -d local-master-formatted    || echo "Branch local-master-formatted not found"
+git branch -D upstream-master-formatted || echo "Branch upstream-master not found"
+git branch -D local-master-formatted    || echo "Branch local-master-formatted not found"
 
 git checkout -b upstream-master-formatted upstream/master
 find . -name "*.cc" -exec clang-format -i {} \;
