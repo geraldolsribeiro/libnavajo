@@ -146,8 +146,8 @@ bool LocalRepository::getFile( HttpRequest *request, HttpResponse *response )
     char logBuffer[150];
     snprintf( logBuffer, 150, "Webserver : Error accessing file '%s'", filename.c_str() );
     NVJ_LOG->append( NVJ_ERROR, logBuffer );
-    //free( webpage );
-    //fclose( pFile );
+    // free( webpage );
+    // fclose( pFile );
     return false;
   }
 
