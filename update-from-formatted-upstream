@@ -10,14 +10,15 @@ git branch -d upstream-master-formatted || echo "Branch upstream-master not foun
 git branch -d local-master-formatted    || echo "Branch local-master-formatted not found"
 
 git checkout -b upstream-master-formatted upstream/master
-
 find . -name "*.cc" -exec clang-format -i {} \;
 find . -name "*.hh" -exec clang-format -i {} \;
+find . -name "*.h" -exec clang-format -i {} \;
 git commit -am "Code formatted"
 
 git checkout -b local-master-formatted master
 find . -name "*.cc" -exec clang-format -i {} \;
 find . -name "*.hh" -exec clang-format -i {} \;
+find . -name "*.h" -exec clang-format -i {} \;
 git commit -am "Code formatted" || echo "Nada a ser feito"
 
 #git merge upstream-master-formatted --no-commit --no-ff
