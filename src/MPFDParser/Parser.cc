@@ -66,6 +66,7 @@ void MPFD::Parser::SetContentType( const std::string type )
 
 void MPFD::Parser::AcceptSomeData( const char *data, const long length )
 {
+  std::cout << "DEBUG: AcceptSomeData " << length << std::endl;
   if( Boundary.length() > 0 ) {
     // Append data to existing accumulator
     if( DataCollector == NULL ) {
@@ -92,6 +93,7 @@ void MPFD::Parser::AcceptSomeData( const char *data, const long length )
 
 void MPFD::Parser::_ProcessData()
 {
+  std::cout << "DEBUG: _ProcessData" << std::endl;
   // If some data left after truncate, process it right now.
   // Do not wait for AcceptSomeData called again
   bool NeedToRepeat;
@@ -125,6 +127,7 @@ void MPFD::Parser::_ProcessData()
 
 bool MPFD::Parser::ProcessContentOfTheField()
 {
+  std::cout << "DEBUG: ProcessContentOfTheField" << std::endl;
   long BoundaryPosition = BoundaryPositionInDataCollector();
   long DataLengthToSendToField;
   if( BoundaryPosition >= 0 ) {
@@ -152,6 +155,8 @@ bool MPFD::Parser::ProcessContentOfTheField()
 
 bool MPFD::Parser::WaitForHeadersEndAndParseThem()
 {
+  std::cout << "DEBUG: WaitForHeadersEndAndParseThem DataCollectorLength: " << DataCollectorLength << std::endl;
+
   for( int i = 0; i < DataCollectorLength - 3; i++ ) {
     if( ( DataCollector[i] == 13 ) && ( DataCollector[i + 1] == 10 ) && ( DataCollector[i + 2] == 13 )
         && ( DataCollector[i + 3] == 10 ) ) {
@@ -174,16 +179,19 @@ bool MPFD::Parser::WaitForHeadersEndAndParseThem()
 
 void MPFD::Parser::SetUploadedFilesStorage( int where )
 {
+  std::cout << "DEBUG: SetUploadedFilesStorage " << where << std::endl;
   WhereToStoreUploadedFiles = where;
 }
 
 void MPFD::Parser::SetTempDirForFileUpload( std::string dir )
 {
+  std::cout << "DEBUG: SetTempDirForFileUpload " << dir << std::endl;
   TempDirForFileUpload = dir;
 }
 
 void MPFD::Parser::_ParseHeaders( std::string headers )
 {
+  std::cout << "DEBUG: _ParseHeaders headers " << headers << std::endl;
   // Check if it is form data
   if( headers.find( "Content-Disposition: form-data;" ) == std::string::npos ) {
     throw Exception(
@@ -251,15 +259,18 @@ void MPFD::Parser::_ParseHeaders( std::string headers )
       }
     }
   }
+  std::cout << "DEBUG: FIM _ParseHeaders" << std::endl;
 }
 
 void MPFD::Parser::SetMaxCollectedDataLength( long max )
 {
+  std::cout << "DEBUG: SetMaxCollectedDataLength " << max << std::endl;
   MaxDataCollectorLength = max;
 }
 
 void MPFD::Parser::TruncateDataCollectorFromTheBeginning( long n )
 {
+  std::cout << "DEBUG: TruncateDataCollectorFromTheBeginning " << n << std::endl;
   long TruncatedDataCollectorLength = DataCollectorLength - n;
 
   char *tmp = DataCollector;
@@ -274,6 +285,7 @@ void MPFD::Parser::TruncateDataCollectorFromTheBeginning( long n )
 
 long MPFD::Parser::BoundaryPositionInDataCollector()
 {
+  std::cout << "DEBUG: BoundaryPositionInDataCollector" << std::endl;
   const char *b  = Boundary.c_str();
   int         bl = Boundary.length();
   if( DataCollectorLength >= bl ) {
@@ -296,6 +308,7 @@ long MPFD::Parser::BoundaryPositionInDataCollector()
 
 bool MPFD::Parser::FindStartingBoundaryAndTruncData()
 {
+  std::cout << "DEBUG: FindStartingBoundaryAndTruncData" << std::endl;
   long n = BoundaryPositionInDataCollector();
   if( n >= 0 ) {
     TruncateDataCollectorFromTheBeginning( n + Boundary.length() );

@@ -967,7 +967,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
       }
     }
 
-    if( keepAlive && ( --nbFileKeepAlive == 0 ) )
+    if( keepAlive && ( --nbFileKeepAlive <= 0 ) ) // GLSR aqui eu havia trocado para ==
       closing = true;
 
     if( sizeZip > 0 && ( client->compression == GZIP ) ) {
