@@ -3,6 +3,8 @@
 //
 // Contacts and other info are on the WEB page:  grigory.info/MPFDParser
 
+#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
+
 #include "MPFDParser/Field.h"
 #include "MPFDParser/Parser.h"
 
@@ -10,6 +12,7 @@ pthread_mutex_t fileCreation_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 MPFD::Field::Field()
 {
+  GR_JUMP_TRACE;
   type         = 0;
   FieldContent = NULL;
 
@@ -18,6 +21,7 @@ MPFD::Field::Field()
 
 MPFD::Field::~Field()
 {
+  GR_JUMP_TRACE;
 
   if( FieldContent ) {
     delete FieldContent;
@@ -33,6 +37,7 @@ MPFD::Field::~Field()
 
 void MPFD::Field::SetType( int type )
 {
+  GR_JUMP_TRACE;
   if( ( type == TextType ) || ( type == FileType ) ) {
     this->type = type;
   }
@@ -43,6 +48,7 @@ void MPFD::Field::SetType( int type )
 
 int MPFD::Field::GetType()
 {
+  GR_JUMP_TRACE;
   if( type > 0 ) {
     return type;
   }
@@ -53,6 +59,7 @@ int MPFD::Field::GetType()
 
 void MPFD::Field::AcceptSomeData( char *data, long length )
 {
+  GR_JUMP_TRACE;
   if( type == TextType ) {
     if( FieldContent == NULL ) {
       FieldContent = new char[length + 1];
@@ -124,11 +131,13 @@ void MPFD::Field::AcceptSomeData( char *data, long length )
 
 void MPFD::Field::SetTempDir( std::string dir )
 {
+  GR_JUMP_TRACE;
   TempDir = dir;
 }
 
 unsigned long MPFD::Field::GetFileContentSize()
 {
+  GR_JUMP_TRACE;
   if( type == 0 ) {
     throw MPFD::Exception( "Trying to get file content size, but no type was set." );
   }
@@ -151,6 +160,7 @@ unsigned long MPFD::Field::GetFileContentSize()
 
 char *MPFD::Field::GetFileContent()
 {
+  GR_JUMP_TRACE;
   if( type == 0 ) {
     throw MPFD::Exception( "Trying to get file content, but no type was set." );
   }
@@ -173,6 +183,7 @@ char *MPFD::Field::GetFileContent()
 
 std::string MPFD::Field::GetTextTypeContent()
 {
+  GR_JUMP_TRACE;
   if( type == 0 ) {
     throw MPFD::Exception( "Trying to get text content of the field, but no type was set." );
   }
@@ -193,6 +204,7 @@ std::string MPFD::Field::GetTextTypeContent()
 
 std::string MPFD::Field::GetTempFileName()
 {
+  GR_JUMP_TRACE;
   if( type == 0 ) {
     throw MPFD::Exception( "Trying to get file temp name, but no type was set." );
   }
@@ -215,6 +227,7 @@ std::string MPFD::Field::GetTempFileName()
 
 std::string MPFD::Field::GetFileName()
 {
+  GR_JUMP_TRACE;
   if( type == 0 ) {
     throw MPFD::Exception( "Trying to get file name, but no type was set." );
   }
@@ -230,21 +243,25 @@ std::string MPFD::Field::GetFileName()
 
 void MPFD::Field::SetFileName( std::string name )
 {
+  GR_JUMP_TRACE;
   FileName = name;
 }
 
 void MPFD::Field::SetUploadedFilesStorage( int where )
 {
+  GR_JUMP_TRACE;
   WhereToStoreUploadedFiles = where;
 }
 
 void MPFD::Field::SetFileContentType( std::string type )
 {
+  GR_JUMP_TRACE;
   FileContentType = type;
 }
 
 std::string MPFD::Field::GetFileMimeType()
 {
+  GR_JUMP_TRACE;
   if( type == 0 ) {
     throw MPFD::Exception( "Trying to get mime type of file, but no type was set." );
   }

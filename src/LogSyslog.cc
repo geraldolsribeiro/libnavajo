@@ -11,6 +11,8 @@
  */
 //********************************************************
 
+#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
+
 #include "libnavajo/LogSyslog.hh"
 
 #include <string.h>
@@ -24,6 +26,7 @@
  */
 void LogSyslog::append( const NvjLogSeverity &l, const std::string &message, const std::string & /*details*/ )
 {
+  GR_JUMP_TRACE;
 
   int type;
   switch( l ) {
@@ -57,6 +60,7 @@ void LogSyslog::append( const NvjLogSeverity &l, const std::string &message, con
 
 void LogSyslog::initialize()
 {
+  GR_JUMP_TRACE;
   openlog( ident, LOG_PID, LOG_USER );
   setWithDateTime( false );
 }
@@ -68,6 +72,7 @@ void LogSyslog::initialize()
 
 LogSyslog::LogSyslog( const char *id )
 {
+  GR_JUMP_TRACE;
   strncpy( ident, id, 30 );
 }
 
@@ -78,6 +83,7 @@ LogSyslog::LogSyslog( const char *id )
 
 LogSyslog::~LogSyslog()
 {
+  GR_JUMP_TRACE;
   closelog();
 }
 

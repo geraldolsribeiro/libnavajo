@@ -13,6 +13,8 @@
  */
 //********************************************************
 
+#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
+
 #include <sys/stat.h>
 
 #include <ctype.h>
@@ -73,6 +75,7 @@ WebServer::WebServer()
       socketTimeoutInSecond( DEFAULT_HTTP_SERVER_SOCKET_TIMEOUT ), tcpPort( DEFAULT_HTTP_PORT ), threadsPoolSize( 64 ),
       multipartMaxCollectedDataLength( 20 * 1024 ), sslEnabled( false ), authPeerSsl( false )
 {
+  GR_JUMP_TRACE;
 
   webServerName                 = std::string( "Server: libNavajo/" ) + std::string( LIBNAVAJO_SOFTWARE_VERSION );
   multipartTempDirForFileUpload = "/tmp";
@@ -89,6 +92,7 @@ WebServer::WebServer()
 
 void WebServer::updatePeerIpHistory( IpAddress &ip )
 {
+  GR_JUMP_TRACE;
   time_t                                t = time( NULL );
   std::map<IpAddress, time_t>::iterator i = peerIpHistory.find( ip );
 
@@ -110,6 +114,7 @@ void WebServer::updatePeerIpHistory( IpAddress &ip )
 
 void WebServer::updatePeerDnHistory( std::string dn )
 {
+  GR_JUMP_TRACE;
 
   pthread_mutex_lock( &peerDnHistory_mutex );
   time_t                                  t = time( NULL );
@@ -140,6 +145,7 @@ void WebServer::updatePeerDnHistory( std::string dn )
  */
 bool WebServer::isUserAllowed( const std::string &pwdb64, std::string &login )
 {
+  GR_JUMP_TRACE;
 
   pthread_mutex_lock( &usersAuthHistory_mutex );
   time_t t = time( NULL );
@@ -200,6 +206,7 @@ bool WebServer::isUserAllowed( const std::string &pwdb64, std::string &login )
  */
 bool WebServer::isTokenAllowed( const std::string &tokb64, const std::string &resourceUrl, std::string &respHeader )
 {
+  GR_JUMP_TRACE;
   std::string    logAuth    = "WebServer: Authentication passed for token '" + tokb64 + "'";
   NvjLogSeverity logAuthLvl = NVJ_DEBUG;
   time_t         t          = time( NULL );
@@ -298,6 +305,7 @@ end:
 
 size_t WebServer::recvLine( int client, char *bufLine, size_t nsize )
 {
+  GR_JUMP_TRACE;
   size_t bufLineLen = 0;
   char   c;
   int    n;
@@ -320,6 +328,7 @@ size_t WebServer::recvLine( int client, char *bufLine, size_t nsize )
 
 bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
 {
+  GR_JUMP_TRACE;
   char              bufLine[BUFSIZE];
   HttpRequestMethod requestMethod;
   size_t            requestContentLength = 0;
@@ -1040,6 +1049,7 @@ FREE_RETURN_TRUE:
 
 bool WebServer::httpSend( ClientSockData *client, const void *buf, size_t len )
 {
+  GR_JUMP_TRACE;
   //  pthread_mutex_lock( &client->client_mutex );
 
   if( !client->socketId ) {
@@ -1089,6 +1099,7 @@ bool WebServer::httpSend( ClientSockData *client, const void *buf, size_t len )
 
 void WebServer::fatalError( const char *s )
 {
+  GR_JUMP_TRACE;
   NVJ_LOG->append( NVJ_FATAL, std::string( s ) + ": " + std::string( strerror( errno ) ) );
   ::exit( 1 );
 }
@@ -1101,6 +1112,7 @@ void WebServer::fatalError( const char *s )
 
 const char *WebServer::get_mime_type( const char *name )
 {
+  GR_JUMP_TRACE;
   char *ext = strrchr( const_cast<char *>( name ), '.' );
   if( !ext )
     return NULL;
@@ -1188,6 +1200,7 @@ std::string WebServer::getHttpHeader(
     const bool    zipped,
     HttpResponse *response )
 {
+  GR_JUMP_TRACE;
   char      timeBuf[200];
   time_t    rawtime;
   struct tm timeinfo;
@@ -1263,6 +1276,7 @@ std::string WebServer::getHttpHeader(
 
 std::string WebServer::getNoContentErrorMsg()
 {
+  GR_JUMP_TRACE;
   std::string header = getHttpHeader( "204 No Content", 0, false );
 
   return header;
@@ -1275,6 +1289,7 @@ std::string WebServer::getNoContentErrorMsg()
 
 std::string WebServer::getBadRequestErrorMsg()
 {
+  GR_JUMP_TRACE;
   std::string errorMessage
       = "<HTML><HEAD>\n<TITLE>400 Bad Request</TITLE>\n</HEAD><body>\n<h1>Bad Request</h1>\n \
                 <p>Your browser sent a request that this server could not understand.<br />\n</p>\n</body></HTML>\n";
@@ -1291,6 +1306,7 @@ std::string WebServer::getBadRequestErrorMsg()
 
 std::string WebServer::getNotFoundErrorMsg()
 {
+  GR_JUMP_TRACE;
   std::string errorMessage
       = "<HTML><HEAD><TITLE>Object not found!</TITLE><body><h1>Object not "
         "found!</h1>\n"
@@ -1311,6 +1327,7 @@ std::string WebServer::getNotFoundErrorMsg()
 
 std::string WebServer::getInternalServerErrorMsg()
 {
+  GR_JUMP_TRACE;
   std::string errorMessage
       = "<HTML><HEAD><TITLE>Internal Server Error!</TITLE><body><h1>Internal "
         "Server Error!</h1>\n"
@@ -1330,6 +1347,7 @@ std::string WebServer::getInternalServerErrorMsg()
 
 std::string WebServer::getNotImplementedErrorMsg()
 {
+  GR_JUMP_TRACE;
   std::string errorMessage
       = "<HTML><HEAD><TITLE>Cannot process "
         "request!</TITLE><body><h1>Cannot process "
@@ -1352,6 +1370,7 @@ std::string WebServer::getNotImplementedErrorMsg()
 
 u_short WebServer::init()
 {
+  GR_JUMP_TRACE;
   // Build SSL context
   if( sslEnabled )
     initialize_ctx( sslCertFile.c_str(), sslCaFile.c_str(), sslCertPwd.c_str() );
@@ -1430,6 +1449,7 @@ u_short WebServer::init()
 
 void WebServer::exit()
 {
+  GR_JUMP_TRACE;
   pthread_mutex_lock( &clientsQueue_mutex );
   exiting = true;
 
@@ -1450,6 +1470,7 @@ void WebServer::exit()
 
 int WebServer::password_cb( char *buf, int num, int /*rwflag*/, void * /*userdata*/ )
 {
+  GR_JUMP_TRACE;
   if( (size_t)num < strlen( certpass ) + 1 )
     return ( 0 );
 
@@ -1463,6 +1484,7 @@ int WebServer::password_cb( char *buf, int num, int /*rwflag*/, void * /*userdat
 
 int WebServer::verify_callback( int preverify_ok, X509_STORE_CTX *ctx )
 {
+  GR_JUMP_TRACE;
   char  buf[256];
   X509 *err_cert;
   int   err, depth;
@@ -1512,6 +1534,7 @@ int WebServer::verify_callback( int preverify_ok, X509_STORE_CTX *ctx )
 
 void WebServer::initialize_ctx( const char *certfile, const char *cafile, const char *password )
 {
+  GR_JUMP_TRACE;
   /* Global system initialization*/
   SSL_library_init();
   SSL_load_error_strings();
@@ -1551,6 +1574,7 @@ void WebServer::initialize_ctx( const char *certfile, const char *cafile, const 
 
 bool WebServer::isAuthorizedDN( const std::string str ) // GLSR FIXME
 {
+  GR_JUMP_TRACE;
   bool res = false;
   for( std::vector<std::string>::const_iterator i = authDnList.begin(); i != authDnList.end() && !res; ++i )
     res = ( *i == str );
@@ -1561,6 +1585,7 @@ bool WebServer::isAuthorizedDN( const std::string str ) // GLSR FIXME
 
 void WebServer::poolThreadProcessing()
 {
+  GR_JUMP_TRACE;
   X509 *peer    = NULL;
   bool  authSSL = false;
 
@@ -1669,6 +1694,7 @@ void WebServer::poolThreadProcessing()
 
 void WebServer::initPoolThreads()
 {
+  GR_JUMP_TRACE;
   pthread_t newthread;
   for( unsigned i = 0; i < threadsPoolSize; i++ ) {
     create_thread( &newthread, WebServer::startPoolThread, static_cast<void *>( this ) );
@@ -1686,6 +1712,7 @@ void WebServer::initPoolThreads()
 
 void *WebServer::startThread( void *t )
 {
+  GR_JUMP_TRACE;
   static_cast<WebServer *>( t )->threadProcessing();
   pthread_exit( NULL );
   return NULL;
@@ -1693,6 +1720,7 @@ void *WebServer::startThread( void *t )
 
 void WebServer::threadProcessing()
 {
+  GR_JUMP_TRACE;
   int client_sock = 0;
 
   exiting      = false;
@@ -1813,6 +1841,7 @@ void WebServer::threadProcessing()
 
 void WebServer::closeSocket( ClientSockData *client )
 {
+  GR_JUMP_TRACE;
   if( client->ssl != NULL ) {
     int n = SSL_shutdown( client->ssl );
     if( !n ) {
@@ -1834,6 +1863,7 @@ void WebServer::closeSocket( ClientSockData *client )
 
 std::string WebServer::base64_decode( const std::string &encoded_string )
 {
+  GR_JUMP_TRACE;
 
   int           in_len = encoded_string.size();
   int           i      = 0;
@@ -1879,6 +1909,7 @@ std::string WebServer::base64_decode( const std::string &encoded_string )
 
 std::string WebServer::base64_encode( unsigned char const *bytes_to_encode, unsigned int in_len )
 {
+  GR_JUMP_TRACE;
   std::string   ret;
   int           i = 0;
   int           j = 0;
@@ -1924,6 +1955,7 @@ std::string WebServer::base64_encode( unsigned char const *bytes_to_encode, unsi
  ************************************************************************/
 std::string WebServer::SHA1_encode( const std::string &input )
 {
+  GR_JUMP_TRACE;
   std::string hash;
   SHA_CTX     context;
   SHA1_Init( &context );
@@ -1940,6 +1972,7 @@ std::string WebServer::SHA1_encode( const std::string &input )
  ************************************************************************/
 std::string WebServer::generateWebSocketServerKey( std::string webSocketKey )
 {
+  GR_JUMP_TRACE;
   std::string sha1Key = SHA1_encode( webSocketKey + webSocketMagicString );
   return base64_encode( reinterpret_cast<const unsigned char *>( sha1Key.c_str() ), sha1Key.length() );
 }
@@ -1955,6 +1988,7 @@ std::string WebServer::getHttpWebSocketHeader(
     const char *webSocketClientKey,
     const bool  webSocketDeflate )
 {
+  GR_JUMP_TRACE;
   char      timeBuf[200];
   time_t    rawtime;
   struct tm timeinfo;

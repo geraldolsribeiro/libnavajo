@@ -11,6 +11,8 @@
  */
 //********************************************************
 
+#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -24,6 +26,7 @@
  */
 void LogFile::append( const NvjLogSeverity & /*l*/, const std::string &message, const std::string & /*details*/ )
 {
+  GR_JUMP_TRACE;
   if( file != NULL )
     ( *file ) << message << std::endl;
 }
@@ -35,6 +38,7 @@ void LogFile::append( const NvjLogSeverity & /*l*/, const std::string &message, 
 
 void LogFile::initialize()
 {
+  GR_JUMP_TRACE;
   file = new std::ofstream;
   file->open( filename, std::ios::out | std::ios::app );
 
@@ -51,6 +55,7 @@ void LogFile::initialize()
 
 LogFile::LogFile( const char *f )
 {
+  GR_JUMP_TRACE;
   strncpy( filename, f, 30 );
   file = NULL;
   // setWithEndline(true);
@@ -63,6 +68,7 @@ LogFile::LogFile( const char *f )
 
 LogFile::~LogFile()
 {
+  GR_JUMP_TRACE;
   if( file != NULL ) {
     file->close();
     delete file;

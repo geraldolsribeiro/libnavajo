@@ -11,6 +11,10 @@
  */
 //********************************************************
 
+#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
+
+#include <iostream>
+
 #include "libnavajo/LogRecorder.hh"
 #include <time.h>
 
@@ -26,6 +30,7 @@ LogRecorder *LogRecorder::theLogRecorder = NULL;
  */
 std::string LogRecorder::getDateStr()
 {
+  GR_JUMP_TRACE;
   struct tm today;
   char      tmpbuf[128];
   time_t    ltime;
@@ -47,6 +52,7 @@ std::string LogRecorder::getDateStr()
  */
 void LogRecorder::append( const NvjLogSeverity &l, const std::string &m, const std::string &details )
 {
+  GR_JUMP_TRACE;
   pthread_mutex_lock( &log_mutex );
 
   if( l != NVJ_DEBUG || debugMode ) {
@@ -75,6 +81,7 @@ void LogRecorder::append( const NvjLogSeverity &l, const std::string &m, const s
 
 void LogRecorder::addLogOutput( LogOutput *output )
 {
+  GR_JUMP_TRACE;
   output->initialize();
   logOutputsList_.push_back( output );
 }
@@ -85,6 +92,7 @@ void LogRecorder::addLogOutput( LogOutput *output )
  */
 void LogRecorder::removeLogOutputs()
 {
+  GR_JUMP_TRACE;
   for( std::list<LogOutput *>::iterator it = logOutputsList_.begin(); it != logOutputsList_.end(); ++it )
     delete *it;
 
@@ -98,6 +106,7 @@ void LogRecorder::removeLogOutputs()
 
 LogRecorder::LogRecorder()
 {
+  GR_JUMP_TRACE;
   debugMode = false;
   pthread_mutex_init( &log_mutex, NULL );
 }
@@ -108,6 +117,7 @@ LogRecorder::LogRecorder()
  */
 LogRecorder::~LogRecorder()
 {
+  GR_JUMP_TRACE;
   removeLogOutputs();
 }
 

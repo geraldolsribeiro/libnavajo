@@ -5,15 +5,19 @@
 
 // ---- ORIGINAL -----
 
+#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
+
 #include "MPFDParser/Parser.h"
 
 std::map<std::string, MPFD::Field *> MPFD::Parser::GetFieldsMap()
 {
+  GR_JUMP_TRACE;
   return Fields;
 }
 
 MPFD::Field *MPFD::Parser::GetField( std::string Name )
 {
+  GR_JUMP_TRACE;
   if( Fields.count( Name ) ) {
     return Fields[Name];
   }
@@ -24,6 +28,7 @@ MPFD::Field *MPFD::Parser::GetField( std::string Name )
 
 MPFD::Parser::Parser()
 {
+  GR_JUMP_TRACE;
   DataCollector                  = NULL;
   DataCollectorLength            = 0;
   _HeadersOfTheFieldAreProcessed = false;
@@ -36,6 +41,7 @@ MPFD::Parser::Parser()
 
 MPFD::Parser::~Parser()
 {
+  GR_JUMP_TRACE;
   std::map<std::string, Field *>::iterator it;
   for( it = Fields.begin(); it != Fields.end(); ++it ) {
     delete it->second;
@@ -49,6 +55,7 @@ MPFD::Parser::~Parser()
 
 void MPFD::Parser::SetContentType( const std::string type )
 {
+  GR_JUMP_TRACE;
   if( type.find( "multipart/form-data;" ) != 0 ) {
     throw MPFD::Exception(
         std::string( "Content type is not \"multipart/form-data\"\nIt is \"" ) + type + std::string( "\"" ) );
@@ -66,6 +73,7 @@ void MPFD::Parser::SetContentType( const std::string type )
 
 void MPFD::Parser::AcceptSomeData( const char *data, const long length )
 {
+  GR_JUMP_TRACE;
   std::cout << "DEBUG: AcceptSomeData " << length << std::endl;
   if( Boundary.length() > 0 ) {
     // Append data to existing accumulator
@@ -93,6 +101,7 @@ void MPFD::Parser::AcceptSomeData( const char *data, const long length )
 
 void MPFD::Parser::_ProcessData()
 {
+  GR_JUMP_TRACE;
   std::cout << "DEBUG: _ProcessData" << std::endl;
   // If some data left after truncate, process it right now.
   // Do not wait for AcceptSomeData called again
@@ -127,6 +136,7 @@ void MPFD::Parser::_ProcessData()
 
 bool MPFD::Parser::ProcessContentOfTheField()
 {
+  GR_JUMP_TRACE;
   std::cout << "DEBUG: ProcessContentOfTheField" << std::endl;
   long BoundaryPosition = BoundaryPositionInDataCollector();
   long DataLengthToSendToField;
@@ -155,6 +165,7 @@ bool MPFD::Parser::ProcessContentOfTheField()
 
 bool MPFD::Parser::WaitForHeadersEndAndParseThem()
 {
+  GR_JUMP_TRACE;
   std::cout << "DEBUG: WaitForHeadersEndAndParseThem DataCollectorLength: " << DataCollectorLength << std::endl;
 
   for( int i = 0; i < DataCollectorLength - 3; i++ ) {
@@ -179,18 +190,21 @@ bool MPFD::Parser::WaitForHeadersEndAndParseThem()
 
 void MPFD::Parser::SetUploadedFilesStorage( int where )
 {
+  GR_JUMP_TRACE;
   std::cout << "DEBUG: SetUploadedFilesStorage " << where << std::endl;
   WhereToStoreUploadedFiles = where;
 }
 
 void MPFD::Parser::SetTempDirForFileUpload( std::string dir )
 {
+  GR_JUMP_TRACE;
   std::cout << "DEBUG: SetTempDirForFileUpload " << dir << std::endl;
   TempDirForFileUpload = dir;
 }
 
 void MPFD::Parser::_ParseHeaders( std::string headers )
 {
+  GR_JUMP_TRACE;
   std::cout << "DEBUG: _ParseHeaders headers " << headers << std::endl;
   // Check if it is form data
   if( headers.find( "Content-Disposition: form-data;" ) == std::string::npos ) {
@@ -264,12 +278,14 @@ void MPFD::Parser::_ParseHeaders( std::string headers )
 
 void MPFD::Parser::SetMaxCollectedDataLength( long max )
 {
+  GR_JUMP_TRACE;
   std::cout << "DEBUG: SetMaxCollectedDataLength " << max << std::endl;
   MaxDataCollectorLength = max;
 }
 
 void MPFD::Parser::TruncateDataCollectorFromTheBeginning( long n )
 {
+  GR_JUMP_TRACE;
   std::cout << "DEBUG: TruncateDataCollectorFromTheBeginning " << n << std::endl;
   long TruncatedDataCollectorLength = DataCollectorLength - n;
 
@@ -285,6 +301,7 @@ void MPFD::Parser::TruncateDataCollectorFromTheBeginning( long n )
 
 long MPFD::Parser::BoundaryPositionInDataCollector()
 {
+  GR_JUMP_TRACE;
   std::cout << "DEBUG: BoundaryPositionInDataCollector" << std::endl;
   const char *b  = Boundary.c_str();
   int         bl = Boundary.length();
@@ -308,6 +325,7 @@ long MPFD::Parser::BoundaryPositionInDataCollector()
 
 bool MPFD::Parser::FindStartingBoundaryAndTruncData()
 {
+  GR_JUMP_TRACE;
   std::cout << "DEBUG: FindStartingBoundaryAndTruncData" << std::endl;
   long n = BoundaryPositionInDataCollector();
   if( n >= 0 ) {

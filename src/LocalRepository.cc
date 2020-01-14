@@ -11,6 +11,8 @@
  */
 //********************************************************
 
+#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
+
 #include "libnavajo/LocalRepository.hh"
 #include "libnavajo/LogRecorder.hh"
 #include <dirent.h>
@@ -25,6 +27,7 @@
 
 LocalRepository::LocalRepository( const std::string &alias, const std::string &dirPath )
 {
+  GR_JUMP_TRACE;
   char resolved_path[4096];
 
   pthread_mutex_init( &_mutex, NULL );
@@ -45,6 +48,7 @@ LocalRepository::LocalRepository( const std::string &alias, const std::string &d
 
 void LocalRepository::reload()
 {
+  GR_JUMP_TRACE;
   pthread_mutex_lock( &_mutex );
   filenamesSet.clear();
   loadFilename_dir( aliasName, fullPathToLocalDir );
@@ -55,6 +59,7 @@ void LocalRepository::reload()
 
 bool LocalRepository::loadFilename_dir( const std::string &alias, const std::string &path, const std::string &subpath )
 {
+  GR_JUMP_TRACE;
   struct dirent *entry;
   DIR *          dir;
   struct stat    s;
@@ -98,6 +103,7 @@ bool LocalRepository::loadFilename_dir( const std::string &alias, const std::str
 
 bool LocalRepository::fileExist( const std::string &url )
 {
+  GR_JUMP_TRACE;
   return filenamesSet.find( url ) != filenamesSet.end();
 }
 
@@ -105,6 +111,7 @@ bool LocalRepository::fileExist( const std::string &url )
 
 bool LocalRepository::getFile( HttpRequest *request, HttpResponse *response )
 {
+  GR_JUMP_TRACE;
   std::string    url = request->getUrl();
   size_t         webpageLen;
   unsigned char *webpage;

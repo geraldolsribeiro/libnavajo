@@ -12,6 +12,8 @@
  */
 //********************************************************
 
+#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
+
 #include "libnavajo/WebServer.hh"
 #include "libnavajo/WebSocket.hh"
 #include "libnavajo/htonll.h"
@@ -23,6 +25,7 @@
 
 WebSocketClient::WebSocketClient( WebSocket *ws, HttpRequest *req ) : websocket( ws ), request( req ), closing( false )
 {
+  GR_JUMP_TRACE;
   snd_maxLatency = ws->getClientSendingMaxLatency();
   pthread_mutex_init( &sendingQueueMutex, NULL );
   pthread_cond_init( &sendingNotification, NULL );
@@ -36,6 +39,7 @@ WebSocketClient::WebSocketClient( WebSocket *ws, HttpRequest *req ) : websocket(
 
 void WebSocketClient::sendingThread()
 {
+  GR_JUMP_TRACE;
   pthread_mutex_lock( &sendingQueueMutex );
 
   for( ;; ) {
@@ -72,6 +76,7 @@ void WebSocketClient::sendingThread()
 
 void WebSocketClient::receivingThread()
 {
+  GR_JUMP_TRACE;
   char      bufferRecv[BUFSIZE];
   u_int64_t msgLength = 0, msgContentIt = 0;
   bool      msgMask = false;
@@ -314,6 +319,7 @@ void WebSocketClient::receivingThread()
 
 void WebSocketClient::closeWS()
 {
+  GR_JUMP_TRACE;
   closing = true;
   websocket->removeClient( this, true );
   websocket->onClosing( this );
@@ -329,6 +335,7 @@ void WebSocketClient::closeWS()
 
 void WebSocketClient::closeSend()
 {
+  GR_JUMP_TRACE;
   closing = true;
   websocket->removeClient( this, false );
   websocket->onClosing( this );
@@ -341,6 +348,7 @@ void WebSocketClient::closeSend()
 
 void WebSocketClient::closeRecv()
 {
+  GR_JUMP_TRACE;
   closing = true;
   websocket->removeClient( this, false );
   websocket->onClosing( this );
@@ -357,6 +365,7 @@ void WebSocketClient::closeRecv()
 
 void WebSocketClient::noSessionExpiration( HttpRequest *request )
 {
+  GR_JUMP_TRACE;
   std::string sessionId = request->getSessionId();
   if( sessionId != "" )
     HttpSession::noExpiration( request->getSessionId() );
@@ -364,6 +373,7 @@ void WebSocketClient::noSessionExpiration( HttpRequest *request )
 
 void WebSocketClient::restoreSessionExpiration( HttpRequest *request )
 {
+  GR_JUMP_TRACE;
   std::string sessionId = request->getSessionId();
   if( sessionId != "" )
     HttpSession::updateExpiration( request->getSessionId() );
@@ -373,6 +383,7 @@ void WebSocketClient::restoreSessionExpiration( HttpRequest *request )
 
 bool WebSocketClient::sendMessage( const MessageContent *msgContent )
 {
+  GR_JUMP_TRACE;
   ClientSockData *client = request->getClientSockData();
 
   unsigned char  headerBuffer[10]; // 10 is the max header size
@@ -428,6 +439,7 @@ bool WebSocketClient::sendMessage( const MessageContent *msgContent )
 
 void WebSocketClient::addSendingQueue( MessageContent *msgContent )
 {
+  GR_JUMP_TRACE;
   pthread_mutex_lock( &sendingQueueMutex );
   if( !closing )
     sendingQueue.push( msgContent );
@@ -439,6 +451,7 @@ void WebSocketClient::addSendingQueue( MessageContent *msgContent )
 
 void WebSocketClient::sendTextMessage( const std::string &message, bool fin )
 {
+  GR_JUMP_TRACE;
   MessageContent *msgContent = (MessageContent *)malloc( sizeof( MessageContent ) );
   msgContent->opcode         = 0x1;
   msgContent->message        = (unsigned char *)malloc( message.length() * sizeof( char ) );
@@ -454,6 +467,7 @@ void WebSocketClient::sendTextMessage( const std::string &message, bool fin )
 
 void WebSocketClient::sendBinaryMessage( const unsigned char *message, size_t length, bool fin )
 {
+  GR_JUMP_TRACE;
   MessageContent *msgContent = (MessageContent *)malloc( sizeof( MessageContent ) );
   msgContent->opcode         = 0x2;
   msgContent->message        = (unsigned char *)malloc( length * sizeof( unsigned char ) );
@@ -469,6 +483,7 @@ void WebSocketClient::sendBinaryMessage( const unsigned char *message, size_t le
 
 void WebSocketClient::sendPingCtrlFrame( const unsigned char *message, size_t length )
 {
+  GR_JUMP_TRACE;
   MessageContent *msgContent = (MessageContent *)malloc( sizeof( MessageContent ) );
   msgContent->opcode         = 0x9;
   msgContent->message        = (unsigned char *)malloc( length * sizeof( unsigned char ) );
@@ -482,6 +497,7 @@ void WebSocketClient::sendPingCtrlFrame( const unsigned char *message, size_t le
 
 void WebSocketClient::sendPingCtrlFrame( const std::string &message )
 {
+  GR_JUMP_TRACE;
   sendPingCtrlFrame( (const unsigned char *)message.c_str(), message.length() );
 }
 
@@ -489,6 +505,7 @@ void WebSocketClient::sendPingCtrlFrame( const std::string &message )
 
 void WebSocketClient::sendPongCtrlFrame( const unsigned char *message, size_t length )
 {
+  GR_JUMP_TRACE;
   MessageContent *msgContent = (MessageContent *)malloc( sizeof( MessageContent ) );
   msgContent->opcode         = 0xa;
   msgContent->message        = (unsigned char *)malloc( length * sizeof( unsigned char ) );
@@ -502,6 +519,7 @@ void WebSocketClient::sendPongCtrlFrame( const unsigned char *message, size_t le
 
 void WebSocketClient::sendPongCtrlFrame( const std::string &message )
 {
+  GR_JUMP_TRACE;
   sendPongCtrlFrame( (const unsigned char *)message.c_str(), message.length() );
 }
 
@@ -509,6 +527,7 @@ void WebSocketClient::sendPongCtrlFrame( const std::string &message )
 
 void WebSocketClient::sendCloseCtrlFrame( const unsigned char *message, size_t length )
 {
+  GR_JUMP_TRACE;
   MessageContent *msgContent = (MessageContent *)malloc( sizeof( MessageContent ) );
   msgContent->opcode         = 0x8;
   msgContent->message        = (unsigned char *)malloc( length * sizeof( unsigned char ) );
@@ -522,6 +541,7 @@ void WebSocketClient::sendCloseCtrlFrame( const unsigned char *message, size_t l
 
 void WebSocketClient::sendCloseCtrlFrame( const std::string &message )
 {
+  GR_JUMP_TRACE;
   sendCloseCtrlFrame( (const unsigned char *)message.c_str(), message.length() );
 }
 

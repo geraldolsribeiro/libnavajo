@@ -11,6 +11,10 @@
  */
 //********************************************************
 
+#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
+
+#include <iostream>
+
 #include <algorithm>
 #include <dirent.h>
 #include <stdio.h>
@@ -22,6 +26,7 @@
 
 void dump_buffer( FILE *f, unsigned n, const unsigned char *buf )
 {
+  GR_JUMP_TRACE;
   int cptLine = 0;
   fputs( "    ", f );
   while( n-- > 0 ) {
@@ -38,6 +43,7 @@ void dump_buffer( FILE *f, unsigned n, const unsigned char *buf )
 
 char *str_replace_first( char *buffer, const char *s, const char *by )
 {
+  GR_JUMP_TRACE;
   char *p = strstr( buffer, s ), *ret = NULL;
 
   if( p != NULL ) {
@@ -69,6 +75,7 @@ std::vector<std::string> listExcludeDir;
 
 bool loadFilename_dir( const std::string &path, const std::string &subpath = "" )
 {
+  GR_JUMP_TRACE;
   struct dirent *entry;
   DIR *          dir;
   struct stat    s;
@@ -113,6 +120,7 @@ bool loadFilename_dir( const std::string &path, const std::string &subpath = "" 
 
 void parseDirectory( const std::string &dirPath )
 {
+  GR_JUMP_TRACE;
   char resolved_path[4096];
 
   if( realpath( dirPath.c_str(), resolved_path ) == NULL )
@@ -131,6 +139,7 @@ void parseDirectory( const std::string &dirPath )
  */
 int main( int argc, char *argv[] )
 {
+  GR_JUMP_TRACE;
   if( argc <= 1 ) {
     printf( "Usage: %s htmlRepository [--exclude [file directory ...]] \n", argv[0] );
     fflush( NULL );

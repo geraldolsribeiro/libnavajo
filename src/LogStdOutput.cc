@@ -11,6 +11,10 @@
  */
 //********************************************************
 
+#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
+
+#include <iostream>
+
 #include "libnavajo/LogStdOutput.hh"
 #include <stdio.h>
 
@@ -31,6 +35,7 @@
  */
 void LogStdOutput::append( const NvjLogSeverity &l, const std::string &message, const std::string & /*details*/ )
 {
+  GR_JUMP_TRACE;
 
   switch( l ) {
   case NVJ_DEBUG:
@@ -65,6 +70,7 @@ void LogStdOutput::append( const NvjLogSeverity &l, const std::string &message, 
 
 void LogStdOutput::initialize()
 {
+  GR_JUMP_TRACE;
 }
 
 /***********************************************************************/
@@ -74,6 +80,7 @@ void LogStdOutput::initialize()
 
 LogStdOutput::LogStdOutput()
 {
+  GR_JUMP_TRACE;
 }
 
 /***********************************************************************/
@@ -83,6 +90,7 @@ LogStdOutput::LogStdOutput()
 
 LogStdOutput::~LogStdOutput()
 {
+  GR_JUMP_TRACE;
 }
 
 /***********************************************************************/
