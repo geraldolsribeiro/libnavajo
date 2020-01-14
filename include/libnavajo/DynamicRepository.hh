@@ -14,6 +14,8 @@
 #ifndef DYNAMICREPOSITORY_HH_
 #define DYNAMICREPOSITORY_HH_
 
+#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
+
 #include <map>
 #include <string>
 
@@ -28,10 +30,12 @@ class DynamicRepository : public WebRepository {
 public:
   DynamicRepository()
   {
+    GR_JUMP_TRACE;
     pthread_mutex_init( &_mutex, NULL );
   };
   virtual ~DynamicRepository()
   {
+    GR_JUMP_TRACE;
     indexMap.clear();
   };
 
@@ -42,6 +46,7 @@ public:
    */
   inline void freeFile( unsigned char *webpage )
   {
+    GR_JUMP_TRACE;
     ::free( webpage );
   };
 
@@ -53,9 +58,12 @@ public:
   // GLSR FIXME
   inline void add( const std::string url, DynamicPage *page )
   {
+    GR_JUMP_TRACE;
     size_t i = 0;
-    while( url.size() && url[i] == '/' )
+    while( url.size() && url[i] == '/' ) {
+      GR_JUMP_TRACE;
       i++;
+    }
     pthread_mutex_lock( &_mutex );
     indexMap.insert( std::pair<std::string, DynamicPage *>( url.substr( i, url.size() - i ), page ) );
     pthread_mutex_unlock( &_mutex );
@@ -69,19 +77,26 @@ public:
   // GLSR FIXME
   inline void remove( const std::string urlToRemove, bool deleteDynamicPage = false )
   {
+    GR_JUMP_TRACE;
     std::string url( urlToRemove );
-    while( url.size() && url[0] == '/' )
+    while( url.size() && url[0] == '/' ) {
+      GR_JUMP_TRACE;
       url.erase( 0, 1 );
+    }
     pthread_mutex_lock( &_mutex );
     IndexMap::iterator i = indexMap.find( url );
     if( i == indexMap.end() ) {
+      GR_JUMP_TRACE;
       pthread_mutex_unlock( &_mutex );
       return;
     }
     else {
+      GR_JUMP_TRACE;
       pthread_mutex_unlock( &_mutex );
-      if( deleteDynamicPage )
+      if( deleteDynamicPage ) {
+        GR_JUMP_TRACE;
         delete i->second;
+      }
       indexMap.erase( i );
       return;
     }
@@ -99,16 +114,19 @@ public:
    */
   inline virtual bool getFile( HttpRequest *request, HttpResponse *response )
   {
+    GR_JUMP_TRACE;
     std::string url = request->getUrl();
     while( url.size() && url[0] == '/' )
       url.erase( 0, 1 );
     pthread_mutex_lock( &_mutex );
     IndexMap::const_iterator i = indexMap.find( url );
     if( i == indexMap.end() ) {
+      GR_JUMP_TRACE;
       pthread_mutex_unlock( &_mutex );
       return false;
     }
     else {
+      GR_JUMP_TRACE;
       pthread_mutex_unlock( &_mutex );
       bool res = i->second->getPage( request, response );
       if( request->getSessionId().size() )

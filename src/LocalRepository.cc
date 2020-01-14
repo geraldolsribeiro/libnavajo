@@ -126,13 +126,18 @@ bool LocalRepository::getFile( HttpRequest *request, HttpResponse *response )
 
   std::string filename = url;
 
-  if( aliasName.size() )
+  if( aliasName.size() ) {
+    GR_JUMP_TRACE;
     filename.replace( 0, aliasName.size(), fullPathToLocalDir );
-  else
+  }
+  else {
+    GR_JUMP_TRACE;
     filename = fullPathToLocalDir + '/' + filename;
+  }
 
   FILE *pFile = fopen( filename.c_str(), "rb" );
   if( pFile == NULL ) {
+    GR_JUMP_TRACE;
     char logBuffer[150];
     snprintf( logBuffer, 150, "Webserver : Error opening file '%s'", filename.c_str() );
     NVJ_LOG->append( NVJ_ERROR, logBuffer );
@@ -145,11 +150,13 @@ bool LocalRepository::getFile( HttpRequest *request, HttpResponse *response )
   rewind( pFile );
 
   if( ( webpage = (unsigned char *)malloc( webpageLen + 1 * sizeof( char ) ) ) == NULL ) {
+    GR_JUMP_TRACE;
     fclose( pFile );
     return false;
   }
   size_t nb = fread( webpage, 1, webpageLen, pFile );
   if( nb != webpageLen ) {
+    GR_JUMP_TRACE;
     char logBuffer[150];
     snprintf( logBuffer, 150, "Webserver : Error accessing file '%s'", filename.c_str() );
     NVJ_LOG->append( NVJ_ERROR, logBuffer );

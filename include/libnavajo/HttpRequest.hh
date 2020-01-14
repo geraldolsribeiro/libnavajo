@@ -14,6 +14,9 @@
 #ifndef HTTPREQUEST_HH_
 #define HTTPREQUEST_HH_
 
+#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
+#include <iostream>
+
 #include <map>
 #include <openssl/ssl.h>
 #include <sstream>
@@ -72,10 +75,12 @@ class HttpRequest {
    */
   inline void decodParams( const std::string &p )
   {
+    GR_JUMP_TRACE;
     size_t      start = 0, end = 0;
     std::string paramstr = p;
 
     while( ( end = paramstr.find_first_of( "%+", start ) ) != std::string::npos ) {
+      GR_JUMP_TRACE;
       size_t len = paramstr.length() - end - 1;
       switch( paramstr[end] ) {
       case '%':
@@ -107,6 +112,7 @@ class HttpRequest {
     end              = 0;
     bool islastParam = false;
     while( !islastParam ) {
+      GR_JUMP_TRACE;
       islastParam = ( end = paramstr.find( '&', start ) ) == std::string::npos;
       if( islastParam )
         end = paramstr.size();
@@ -114,20 +120,27 @@ class HttpRequest {
       std::string theParam = paramstr.substr( start, end - start );
 
       size_t posEq = 0;
-      if( ( posEq = theParam.find( '=' ) ) == std::string::npos )
+      if( ( posEq = theParam.find( '=' ) ) == std::string::npos ) {
+        GR_JUMP_TRACE;
         parameters[theParam] = "";
+      }
       else {
+        GR_JUMP_TRACE;
         std::string key   = theParam.substr( 0, posEq );
         std::string value = theParam.substr( posEq + 1 );
         if( parameters.count( key ) == 0 ) {
+          GR_JUMP_TRACE;
           parameters[key] = value;
         }
         else {
+          GR_JUMP_TRACE;
           std::string arrayKey = key + "[]";
           if( parameters.count( arrayKey ) == 1 ) {
+            GR_JUMP_TRACE;
             parameters[arrayKey] += "|" + value;
           }
           else {
+            GR_JUMP_TRACE;
             parameters[arrayKey] = parameters[key] + "|" + value;
           }
           parameters[key] = value;
@@ -145,19 +158,25 @@ class HttpRequest {
    */
   inline void decodCookies( const std::string &c )
   {
+    GR_JUMP_TRACE;
     std::stringstream ss( c );
     std::string       theCookie;
     while( std::getline( ss, theCookie, ';' ) ) {
+      GR_JUMP_TRACE;
       size_t posEq = 0;
       if( ( posEq = theCookie.find( '=' ) ) != std::string::npos ) {
+        GR_JUMP_TRACE;
         size_t firstC = 0;
         while( !iswgraph( theCookie[firstC] ) && firstC < posEq ) {
+          GR_JUMP_TRACE;
           firstC++;
         };
 
-        if( posEq - firstC > 0 && theCookie.length() - posEq > 0 )
+        if( posEq - firstC > 0 && theCookie.length() - posEq > 0 ) {
+          GR_JUMP_TRACE;
           cookies[theCookie.substr( firstC, posEq - firstC )]
               = theCookie.substr( posEq + 1, theCookie.length() - posEq );
+        }
       }
     }
   };
@@ -169,6 +188,7 @@ class HttpRequest {
    */
   inline void getSession()
   {
+    GR_JUMP_TRACE;
     sessionId = getCookie( "SID" );
 
     if( sessionId.length() && HttpSession::find( sessionId ) )
@@ -185,6 +205,7 @@ public:
    */
   inline std::string getCookie( const std::string &name ) const
   {
+    GR_JUMP_TRACE;
     std::string res = "";
     getCookie( name, res );
     return res;
@@ -199,6 +220,7 @@ public:
    */
   inline bool getCookie( const std::string &name, std::string &value ) const
   {
+    GR_JUMP_TRACE;
     if( !cookies.empty() ) {
       HttpRequestCookiesMap::const_iterator it;
       if( ( it = cookies.find( name ) ) != cookies.end() ) {
@@ -216,6 +238,7 @@ public:
    */
   inline std::vector<std::string> getCookiesNames() const
   {
+    GR_JUMP_TRACE;
     std::vector<std::string> res;
     for( HttpRequestCookiesMap::const_iterator iter = cookies.begin(); iter != cookies.end(); ++iter )
       res.push_back( iter->first );
@@ -231,6 +254,7 @@ public:
    */
   inline bool getParameter( const std::string &name, std::string &value ) const
   {
+    GR_JUMP_TRACE;
     if( !parameters.empty() ) {
       HttpRequestParametersMap::const_iterator it;
       if( ( it = parameters.find( name ) ) != parameters.end() ) {
@@ -249,6 +273,7 @@ public:
    */
   inline std::string getParameter( const std::string &name ) const
   {
+    GR_JUMP_TRACE;
     std::string res = "";
     getParameter( name, res );
     return res;
@@ -262,6 +287,7 @@ public:
    */
   inline bool hasParameter( const std::string &name ) const
   {
+    GR_JUMP_TRACE;
     std::string tmp;
     return getParameter( name, tmp );
   }
@@ -273,9 +299,12 @@ public:
    */
   inline std::vector<std::string> getParameterNames() const
   {
+    GR_JUMP_TRACE;
     std::vector<std::string> res;
-    for( HttpRequestParametersMap::const_iterator iter = parameters.begin(); iter != parameters.end(); ++iter )
+    for( HttpRequestParametersMap::const_iterator iter = parameters.begin(); iter != parameters.end(); ++iter ) {
+      GR_JUMP_TRACE;
       res.push_back( iter->first );
+    }
     return res;
   }
 
@@ -285,6 +314,7 @@ public:
    */
   inline bool isSessionValid()
   {
+    GR_JUMP_TRACE;
     return sessionId != "";
   }
 
@@ -294,6 +324,7 @@ public:
    */
   inline void createSession()
   {
+    GR_JUMP_TRACE;
     HttpSession::create( sessionId );
   }
 
@@ -302,8 +333,11 @@ public:
    */
   inline void removeSession()
   {
-    if( sessionId == "" )
+    GR_JUMP_TRACE;
+    if( sessionId == "" ) {
+      GR_JUMP_TRACE;
       return;
+    }
     HttpSession::remove( sessionId );
   }
 
@@ -314,8 +348,11 @@ public:
    */
   void setSessionAttribute( const std::string &name, void *value )
   {
-    if( sessionId == "" )
+    GR_JUMP_TRACE;
+    if( sessionId == "" ) {
+      GR_JUMP_TRACE;
       createSession();
+    }
     HttpSession::setAttribute( sessionId, name, value );
   }
 
@@ -326,8 +363,11 @@ public:
    */
   void setSessionObjectAttribute( const std::string &name, SessionAttributeObject *value )
   {
-    if( sessionId == "" )
+    GR_JUMP_TRACE;
+    if( sessionId == "" ) {
+      GR_JUMP_TRACE;
       createSession();
+    }
     HttpSession::setObjectAttribute( sessionId, name, value );
   }
 
@@ -338,8 +378,11 @@ public:
    */
   void *getSessionAttribute( const std::string &name )
   {
-    if( sessionId == "" )
+    GR_JUMP_TRACE;
+    if( sessionId == "" ) {
+      GR_JUMP_TRACE;
       return NULL;
+    }
     return HttpSession::getAttribute( sessionId, name );
   }
 
@@ -350,8 +393,11 @@ public:
    */
   SessionAttributeObject *getSessionObjectAttribute( const std::string &name )
   {
-    if( sessionId == "" )
+    GR_JUMP_TRACE;
+    if( sessionId == "" ) {
+      GR_JUMP_TRACE;
       return NULL;
+    }
     return HttpSession::getObjectAttribute( sessionId, name );
   }
 
@@ -361,8 +407,10 @@ public:
    */
   inline std::vector<std::string> getSessionAttributeNames()
   {
-    if( sessionId == "" )
+    GR_JUMP_TRACE;
+    if( sessionId == "" ) {
       return std::vector<std::string>();
+    }
     ;
     return HttpSession::getAttributeNames( sessionId );
   }
@@ -373,8 +421,11 @@ public:
    */
   inline void getSessionRemoveAttribute( const std::string &name )
   {
-    if( sessionId != "" )
+    GR_JUMP_TRACE;
+    if( sessionId != "" ) {
+      GR_JUMP_TRACE;
       HttpSession::removeAttribute( sessionId, name );
+    }
   }
 
   /**
@@ -382,6 +433,7 @@ public:
    */
   inline void initSessionId()
   {
+    GR_JUMP_TRACE;
     sessionId = "";
   };
 
@@ -391,6 +443,7 @@ public:
    */
   std::string getSessionId() const
   {
+    GR_JUMP_TRACE;
     return sessionId;
   };
 
@@ -414,6 +467,7 @@ public:
       std::vector<uint8_t> *  payload = NULL,
       MPFD::Parser *          parser  = NULL )
   {
+    GR_JUMP_TRACE;
     this->httpMethod             = type;
     this->url                    = url;
     this->origin                 = origin;
@@ -425,8 +479,10 @@ public:
 
     setParams( params );
 
-    if( cookies != NULL && strlen( cookies ) )
+    if( cookies != NULL && strlen( cookies ) ) {
+      GR_JUMP_TRACE;
       decodCookies( cookies );
+    }
     getSession();
   };
 
@@ -437,6 +493,7 @@ public:
    */
   inline bool isMultipartContent() const
   {
+    GR_JUMP_TRACE;
     return multipartContentParser != NULL;
   };
 
@@ -447,6 +504,7 @@ public:
    */
   inline MPFD::Parser *getMPFDparser()
   {
+    GR_JUMP_TRACE;
     return multipartContentParser;
   };
 
@@ -457,6 +515,7 @@ public:
    */
   inline const char *getMimeType() const
   {
+    GR_JUMP_TRACE;
     return mimeType;
   };
 
@@ -467,6 +526,7 @@ public:
    */
   inline std::vector<uint8_t> &getPayload()
   {
+    GR_JUMP_TRACE;
     return *payload;
   };
 
@@ -477,6 +537,7 @@ public:
    */
   inline const char *getUrl() const
   {
+    GR_JUMP_TRACE;
     return url;
   };
 
@@ -487,6 +548,7 @@ public:
    * */
   inline void setUrl( const char *newUrl )
   {
+    GR_JUMP_TRACE;
     url = newUrl;
   };
 
@@ -494,7 +556,14 @@ public:
   // forwardTo com novos parâmetros
   inline void setParams( const char *params )
   {
+    GR_JUMP_TRACE;
+    if( params != NULL ) {
+      std::cerr << "params: " << strlen( params ) << " - " << params << std::endl;
+    } else {
+      std::cerr << "params: NULL" << std::endl;
+    }
     if( params != NULL && strlen( params ) ) {
+      GR_JUMP_TRACE;
       decodParams( params );
     }
   }
@@ -506,6 +575,7 @@ public:
    */
   inline HttpRequestMethod getRequestType() const
   {
+    GR_JUMP_TRACE;
     return httpMethod;
   };
 
@@ -516,6 +586,7 @@ public:
    * */
   inline void setRequestType( HttpRequestMethod newMethod )
   {
+    GR_JUMP_TRACE;
     httpMethod = newMethod;
   };
 
@@ -526,6 +597,7 @@ public:
    */
   inline const char *getRequestOrigin() const
   {
+    GR_JUMP_TRACE;
     return origin;
   };
 
@@ -536,6 +608,7 @@ public:
    */
   inline IpAddress &getPeerIpAddress()
   {
+    GR_JUMP_TRACE;
     return clientSockData->ip;
   };
 
@@ -546,6 +619,7 @@ public:
    */
   inline std::string &getHttpAuthUsername()
   {
+    GR_JUMP_TRACE;
     return httpAuthUsername;
   };
 
@@ -556,6 +630,7 @@ public:
    */
   inline std::string &getX509PeerDN()
   {
+    GR_JUMP_TRACE;
     return *( clientSockData->peerDN );
   };
 
@@ -566,6 +641,7 @@ public:
    */
   inline bool isX509auth()
   {
+    GR_JUMP_TRACE;
     return clientSockData->peerDN != NULL;
   }
 
@@ -576,6 +652,7 @@ public:
    */
   inline CompressionMode getCompressionMode()
   {
+    GR_JUMP_TRACE;
     return clientSockData->compression;
   };
 
@@ -586,6 +663,7 @@ public:
    */
   ClientSockData *getClientSockData()
   {
+    GR_JUMP_TRACE;
     return clientSockData;
   }
 };

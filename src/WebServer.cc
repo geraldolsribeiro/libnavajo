@@ -306,6 +306,9 @@ end:
 size_t WebServer::recvLine( int client, char *bufLine, size_t nsize )
 {
   GR_JUMP_TRACE;
+
+  std::cerr << "Params: client: " << client << " nsize: " << nsize << " bufLine: " << bufLine << std::endl;
+
   size_t bufLineLen = 0;
   char   c;
   int    n;
@@ -365,6 +368,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
   }
 
   do {
+    GR_JUMP_TRACE;
     // Initialisation /////////
     requestMethod        = UNKNOWN_METHOD;
     requestContentLength = 0;
@@ -375,30 +379,37 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
     isQueryStr           = false;
 
     if( urlBuffer != NULL ) {
+      GR_JUMP_TRACE;
       free( urlBuffer );
       urlBuffer = NULL;
     };
     if( requestParams != NULL ) {
+      GR_JUMP_TRACE;
       free( requestParams );
       requestParams = NULL;
     };
     if( requestCookies != NULL ) {
+      GR_JUMP_TRACE;
       free( requestCookies );
       requestCookies = NULL;
     };
     if( requestOrigin != NULL ) {
+      GR_JUMP_TRACE;
       free( requestOrigin );
       requestOrigin = NULL;
     };
     if( webSocketClientKey != NULL ) {
+      GR_JUMP_TRACE;
       free( webSocketClientKey );
       webSocketClientKey = NULL;
     };
     if( multipartContent != NULL ) {
+      GR_JUMP_TRACE;
       free( multipartContent );
       multipartContent = NULL;
     };
     if( multipartContentParser != NULL ) {
+      GR_JUMP_TRACE;
       delete multipartContentParser;
       multipartContentParser = NULL;
     };
@@ -409,19 +420,25 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
     //////////////////////////
 
     while( true ) {
+      GR_JUMP_TRACE;
       bufLineLen = 0;
       *bufLine   = '\0';
 
       if( sslEnabled ) {
+        GR_JUMP_TRACE;
+        std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
         int r = BIO_gets( client->bio, bufLine, BUFSIZE - 1 );
 
         switch( SSL_get_error( client->ssl, r ) ) {
         case SSL_ERROR_NONE:
+          GR_JUMP_TRACE;
           if( ( r == 0 ) || ( r == -1 ) )
             continue;
           bufLineLen = r;
+          std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
           break;
         case SSL_ERROR_ZERO_RETURN:
+          GR_JUMP_TRACE;
           NVJ_LOG->append(
               NVJ_DEBUG,
               "WebServer::accept_request - BIO_gets() "
@@ -429,76 +446,115 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
           goto FREE_RETURN_TRUE;
         }
       }
-      else
+      else {
+        GR_JUMP_TRACE;
         bufLineLen = recvLine( client->socketId, bufLine, BUFSIZE - 1 );
+        std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
+      }
 
-      if( bufLineLen == 0 || exiting )
+      if( bufLineLen == 0 || exiting ) {
+        GR_JUMP_TRACE;
         goto FREE_RETURN_TRUE;
+      }
 
       if( bufLineLen <= 2 ) {
+        GR_JUMP_TRACE;
         // only CRLF found (empty line) -> decoding is finished !
-        if( ( *bufLine == '\n' ) || ( *bufLine == '\r' && *( bufLine + 1 ) == '\n' ) )
+        if( ( *bufLine == '\n' ) || ( *bufLine == '\r' && *( bufLine + 1 ) == '\n' ) ) {
+          GR_JUMP_TRACE;
           break;
+        }
       }
       else {
-        if( bufLineLen == BUFSIZE - 1 )
+        GR_JUMP_TRACE;
+        if( bufLineLen == BUFSIZE - 1 ) {
+          GR_JUMP_TRACE;
           *( bufLine + bufLineLen ) = '\0';
-        else
+        }
+        else {
+          GR_JUMP_TRACE;
           *( bufLine + bufLineLen - 2 ) = '\0';
+        }
         j = 0;
-        while( j < (unsigned)bufLineLen && isspace( (int)( bufLine[j] ) ) )
+        while( j < (unsigned)bufLineLen && isspace( (int)( bufLine[j] ) ) ) {
+          GR_JUMP_TRACE;
           j++;
+        }
 
         // decode login/passwd
         if( strncmp( bufLine + j, authStr, sizeof authStr - 1 ) == 0 ) {
+          GR_JUMP_TRACE;
           j += sizeof authStr - 1;
 
           std::string pwdb64 = "";
-          while( j < (unsigned)bufLineLen && *( bufLine + j ) != 0x0d && *( bufLine + j ) != 0x0a )
+          while( j < (unsigned)bufLineLen && *( bufLine + j ) != 0x0d && *( bufLine + j ) != 0x0a ) {
+            GR_JUMP_TRACE;
             pwdb64 += *( bufLine + j++ );
-          ;
-          if( !authOK )
+          };
+          if( !authOK ) {
+            GR_JUMP_TRACE;
             authOK = isUserAllowed( pwdb64, username );
+          }
           continue;
         }
 
         // decode HTTP headers
         if( strncasecmp( bufLine + j, "Connection: ", 12 ) == 0 ) {
+          GR_JUMP_TRACE;
           j += 12;
-          if( strstr( bufLine + j, "pgrade" ) != NULL )
+          if( strstr( bufLine + j, "pgrade" ) != NULL ) {
+            GR_JUMP_TRACE;
             websocket = true;
+          }
           else {
-            if( strstr( bufLine + j, "lose" ) != NULL )
+            if( strstr( bufLine + j, "lose" ) != NULL ) {
+              GR_JUMP_TRACE;
               closing = false;
-            else if( ( strstr( bufLine + j, "eep-" ) != NULL ) && ( strstr( bufLine + j + 4, "live" ) != NULL ) )
+            }
+            else if( ( strstr( bufLine + j, "eep-" ) != NULL ) && ( strstr( bufLine + j + 4, "live" ) != NULL ) ) {
+              GR_JUMP_TRACE;
               keepAlive = true;
+            }
           }
           continue;
         }
 
         if( strncasecmp( bufLine + j, "Accept-Encoding: ", 17 ) == 0 ) {
+          GR_JUMP_TRACE;
           j += 17;
-          if( strstr( bufLine + j, "gzip" ) != NULL )
+          if( strstr( bufLine + j, "gzip" ) != NULL ) {
+            GR_JUMP_TRACE;
             client->compression = GZIP;
+          }
           continue;
         }
 
         if( strncasecmp( bufLine + j, "Content-Type: ", 14 ) == 0 ) {
+          GR_JUMP_TRACE;
           j += 14;
           char * start = bufLine + j, *end = NULL;
           size_t length = 0;
-          if( ( end = index( start, ';' ) ) != NULL )
+          if( ( end = index( start, ';' ) ) != NULL ) {
+            GR_JUMP_TRACE;
             length = end - start;
-          else
+          }
+          else {
+            GR_JUMP_TRACE;
             length = strlen( start );
-          if( length >= 63 )
+          }
+          if( length >= 63 ) {
+            GR_JUMP_TRACE;
             length = 63;
+          }
           strncpy( mimeType, start, length );
           mimeType[length] = '\0';
 
-          if( strncasecmp( mimeType, "application/x-www-form-urlencoded", 33 ) == 0 )
+          if( strncasecmp( mimeType, "application/x-www-form-urlencoded", 33 ) == 0 ) {
+            GR_JUMP_TRACE;
             urlencodedForm = true;
+          }
           else if( strncasecmp( mimeType, "multipart/form-data", 19 ) == 0 ) {
+            GR_JUMP_TRACE;
             multipartContent = (char *)malloc( ( strlen( bufLine + j ) + 1 ) * sizeof( char ) );
             strcpy( multipartContent, bufLine + j );
           }
@@ -506,12 +562,14 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         }
 
         if( strncasecmp( bufLine + j, "Content-Length: ", 16 ) == 0 ) {
+          GR_JUMP_TRACE;
           j += 16;
           requestContentLength = atoi( bufLine + j );
           continue;
         }
 
         if( strncasecmp( bufLine + j, "Cookie: ", 8 ) == 0 ) {
+          GR_JUMP_TRACE;
           j += 8;
           requestCookies = (char *)malloc( ( strlen( bufLine + j ) + 1 ) * sizeof( char ) );
           strcpy( requestCookies, bufLine + j );
@@ -519,6 +577,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         }
 
         if( strncasecmp( bufLine + j, "Origin: ", 8 ) == 0 ) {
+          GR_JUMP_TRACE;
           j += 8;
           requestOrigin = (char *)malloc( ( strlen( bufLine + j ) + 1 ) * sizeof( char ) );
           strcpy( requestOrigin, bufLine + j );
@@ -526,6 +585,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         }
 
         if( strncasecmp( bufLine + j, "Sec-WebSocket-Key: ", 19 ) == 0 ) {
+          GR_JUMP_TRACE;
           j += 19;
           webSocketClientKey = (char *)malloc( ( strlen( bufLine + j ) + 1 ) * sizeof( char ) );
           strcpy( webSocketClientKey, bufLine + j );
@@ -533,6 +593,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         }
 
         if( strncasecmp( bufLine + j, "Sec-WebSocket-Extensions: ", 26 ) == 0 ) {
+          GR_JUMP_TRACE;
           j += 26;
           if( strstr( bufLine + j, "permessage-deflate" ) != NULL )
             client->compression = ZLIB;
@@ -540,6 +601,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         }
 
         if( strncasecmp( bufLine + j, "Sec-WebSocket-Version: ", 23 ) == 0 ) {
+          GR_JUMP_TRACE;
           j += 23;
           webSocketVersion = atoi( bufLine + j );
           continue;
@@ -547,58 +609,73 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
 
         isQueryStr = false;
         if( strncmp( bufLine + j, "GET", 3 ) == 0 ) {
+          GR_JUMP_TRACE;
           requestMethod = GET_METHOD;
           isQueryStr    = true;
           j += 4;
         }
         else if( strncmp( bufLine + j, "POST", 4 ) == 0 ) {
+          GR_JUMP_TRACE;
           requestMethod = POST_METHOD;
           isQueryStr    = true;
           j += 5;
         }
         else if( strncmp( bufLine + j, "PUT", 3 ) == 0 ) {
+          GR_JUMP_TRACE;
           requestMethod = PUT_METHOD;
           isQueryStr    = true;
           j += 4;
         }
         else if( strncmp( bufLine + j, "DELETE", 6 ) == 0 ) {
+          GR_JUMP_TRACE;
           requestMethod = DELETE_METHOD;
           isQueryStr    = true;
           j += 7;
         }
         else if( strncmp( bufLine + j, "UPDATE", 6 ) == 0 ) {
+          GR_JUMP_TRACE;
           requestMethod = UPDATE_METHOD;
           isQueryStr    = true;
           j += 7;
         }
         else if( strncmp( bufLine + j, "PATCH", 5 ) == 0 ) {
+          GR_JUMP_TRACE;
           requestMethod = PATCH_METHOD;
           isQueryStr    = true;
           j += 6;
         }
         else if( strncmp( bufLine + j, "OPTIONS", 7 ) == 0 ) {
+          GR_JUMP_TRACE;
           requestMethod = OPTIONS_METHOD;
           isQueryStr    = true;
           j += 7;
         }
 
         if( isQueryStr ) {
-          while( j < (unsigned)bufLineLen && isspace( (int)( bufLine[j] ) ) )
+          GR_JUMP_TRACE;
+          while( j < (unsigned)bufLineLen && isspace( (int)( bufLine[j] ) ) ) {
+            GR_JUMP_TRACE;
             j++;
+          }
 
           // Decode URL
           urlBuffer = (char *)malloc( ( strlen( bufLine + j ) + 1 ) * sizeof( char ) );
           i         = 0;
           while( !isspace( (int)( bufLine[j] ) ) && ( i < BUFSIZE - 1 ) && ( j < (unsigned)bufLineLen )
-                 && bufLine[j] != '?' )
-            if( !i && ( bufLine[j] == '/' ) ) // remove first '/'
+                 && bufLine[j] != '?' ) {
+            GR_JUMP_TRACE;
+            if( !i && ( bufLine[j] == '/' ) ) { // remove first '/'
               j++;
-            else
+            }
+            else {
               urlBuffer[i++] = bufLine[j++];
+            }
+          }
           urlBuffer[i] = '\0';
 
           // Decode GET Parameters
           if( !urlencodedForm && ( bufLine[j] == '?' ) ) {
+            GR_JUMP_TRACE;
             i = 0;
             j++;
             requestParams = (char *)malloc( BUFSIZE * sizeof( char ) );
@@ -607,9 +684,12 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
             requestParams[i] = '\0';
           }
 
-          while( j < (unsigned)bufLineLen && isspace( (int)( bufLine[j] ) ) )
+          while( j < (unsigned)bufLineLen && isspace( (int)( bufLine[j] ) ) ) {
+            GR_JUMP_TRACE;
             j++;
+          }
           if( strncmp( bufLine + j, "HTTP/", 5 ) == 0 ) {
+            GR_JUMP_TRACE;
             strncpy( httpVers, bufLine + j + 5, 3 );
             *( httpVers + 3 ) = '\0';
             j += 8;
@@ -620,19 +700,25 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
 
         //  authorization through bearer token, RFC 6750
         if( strncmp( bufLine + j, authBearerStr, sizeof authBearerStr - 1 ) == 0 ) {
+          GR_JUMP_TRACE;
           j += sizeof authStr;
 
           std::string tokb64 = "";
-          while( j < (unsigned)bufLineLen && *( bufLine + j ) != 0x0d && *( bufLine + j ) != 0x0a )
+          while( j < (unsigned)bufLineLen && *( bufLine + j ) != 0x0d && *( bufLine + j ) != 0x0a ) {
+            GR_JUMP_TRACE;
             tokb64 += *( bufLine + j++ );
-          if( authBearerEnabled )
+          }
+          if( authBearerEnabled ) {
+            GR_JUMP_TRACE;
             authOK = isTokenAllowed( tokb64, urlBuffer, authRespHeader );
+          }
           continue;
         }
       }
     }
 
     if( !authOK ) {
+      GR_JUMP_TRACE;
       const char *abh = authRespHeader.empty() ? NULL : authRespHeader.c_str();
       std::string msg = getHttpHeader( "401 Authorization Required", 0, false, abh );
       httpSend( client, (const void *)msg.c_str(), msg.length() );
@@ -640,6 +726,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
     }
 
     if( requestMethod == UNKNOWN_METHOD ) {
+      GR_JUMP_TRACE;
       std::string msg = getNotImplementedErrorMsg();
       httpSend( client, (const void *)msg.c_str(), msg.length() );
       goto FREE_RETURN_TRUE;
@@ -647,6 +734,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
 
     // update URL to load the default index.html page
     if( ( *urlBuffer == '\0' || *( urlBuffer + strlen( urlBuffer ) - 1 ) == '/' ) ) {
+      GR_JUMP_TRACE;
       urlBuffer = (char *)realloc( urlBuffer, strlen( urlBuffer ) + 10 + 1 );
       strcpy( urlBuffer + strlen( urlBuffer ), "index.html" );
     }
@@ -656,12 +744,18 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
     size_t      start = 0, end = 0;
 
     while( ( end = urlString.find_first_of( '%', start ) ) != std::string::npos ) {
+      GR_JUMP_TRACE;
       size_t len = urlString.length() - end - 1;
       if( urlString[end] == '%' && len >= 1 ) {
-        if( urlString[end + 1] == '%' )
+        GR_JUMP_TRACE;
+        if( urlString[end + 1] == '%' ) {
+          GR_JUMP_TRACE;
           urlString = urlString.erase( end + 1, 1 );
+        }
         else {
+          GR_JUMP_TRACE;
           if( len >= 2 ) {
+            GR_JUMP_TRACE;
             unsigned int      specar;
             std::string       hexChar = urlString.substr( end + 1, 2 );
             std::stringstream ss;
@@ -697,6 +791,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
 #endif
 
     if( multipartContent != NULL ) {
+      GR_JUMP_TRACE;
       try {
         // Initialize MPFDParser
         multipartContentParser = new MPFD::Parser();
@@ -704,8 +799,10 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         multipartContentParser->SetTempDirForFileUpload( multipartTempDirForFileUpload );
         multipartContentParser->SetMaxCollectedDataLength( multipartMaxCollectedDataLength );
         multipartContentParser->SetContentType( multipartContent );
+        GR_JUMP_TRACE;
       }
       catch( const MPFD::Exception &e ) {
+        GR_JUMP_TRACE;
         NVJ_LOG->append( NVJ_DEBUG, "WebServer::accept_request -  MPFD::Exception: " + e.GetError() );
         delete multipartContentParser;
         multipartContentParser = NULL;
@@ -714,23 +811,29 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
 
     // Read request content
     if( requestContentLength ) {
+      GR_JUMP_TRACE;
       size_t datalen = 0;
 
       while( datalen < requestContentLength ) {
+        GR_JUMP_TRACE;
         char   buffer[BUFSIZE];
         size_t requestedLength
             = ( requestContentLength - datalen > BUFSIZE ) ? BUFSIZE : requestContentLength - datalen;
 
         if( sslEnabled ) {
+          GR_JUMP_TRACE;
           int r = BIO_gets( client->bio, buffer, requestedLength + 1 ); // BUFSIZE);
 
           switch( SSL_get_error( client->ssl, r ) ) {
           case SSL_ERROR_NONE:
+            GR_JUMP_TRACE;
             if( ( r == 0 ) || ( r == -1 ) )
               continue;
             bufLineLen = r;
+            std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
             break;
           case SSL_ERROR_ZERO_RETURN:
+            GR_JUMP_TRACE;
             NVJ_LOG->append(
                 NVJ_DEBUG,
                 "WebServer::accept_request - BIO_gets() "
@@ -738,16 +841,25 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
             goto FREE_RETURN_TRUE;
           }
         }
-        else
+        else {
+          GR_JUMP_TRACE;
           bufLineLen = recvLine( client->socketId, buffer, requestedLength );
+          std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
+        }
 
         if( urlencodedForm ) {
-          if( requestParams == NULL )
+          GR_JUMP_TRACE;
+          if( requestParams == NULL ) {
+            GR_JUMP_TRACE;
             requestParams = (char *)malloc( ( bufLineLen + 1 ) * sizeof( char ) );
-          else
+          }
+          else {
+            GR_JUMP_TRACE;
             requestParams = (char *)realloc( requestParams, ( datalen + bufLineLen + 1 ) );
+          }
 
           if( requestParams == NULL ) {
+            GR_JUMP_TRACE;
             NVJ_LOG->append( NVJ_DEBUG, "WebServer::accept_request -  memory allocation failed" );
             break;
           }
@@ -755,7 +867,9 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
           *( requestParams + datalen + bufLineLen ) = '\0';
         }
         else {
-          if( multipartContentParser != NULL && bufLineLen )
+          GR_JUMP_TRACE;
+          std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
+          if( multipartContentParser != NULL && bufLineLen ) {
             try {
               multipartContentParser->AcceptSomeData( buffer, bufLineLen );
             }
@@ -763,12 +877,17 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
               NVJ_LOG->append( NVJ_DEBUG, "WebServer::accept_request -  MPFD::Exception: " + e.GetError() );
               break;
             }
+          }
           else {
+            std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
+            GR_JUMP_TRACE;
             if( !payload.size() ) {
               try {
+                GR_JUMP_TRACE;
                 payload.reserve( requestContentLength );
               }
               catch( std::bad_alloc &e ) {
+                GR_JUMP_TRACE;
                 NVJ_LOG->append(
                     NVJ_DEBUG,
                     "WebServer::accept_request -  "
@@ -793,12 +912,14 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
     /  *************************/
 
     if( websocket ) {
+      GR_JUMP_TRACE;
       // search endpoint
       std::map<std::string, WebSocket *>::iterator it;
 
       it = webSocketEndPoints.find( urlBuffer );
       if( it != webSocketEndPoints.end() ) // FOUND
       {
+        GR_JUMP_TRACE;
         WebSocket *webSocket = it->second;
         if( !webSocket->isUsingCompression() )
           client->compression = NONE;
@@ -806,9 +927,12 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         std::string header
             = getHttpWebSocketHeader( "101 Switching Protocols", webSocketClientKey, client->compression == ZLIB );
 
-        if( !httpSend( client, (const void *)header.c_str(), header.length() ) )
+        if( !httpSend( client, (const void *)header.c_str(), header.length() ) ) {
+          GR_JUMP_TRACE;
           goto FREE_RETURN_TRUE;
+        }
 
+        GR_JUMP_TRACE;
         HttpRequest *request = new HttpRequest(
             requestMethod,
             urlBuffer,
@@ -821,6 +945,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
             &payload,
             multipartContentParser );
 
+        GR_JUMP_TRACE;
         webSocket->newConnectionRequest( request );
 
         if( urlBuffer != NULL )
@@ -837,9 +962,11 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
           free( multipartContent );
         if( multipartContentParser != NULL )
           delete multipartContentParser;
+        GR_JUMP_TRACE;
         return false;
       }
       else {
+        GR_JUMP_TRACE;
         char bufLinestr[300];
         snprintf( bufLinestr, 300, "Webserver: Websocket not found %s", urlBuffer );
         NVJ_LOG->append( NVJ_WARNING, bufLinestr );
@@ -860,6 +987,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
     int            sizeZip     = 0;
     bool           zippedFile  = false;
 
+    GR_JUMP_TRACE;
     HttpRequest request(
         requestMethod,
         urlBuffer,
@@ -872,6 +1000,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         &payload,
         multipartContentParser );
 
+    GR_JUMP_TRACE;
     const char *mime = get_mime_type( urlBuffer );
     std::string mimeStr;
     if( mime != NULL )
@@ -880,11 +1009,16 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
 
     std::vector<WebRepository *>::const_iterator repo = webRepositories.begin();
     for( ; repo != webRepositories.end() && !fileFound && !zippedFile; ) {
-      if( *repo == NULL )
+      GR_JUMP_TRACE;
+      if( *repo == NULL ) {
+        GR_JUMP_TRACE;
         continue;
+      }
 
+      GR_JUMP_TRACE;
       fileFound = ( *repo )->getFile( &request, &response );
       if( fileFound && response.getForwardedUrl() != "" ) {
+        GR_JUMP_TRACE;
         urlBuffer = (char *)realloc( urlBuffer, ( response.getForwardedUrl().size() + 1 ) * sizeof( char ) );
         strcpy( urlBuffer, response.getForwardedUrl().c_str() );
         request.setUrl( urlBuffer );
@@ -892,11 +1026,14 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         repo      = webRepositories.begin();
         fileFound = false;
       }
-      else
+      else {
+        GR_JUMP_TRACE;
         ++repo;
+      }
     }
 
     if( !fileFound ) {
+      GR_JUMP_TRACE;
       char bufLinestr[300];
       snprintf( bufLinestr, 300, "Webserver: page not found %s", urlBuffer );
       NVJ_LOG->append( NVJ_DEBUG, bufLinestr );
@@ -907,6 +1044,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
       goto FREE_RETURN_TRUE;
     }
     else {
+      GR_JUMP_TRACE;
       --repo;
       response.getContent( &webpage, &webpageLen, &zippedFile );
 
@@ -919,6 +1057,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
       }
 
       if( zippedFile ) {
+        GR_JUMP_TRACE;
         gzipWebPage = webpage;
         sizeZip     = webpageLen;
       }
@@ -930,6 +1069,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
 #endif
 
     if( ( client->compression == NONE ) && zippedFile ) {
+      GR_JUMP_TRACE;
       // Need to uncompress
       try {
         if( (int)( webpageLen = nvj_gunzip( &webpage, gzipWebPage, sizeZip ) ) < 0 ) {
