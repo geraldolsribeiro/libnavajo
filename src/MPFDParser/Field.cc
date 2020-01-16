@@ -3,7 +3,8 @@
 //
 // Contacts and other info are on the WEB page:  grigory.info/MPFDParser
 
-#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
+//#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
+#define GR_JUMP_TRACE;
 
 #include "MPFDParser/Field.h"
 #include "MPFDParser/Parser.h"
