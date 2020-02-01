@@ -1432,7 +1432,7 @@ std::string WebServer::getBadRequestErrorMsg()
 {
   GR_JUMP_TRACE;
 
-  const string errorMessage = R"(
+  const std::string errorMessage = R"(
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -1462,7 +1462,7 @@ std::string WebServer::getNotFoundErrorMsg()
 {
   GR_JUMP_TRACE;
 
-  const string errorMessage = R"(
+  const std::string errorMessage = R"(
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -1493,7 +1493,7 @@ std::string WebServer::getInternalServerErrorMsg()
 {
   GR_JUMP_TRACE;
 
-  const string errorMessage = R"(
+  const std::string errorMessage = R"(
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -1524,7 +1524,7 @@ std::string WebServer::getNotImplementedErrorMsg()
 {
   GR_JUMP_TRACE;
 
-  const string errorMessage = R"(
+  const std::string errorMessage = R"(
 <!DOCTYPE html>
 <html lang="en">
   <head>
