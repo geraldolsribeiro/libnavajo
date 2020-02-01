@@ -1431,9 +1431,22 @@ std::string WebServer::getNoContentErrorMsg()
 std::string WebServer::getBadRequestErrorMsg()
 {
   GR_JUMP_TRACE;
-  std::string errorMessage
-      = "<HTML><HEAD>\n<TITLE>400 Bad Request</TITLE>\n</HEAD><body>\n<h1>Bad Request</h1>\n \
-                <p>Your browser sent a request that this server could not understand.<br />\n</p>\n</body></HTML>\n";
+
+  const string errorMessage = R"(
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Bad Request!</title>
+  </head>
+  <body>
+    <h1>Error 400: Bad Request!</h1>
+    <p>
+      Your browser sent a request that this server could not understand.
+    </p>
+  </body>
+</html>
+)";
 
   std::string header = getHttpHeader( "400 Bad Request", errorMessage.length(), false );
 
@@ -1448,13 +1461,23 @@ std::string WebServer::getBadRequestErrorMsg()
 std::string WebServer::getNotFoundErrorMsg()
 {
   GR_JUMP_TRACE;
-  std::string errorMessage
-      = "<HTML><HEAD><TITLE>Object not found!</TITLE><body><h1>Object not "
-        "found!</h1>\n"
-        "<p>\n\n\nThe requested URL was not found on this server.\n\n\n\n    If "
-        "you entered the URL manually please "
-        "check your spelling and try again.\n\n\n</p>\n"
-        "<h2>Error 404</h2></body></HTML>\n";
+
+  const string errorMessage = R"(
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Object not found!</title>
+  </head>
+  <body>
+    <h1>Error 404: Object not found!</h1>
+    <p>
+      The requested URL was not found on this server.
+      If you entered the URL manually please check your spelling and try again.
+    </p>
+  </body>
+</html>
+)";
 
   std::string header = getHttpHeader( "404 Not Found", errorMessage.length(), false );
 
@@ -1469,13 +1492,24 @@ std::string WebServer::getNotFoundErrorMsg()
 std::string WebServer::getInternalServerErrorMsg()
 {
   GR_JUMP_TRACE;
-  std::string errorMessage
-      = "<HTML><HEAD><TITLE>Internal Server Error!</TITLE><body><h1>Internal "
-        "Server Error!</h1>\n"
-        "<p>\n\n\nSomething happens.\n\n\n\n    If you entered the URL manually "
-        "please check your spelling and try "
-        "again.\n\n\n</p>\n"
-        "<h2>Error 500</h2></body></HTML>\n";
+
+  const string errorMessage = R"(
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Internal Server Error!</title>
+  </head>
+  <body>
+    <h1>Error 500: Internal Server Error!</h1>
+    <p>
+      Something happens.
+      If you entered the URL manually please check your spelling and try again.
+    </p>
+  </body>
+</html>
+)";
+
   std::string header = getHttpHeader( "500 Internal Server Error", errorMessage.length(), false );
 
   return header + errorMessage;
@@ -1489,15 +1523,23 @@ std::string WebServer::getInternalServerErrorMsg()
 std::string WebServer::getNotImplementedErrorMsg()
 {
   GR_JUMP_TRACE;
-  std::string errorMessage
-      = "<HTML><HEAD><TITLE>Cannot process "
-        "request!</TITLE><body><h1>Cannot process "
-        "request!</h1>\n"
-        "<p>\n\n\n   The server does not support the "
-        "action requested by the browser.\n\n\n\n"
-        "If you entered the URL manually please check "
-        "your spelling and try again.\n\n\n</p>\n"
-        "<h2>Error 501</h2></body></HTML>\n";
+
+  const string errorMessage = R"(
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cannot process request!</title>
+  </head>
+  <body>
+    <h1>Error 501: Cannot process request!</h1>
+    <p>
+      The server does not support the action requested by the browser.
+      If you entered the URL manually please check your spelling and try again.
+    </p>
+  </body>
+</html>
+)";
 
   std::string header = getHttpHeader( "501 Method Not Implemented", errorMessage.length(), false );
 
@@ -1513,8 +1555,9 @@ u_short WebServer::init()
 {
   GR_JUMP_TRACE;
   // Build SSL context
-  if( sslEnabled )
+  if( sslEnabled ) {
     initialize_ctx( sslCertFile.c_str(), sslCaFile.c_str(), sslCertPwd.c_str() );
+  }
 
   struct addrinfo  hints;
   struct addrinfo *result, *rp;
