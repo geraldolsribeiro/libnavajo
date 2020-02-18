@@ -10,6 +10,10 @@ git branch -D upstream-master-formatted || echo "Branch upstream-master not foun
 git branch -D local-master-formatted    || echo "Branch local-master-formatted not found"
 
 git checkout -b upstream-master-formatted upstream/master
+find . -name "*.cc" -exec clang-tidy {} -fix -checks="readability-braces-around-statements" -- -std=c++17 \;
+find . -name "*.hh" -exec clang-tidy {} -fix -checks="readability-braces-around-statements" -- -std=c++17 \;
+find . -name "*.h" -exec clang-tidy {} -fix -checks="readability-braces-around-statements" -- -std=c++17 \;
+
 find . -name "*.cc" -exec clang-format -i {} \;
 find . -name "*.hh" -exec clang-format -i {} \;
 find . -name "*.h" -exec clang-format -i {} \;
