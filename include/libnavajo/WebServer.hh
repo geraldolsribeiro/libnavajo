@@ -14,7 +14,7 @@
 #ifndef WEBSERVER_HH_
 #define WEBSERVER_HH_
 
-#include <stdio.h>
+#include <cstdio>
 #include <sys/types.h>
 #ifdef LINUX
 #include <arpa/inet.h>

@@ -31,8 +31,8 @@ WebSocketClient::WebSocketClient( WebSocket *ws, HttpRequest *req ) : websocket(
 {
   GR_JUMP_TRACE;
   snd_maxLatency = ws->getClientSendingMaxLatency();
-  pthread_mutex_init( &sendingQueueMutex, NULL );
-  pthread_cond_init( &sendingNotification, NULL );
+  pthread_mutex_init( &sendingQueueMutex, nullptr );
+  pthread_cond_init( &sendingNotification, nullptr );
   gzipcontext.dictInfLength = 0;
   nvj_init_stream( &( gzipcontext.strm_deflate ), true );
   noSessionExpiration( request );
@@ -88,7 +88,7 @@ void WebSocketClient::receivingThread()
   bool      msgMask = false;
 
   unsigned char  msgKeys[4];
-  unsigned char *msgContent = NULL;
+  unsigned char *msgContent = nullptr;
   enum MsgDecodSteps { FIRSTBYTE, LENGTH, MASK, CONTENT };
 
   ClientSockData *client = request->getClientSockData();
@@ -127,7 +127,7 @@ void WebSocketClient::receivingThread()
     }
 
     do {
-      if( client->bio != NULL && client->ssl != NULL ) {
+      if( client->bio != nullptr && client->ssl != nullptr ) {
         n = BIO_read( client->bio, bufferRecv + it, length - it );
 
         if( SSL_get_error( client->ssl, n ) == SSL_ERROR_ZERO_RETURN ) {
@@ -178,7 +178,7 @@ void WebSocketClient::receivingThread()
         if( !msgLength ) {
           NVJ_LOG->append( NVJ_WARNING, "Websocket: Message length is null. Closing socket." );
           msgLength  = 0;
-          msgContent = NULL;
+          msgContent = nullptr;
           step       = CONTENT;
           continue;
         }
@@ -193,16 +193,16 @@ void WebSocketClient::receivingThread()
       }
       else {
         if( msgLength == 126 ) {
-          u_int16_t *tmp = (u_int16_t *)bufferRecv;
-          msgLength      = ntohs( *tmp );
+          auto *tmp = (u_int16_t *)bufferRecv;
+          msgLength = ntohs( *tmp );
         }
         if( msgLength == 127 ) {
-          u_int64_t *tmp = (u_int64_t *)bufferRecv;
-          msgLength      = ntohll( *tmp );
+          auto *tmp = (u_int64_t *)bufferRecv;
+          msgLength = ntohll( *tmp );
         }
       }
 
-      if( ( msgContent = (unsigned char *)malloc( msgLength * sizeof( unsigned char ) ) ) == NULL ) {
+      if( ( msgContent = (unsigned char *)malloc( msgLength * sizeof( unsigned char ) ) ) == nullptr ) {
         char logBuffer[500];
         snprintf(
             logBuffer,
@@ -210,7 +210,7 @@ void WebSocketClient::receivingThread()
             " Websocket: Message content allocation failed (length: %llu)",
             static_cast<unsigned long long>( msgLength ) );
         NVJ_LOG->append( NVJ_WARNING, logBuffer );
-        msgContent = NULL;
+        msgContent = nullptr;
       }
       msgContentIt = 0;
       if( msgMask ) {
@@ -242,7 +242,7 @@ void WebSocketClient::receivingThread()
           opcode,
           msgMask );
       NVJ_LOG->append( NVJ_DEBUG, buf );
-      if( msgContent != NULL ) {
+      if( msgContent != nullptr ) {
         for( size_t i = 0; i < length; i++ ) {
           if( msgMask ) {
             msgContent[msgContentIt] = bufferRecv[i] ^ msgKeys[msgContentIt % 4];
@@ -256,9 +256,9 @@ void WebSocketClient::receivingThread()
       }
 
       if( msgContentIt == msgLength ) {
-        if( msgContent != NULL && ( client->compression == ZLIB ) && ( rsv & 4 ) ) {
+        if( msgContent != nullptr && ( client->compression == ZLIB ) && ( rsv & 4 ) ) {
           try {
-            unsigned char *msg    = NULL;
+            unsigned char *msg    = nullptr;
             size_t         msgLen = nvj_gunzip_websocket_v2(
                 &msg, msgContent, msgLength, true, gzipcontext.z_dictionary_inflate, &( gzipcontext.dictInfLength ) );
             free( msgContent );
@@ -323,7 +323,7 @@ void WebSocketClient::receivingThread()
         msgContentIt = 0;
         msgMask      = false;
         memset( msgKeys, 0, 4 * sizeof( unsigned char ) );
-        msgContent = NULL;
+        msgContent = nullptr;
         readLength = 1;
         step       = FIRSTBYTE;
       }
@@ -407,11 +407,11 @@ bool WebSocketClient::sendMessage( const MessageContent *msgContent )
 
   unsigned char  headerBuffer[10]; // 10 is the max header size
   size_t         headerLen = 2;    // default header size
-  unsigned char *msg       = NULL;
+  unsigned char *msg       = nullptr;
   size_t         msgLen    = 0;
   bool           result    = true;
 
-  if( client == NULL ) {
+  if( client == nullptr ) {
     return false;
   }
 
@@ -476,9 +476,9 @@ void WebSocketClient::addSendingQueue( MessageContent *msgContent )
 void WebSocketClient::sendTextMessage( const std::string &message, bool fin )
 {
   GR_JUMP_TRACE;
-  MessageContent *msgContent = (MessageContent *)malloc( sizeof( MessageContent ) );
-  msgContent->opcode         = 0x1;
-  msgContent->message        = (unsigned char *)malloc( message.length() * sizeof( char ) );
+  auto *msgContent    = (MessageContent *)malloc( sizeof( MessageContent ) );
+  msgContent->opcode  = 0x1;
+  msgContent->message = (unsigned char *)malloc( message.length() * sizeof( char ) );
   message.copy( (char *)msgContent->message, message.length() );
   msgContent->length = message.length();
   msgContent->fin    = fin;
@@ -492,9 +492,9 @@ void WebSocketClient::sendTextMessage( const std::string &message, bool fin )
 void WebSocketClient::sendBinaryMessage( const unsigned char *message, size_t length, bool fin )
 {
   GR_JUMP_TRACE;
-  MessageContent *msgContent = (MessageContent *)malloc( sizeof( MessageContent ) );
-  msgContent->opcode         = 0x2;
-  msgContent->message        = (unsigned char *)malloc( length * sizeof( unsigned char ) );
+  auto *msgContent    = (MessageContent *)malloc( sizeof( MessageContent ) );
+  msgContent->opcode  = 0x2;
+  msgContent->message = (unsigned char *)malloc( length * sizeof( unsigned char ) );
   memcpy( msgContent->message, message, length );
   msgContent->length = length;
   msgContent->fin    = fin;
@@ -508,9 +508,9 @@ void WebSocketClient::sendBinaryMessage( const unsigned char *message, size_t le
 void WebSocketClient::sendPingCtrlFrame( const unsigned char *message, size_t length )
 {
   GR_JUMP_TRACE;
-  MessageContent *msgContent = (MessageContent *)malloc( sizeof( MessageContent ) );
-  msgContent->opcode         = 0x9;
-  msgContent->message        = (unsigned char *)malloc( length * sizeof( unsigned char ) );
+  auto *msgContent    = (MessageContent *)malloc( sizeof( MessageContent ) );
+  msgContent->opcode  = 0x9;
+  msgContent->message = (unsigned char *)malloc( length * sizeof( unsigned char ) );
   memcpy( msgContent->message, message, length );
   msgContent->length = length;
   msgContent->fin    = true;
@@ -530,9 +530,9 @@ void WebSocketClient::sendPingCtrlFrame( const std::string &message )
 void WebSocketClient::sendPongCtrlFrame( const unsigned char *message, size_t length )
 {
   GR_JUMP_TRACE;
-  MessageContent *msgContent = (MessageContent *)malloc( sizeof( MessageContent ) );
-  msgContent->opcode         = 0xa;
-  msgContent->message        = (unsigned char *)malloc( length * sizeof( unsigned char ) );
+  auto *msgContent    = (MessageContent *)malloc( sizeof( MessageContent ) );
+  msgContent->opcode  = 0xa;
+  msgContent->message = (unsigned char *)malloc( length * sizeof( unsigned char ) );
   memcpy( msgContent->message, message, length );
   msgContent->length = length;
   msgContent->fin    = false;
@@ -552,9 +552,9 @@ void WebSocketClient::sendPongCtrlFrame( const std::string &message )
 void WebSocketClient::sendCloseCtrlFrame( const unsigned char *message, size_t length )
 {
   GR_JUMP_TRACE;
-  MessageContent *msgContent = (MessageContent *)malloc( sizeof( MessageContent ) );
-  msgContent->opcode         = 0x8;
-  msgContent->message        = (unsigned char *)malloc( length * sizeof( unsigned char ) );
+  auto *msgContent    = (MessageContent *)malloc( sizeof( MessageContent ) );
+  msgContent->opcode  = 0x8;
+  msgContent->message = (unsigned char *)malloc( length * sizeof( unsigned char ) );
   memcpy( msgContent->message, message, length );
   msgContent->length = length;
   msgContent->fin    = true;

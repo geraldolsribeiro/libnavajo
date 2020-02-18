@@ -16,10 +16,10 @@
 
 #include "libnavajo/LogOutput.hh"
 #include "libnavajo/nvjThread.h"
+#include <cstdarg>
+#include <cstdio>
 #include <list>
 #include <set>
-#include <stdarg.h>
-#include <stdio.h>
 #include <string>
 
 #define NVJ_LOG LogRecorder::getInstance()

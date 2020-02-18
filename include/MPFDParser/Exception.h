@@ -7,7 +7,7 @@
 #ifndef _EXCEPTION_H
 #define _EXCEPTION_H
 
-#include <errno.h>
+#include <cerrno>
 #include <iostream>
 #include <string>
 

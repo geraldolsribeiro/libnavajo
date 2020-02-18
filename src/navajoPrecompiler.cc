@@ -20,10 +20,10 @@
 #include <iostream>
 
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <dirent.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <string>
 #include <sys/stat.h>
 #include <vector>
@@ -49,9 +49,9 @@ void dump_buffer( FILE *f, unsigned n, const unsigned char *buf )
 char *str_replace_first( char *buffer, const char *s, const char *by )
 {
   GR_JUMP_TRACE;
-  char *p = strstr( buffer, s ), *ret = NULL;
+  char *p = strstr( buffer, s ), *ret = nullptr;
 
-  if( p != NULL ) {
+  if( p != nullptr ) {
     size_t len_p = strlen( p ), len_s = strlen( s ), len_by = strlen( by );
 
     if( len_s != len_by ) {
@@ -93,10 +93,10 @@ bool loadFilename_dir( const std::string &path, const std::string &subpath = "" 
   }
 
   dir = opendir( fullPath.c_str() );
-  if( dir == NULL ) {
+  if( dir == nullptr ) {
     return false;
   }
-  while( ( entry = readdir( dir ) ) != NULL ) {
+  while( ( entry = readdir( dir ) ) != nullptr ) {
     if( !strcmp( entry->d_name, "." ) || !strcmp( entry->d_name, ".." ) || !strlen( entry->d_name ) ) {
       continue;
     }
@@ -133,7 +133,7 @@ void parseDirectory( const std::string &dirPath )
   GR_JUMP_TRACE;
   char resolved_path[4096];
 
-  if( realpath( dirPath.c_str(), resolved_path ) == NULL ) {
+  if( realpath( dirPath.c_str(), resolved_path ) == nullptr ) {
     return;
   }
 
@@ -154,7 +154,7 @@ int main( int argc, char *argv[] )
   GR_JUMP_TRACE;
   if( argc <= 1 ) {
     printf( "Usage: %s htmlRepository [--exclude [file directory ...]] \n", argv[0] );
-    fflush( NULL );
+    fflush( nullptr );
     exit( EXIT_FAILURE );
   }
 
@@ -167,7 +167,7 @@ int main( int argc, char *argv[] )
 
   if( strcmp( argv[param], "--exclude" ) != 0 ) {
     for( ; param < argc; param++ ) {
-      listExcludeDir.push_back( std::string( argv[param] ) );
+      listExcludeDir.emplace_back( argv[param] );
     }
   }
 
@@ -178,7 +178,7 @@ int main( int argc, char *argv[] )
     exit( EXIT_FAILURE );
   }
 
-  ConversionEntry *conversionTable = (ConversionEntry *)malloc( filenamesVec.size() * sizeof( ConversionEntry ) );
+  auto *conversionTable = (ConversionEntry *)malloc( filenamesVec.size() * sizeof( ConversionEntry ) );
 
   fprintf( stdout, "#include \"libnavajo/PrecompiledRepository.hh\"\n\n" );
   fprintf( stdout, "namespace webRepository\n{\n" );
@@ -191,7 +191,7 @@ int main( int argc, char *argv[] )
     std::string filename = directory + '/' + filenamesVec[i];
 
     pFile = fopen( filename.c_str(), "rb" );
-    if( pFile == NULL ) {
+    if( pFile == nullptr ) {
       fprintf( stderr, "ERROR: can't read file: %s\n", filenamesVec[i].c_str() );
       exit( EXIT_FAILURE );
     }
@@ -203,7 +203,7 @@ int main( int argc, char *argv[] )
 
     // allocate memory to contain the whole file.
     buffer = (unsigned char *)malloc( ( lSize + 1 ) * sizeof( unsigned char ) );
-    if( buffer == NULL ) {
+    if( buffer == nullptr ) {
       fprintf( stderr, "ERROR: can't malloc reading file: %s\n", filenamesVec[i].c_str() );
       fclose( pFile );
       exit( EXIT_FAILURE );

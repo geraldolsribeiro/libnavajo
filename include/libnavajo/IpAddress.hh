@@ -14,10 +14,10 @@
 #ifndef IPADDRESS_HH_
 #define IPADDRESS_HH_
 
-#include <errno.h>
+#include <cerrno>
+#include <cstring>
 #include <sstream>
 #include <stdexcept>
-#include <string.h>
 #include <string>
 #include <vector>
 
@@ -46,8 +46,8 @@
 
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #define INET6_ADDRLEN 16
 

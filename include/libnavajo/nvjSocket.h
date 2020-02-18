@@ -14,7 +14,7 @@
 #ifndef NVJSOCKET_H_
 #define NVJSOCKET_H_
 
-#include <string.h>
+#include <cstring>
 
 #ifdef WIN32
 

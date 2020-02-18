@@ -8,11 +8,11 @@
 #define _FIELD_H
 
 #include "Exception.h"
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <stdlib.h>
-#include <string.h>
 
 namespace MPFD {
 

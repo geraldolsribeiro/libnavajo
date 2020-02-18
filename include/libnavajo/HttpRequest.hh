@@ -249,8 +249,8 @@ public:
   {
     GR_JUMP_TRACE;
     std::vector<std::string> res;
-    for( HttpRequestCookiesMap::const_iterator iter = cookies.begin(); iter != cookies.end(); ++iter ) {
-      res.push_back( iter->first );
+    for( const auto &cookie : cookies ) {
+      res.push_back( cookie.first );
     }
     return res;
   }
@@ -311,9 +311,9 @@ public:
   {
     GR_JUMP_TRACE;
     std::vector<std::string> res;
-    for( HttpRequestParametersMap::const_iterator iter = parameters.begin(); iter != parameters.end(); ++iter ) {
+    for( const auto &parameter : parameters ) {
       GR_JUMP_TRACE;
-      res.push_back( iter->first );
+      res.push_back( parameter.first );
     }
     return res;
   }

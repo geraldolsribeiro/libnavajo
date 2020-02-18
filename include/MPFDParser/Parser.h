@@ -9,10 +9,10 @@
 
 #include "Exception.h"
 #include "Field.h"
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <map>
-#include <stdlib.h>
-#include <string.h>
 #include <string>
 
 namespace MPFD {

@@ -19,12 +19,12 @@
 
 #include "libnavajo/LocalRepository.hh"
 #include "libnavajo/LogRecorder.hh"
+#include <cstdlib>
+#include <cstring>
 #include <dirent.h>
 #include <fstream>
 #include <sstream>
-#include <stdlib.h>
 #include <streambuf>
-#include <string.h>
 #include <sys/stat.h>
 
 /**********************************************************************/
@@ -34,7 +34,7 @@ LocalRepository::LocalRepository( const std::string &alias, const std::string &d
   GR_JUMP_TRACE;
   char resolved_path[4096];
 
-  pthread_mutex_init( &_mutex, NULL );
+  pthread_mutex_init( &_mutex, nullptr );
 
   aliasName = alias;
   while( aliasName.size() && aliasName[0] == '/' ) {
@@ -44,7 +44,7 @@ LocalRepository::LocalRepository( const std::string &alias, const std::string &d
     aliasName.erase( aliasName.size() - 1 );
   }
 
-  if( realpath( dirPath.c_str(), resolved_path ) != NULL ) {
+  if( realpath( dirPath.c_str(), resolved_path ) != nullptr ) {
     fullPathToLocalDir = resolved_path;
     loadFilename_dir( aliasName, fullPathToLocalDir );
   }
@@ -72,10 +72,10 @@ bool LocalRepository::loadFilename_dir( const std::string &alias, const std::str
   std::string    fullPath = path + subpath;
 
   dir = opendir( fullPath.c_str() );
-  if( dir == NULL ) {
+  if( dir == nullptr ) {
     return false;
   }
-  while( ( entry = readdir( dir ) ) != NULL ) {
+  while( ( entry = readdir( dir ) ) != nullptr ) {
     if( !strcmp( entry->d_name, "." ) || !strcmp( entry->d_name, ".." ) || !strlen( entry->d_name ) ) {
       continue;
     }
@@ -146,7 +146,7 @@ bool LocalRepository::getFile( HttpRequest *request, HttpResponse *response )
   }
 
   FILE *pFile = fopen( filename.c_str(), "rb" );
-  if( pFile == NULL ) {
+  if( pFile == nullptr ) {
     GR_JUMP_TRACE;
     char logBuffer[150];
     snprintf( logBuffer, 150, "Webserver : Error opening file '%s'", filename.c_str() );
@@ -159,7 +159,7 @@ bool LocalRepository::getFile( HttpRequest *request, HttpResponse *response )
   webpageLen = ftell( pFile );
   rewind( pFile );
 
-  if( ( webpage = (unsigned char *)malloc( webpageLen + 1 * sizeof( char ) ) ) == NULL ) {
+  if( ( webpage = (unsigned char *)malloc( webpageLen + 1 * sizeof( char ) ) ) == nullptr ) {
     GR_JUMP_TRACE;
     // fclose( pFile ); // GLSR FIXME resource leak
     return false;

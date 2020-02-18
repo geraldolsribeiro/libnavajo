@@ -15,7 +15,7 @@
 #define DYNAMICPAGE_HH_
 
 #include <algorithm>
-#include <ctype.h>
+#include <cctype>
 #include <string>
 #include <typeinfo>
 

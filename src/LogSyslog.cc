@@ -19,7 +19,7 @@
 
 #include "libnavajo/LogSyslog.hh"
 
-#include <string.h>
+#include <cstring>
 #include <syslog.h>
 
 /***********************************************************************/

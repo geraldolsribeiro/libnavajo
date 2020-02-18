@@ -124,9 +124,8 @@ public:
   inline void sendBroadcastTextMessage( const std::string &message, bool fin = true )
   {
     pthread_mutex_lock( &webSocketClientList_mutex );
-    for( std::list<WebSocketClient *>::iterator it = webSocketClientList.begin(); it != webSocketClientList.end();
-         ++it ) {
-      ( *it )->sendTextMessage( message, fin );
+    for( auto &it : webSocketClientList ) {
+      it->sendTextMessage( message, fin );
     }
     pthread_mutex_unlock( &webSocketClientList_mutex );
   };
@@ -140,9 +139,8 @@ public:
   inline void sendBroadcastBinaryMessage( const unsigned char *message, size_t length, bool fin = true )
   {
     pthread_mutex_lock( &webSocketClientList_mutex );
-    for( std::list<WebSocketClient *>::iterator it = webSocketClientList.begin(); it != webSocketClientList.end();
-         ++it ) {
-      ( *it )->sendBinaryMessage( message, length, fin );
+    for( auto &it : webSocketClientList ) {
+      it->sendBinaryMessage( message, length, fin );
     }
     pthread_mutex_unlock( &webSocketClientList_mutex );
   };
@@ -155,9 +153,8 @@ public:
   inline void sendBroadcastCloseCtrlFrame( const unsigned char *message, size_t length )
   {
     pthread_mutex_lock( &webSocketClientList_mutex );
-    for( std::list<WebSocketClient *>::iterator it = webSocketClientList.begin(); it != webSocketClientList.end();
-         ++it ) {
-      ( *it )->sendCloseCtrlFrame( message, length );
+    for( auto &it : webSocketClientList ) {
+      it->sendCloseCtrlFrame( message, length );
     }
     pthread_mutex_unlock( &webSocketClientList_mutex );
   };
@@ -179,9 +176,8 @@ public:
   inline void sendBroadcastPingCtrlFrame( const unsigned char *message, size_t length )
   {
     pthread_mutex_lock( &webSocketClientList_mutex );
-    for( std::list<WebSocketClient *>::iterator it = webSocketClientList.begin(); it != webSocketClientList.end();
-         ++it ) {
-      ( *it )->sendPingCtrlFrame( message, length );
+    for( auto &it : webSocketClientList ) {
+      it->sendPingCtrlFrame( message, length );
     }
     pthread_mutex_unlock( &webSocketClientList_mutex );
   };
@@ -203,9 +199,8 @@ public:
   inline void sendBroadcastPongCtrlFrame( const unsigned char *message, size_t length )
   {
     pthread_mutex_lock( &webSocketClientList_mutex );
-    for( std::list<WebSocketClient *>::iterator it = webSocketClientList.begin(); it != webSocketClientList.end();
-         ++it ) {
-      ( *it )->sendPongCtrlFrame( message, length );
+    for( auto &it : webSocketClientList ) {
+      it->sendPongCtrlFrame( message, length );
     }
     pthread_mutex_unlock( &webSocketClientList_mutex );
   }

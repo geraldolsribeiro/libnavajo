@@ -13,10 +13,10 @@
 
 #include "libnavajo/LogStdOutput.hh"
 #include "libnavajo/libnavajo.hh"
+#include <csignal>
+#include <cstring>
 #include <iomanip>
-#include <signal.h>
 #include <sstream>
-#include <string.h>
 
 #define UPLOAD_DIR "./upload"
 
@@ -37,8 +37,8 @@ inline std::string escape_json( const std::string &s )
 {
   std::ostringstream o;
 
-  for( size_t i = 0; i < s.length(); i++ ) {
-    switch( s[i] ) {
+  for( char i : s ) {
+    switch( i ) {
     case '"':
       o << "\\\"";
       break;
@@ -61,11 +61,11 @@ inline std::string escape_json( const std::string &s )
       o << "\\t";
       break;
     default:
-      if( '\x00' <= s[i] && s[i] <= '\x1f' ) {
-        o << "\\u" << std::hex << std::setw( 4 ) << std::setfill( '0' ) << (int)s[i];
+      if( '\x00' <= i && i <= '\x1f' ) {
+        o << "\\u" << std::hex << std::setw( 4 ) << std::setfill( '0' ) << (int)i;
       }
       else {
-        o << s[i];
+        o << i;
       }
     }
   }

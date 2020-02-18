@@ -14,8 +14,8 @@
 #ifndef NVJTHREAD_H_
 #define NVJTHREAD_H_
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 extern "C" {
 #include "pthread.h"

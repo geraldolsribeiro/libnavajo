@@ -15,8 +15,8 @@
 #define NVJGZIP_H_
 
 
+#include <cstdlib>
 #include <stdexcept>
-#include <stdlib.h>
 #include <string>
 
 #include "zlib.h"

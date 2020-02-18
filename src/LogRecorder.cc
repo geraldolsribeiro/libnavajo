@@ -20,12 +20,12 @@
 #include <iostream>
 
 #include "libnavajo/LogRecorder.hh"
-#include <time.h>
+#include <ctime>
 
 /**
  * LogRecorder - static and unique log recorder object
  */
-LogRecorder *LogRecorder::theLogRecorder = NULL;
+LogRecorder *LogRecorder::theLogRecorder = nullptr;
 
 /***********************************************************************/
 /**
@@ -60,21 +60,21 @@ void LogRecorder::append( const NvjLogSeverity &l, const std::string &m, const s
   pthread_mutex_lock( &log_mutex );
 
   if( l != NVJ_DEBUG || debugMode ) {
-    for( std::list<LogOutput *>::iterator it = logOutputsList_.begin(); it != logOutputsList_.end(); ++it ) {
+    for( auto &it : logOutputsList_ ) {
       std::string msg;
 
-      if( ( *it )->isWithDateTime() ) {
+      if( it->isWithDateTime() ) {
         msg = getDateStr() + m;
       }
       else {
         msg = m;
       }
 
-      if( ( *it )->isWithEndline() ) {
+      if( it->isWithEndline() ) {
         msg += std::string( "\n" );
       }
 
-      ( *it )->append( l, msg, details );
+      it->append( l, msg, details );
     }
   }
 
@@ -100,8 +100,8 @@ void LogRecorder::addLogOutput( LogOutput *output )
 void LogRecorder::removeLogOutputs()
 {
   GR_JUMP_TRACE;
-  for( std::list<LogOutput *>::iterator it = logOutputsList_.begin(); it != logOutputsList_.end(); ++it ) {
-    delete *it;
+  for( auto &it : logOutputsList_ ) {
+    delete it;
   }
 
   logOutputsList_.clear();
@@ -116,7 +116,7 @@ LogRecorder::LogRecorder()
 {
   GR_JUMP_TRACE;
   debugMode = false;
-  pthread_mutex_init( &log_mutex, NULL );
+  pthread_mutex_init( &log_mutex, nullptr );
 }
 
 /***********************************************************************/

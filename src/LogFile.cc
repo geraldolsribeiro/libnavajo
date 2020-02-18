@@ -17,8 +17,8 @@
   {                                                                                                                    \
   }
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 #include "libnavajo/LogFile.hh"
 
@@ -31,7 +31,7 @@
 void LogFile::append( const NvjLogSeverity & /*l*/, const std::string &message, const std::string & /*details*/ )
 {
   GR_JUMP_TRACE;
-  if( file != NULL ) {
+  if( file != nullptr ) {
     ( *file ) << message << std::endl;
   }
 }
@@ -62,7 +62,7 @@ LogFile::LogFile( const char *f )
 {
   GR_JUMP_TRACE;
   strncpy( filename, f, 30 );
-  file = NULL;
+  file = nullptr;
   // setWithEndline(true);
 }
 
@@ -74,7 +74,7 @@ LogFile::LogFile( const char *f )
 LogFile::~LogFile()
 {
   GR_JUMP_TRACE;
-  if( file != NULL ) {
+  if( file != nullptr ) {
     file->close();
     delete file;
   }

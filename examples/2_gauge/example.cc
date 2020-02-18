@@ -13,8 +13,8 @@
 
 #include "libnavajo/LogStdOutput.hh"
 #include "libnavajo/libnavajo.hh"
-#include <signal.h>
-#include <string.h>
+#include <csignal>
+#include <cstring>
 
 WebServer *webServer = NULL;
 

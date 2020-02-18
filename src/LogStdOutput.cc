@@ -20,7 +20,7 @@
 #include <iostream>
 
 #include "libnavajo/LogStdOutput.hh"
-#include <stdio.h>
+#include <cstdio>
 
 #define RED "\x1B[31m"
 #define GRN "\x1B[32m"
@@ -44,19 +44,19 @@ void LogStdOutput::append( const NvjLogSeverity &l, const std::string &message, 
   switch( l ) {
   case NVJ_DEBUG:
     fprintf( stdout, CYN "%s\n" RESET, message.c_str() );
-    fflush( NULL );
+    fflush( nullptr );
     break;
   case NVJ_WARNING:
     fprintf( stdout, YEL "%s\n" RESET, message.c_str() );
-    fflush( NULL );
+    fflush( nullptr );
     break;
   case NVJ_ALERT:
     fprintf( stdout, MAG "%s\n" RESET, message.c_str() );
-    fflush( NULL );
+    fflush( nullptr );
     break;
   case NVJ_INFO:
     fprintf( stdout, GRN "%s\n" RESET, message.c_str() );
-    fflush( NULL );
+    fflush( nullptr );
     break;
   case NVJ_ERROR:
     fprintf( stderr, RED "%s\n" RESET, message.c_str() );

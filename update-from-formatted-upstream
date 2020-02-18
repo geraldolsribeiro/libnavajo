@@ -11,12 +11,15 @@ git branch -D local-master-formatted    || echo "Branch local-master-formatted n
 
 git checkout -b upstream-master-formatted upstream/master
 
+CHECKS="readability-braces-around-statements,modernize-use-override,modernize-raw-string-literal,modernize-deprecated-headers,modernize-loop-convert"
+CXXFLAGS="-std=c++14 -I./include/"
+
 for ext in cc hh h
 do
   echo "Updating *.${ext}..."
   find . -name "*.${ext}" -exec sed -i "s/mutipart/multipart/g" {} \;
   find . -name "*.${ext}" -exec sed -i "s/Mutipart/Multipart/g" {} \;
-  find . -name "*.${ext}" -exec clang-tidy {} -fix-errors -checks="readability-braces-around-statements,modernize-use-override" -- -std=c++14 -I./include/ \;
+  find . -name "*.${ext}" -exec clang-tidy {} -fix-errors -checks="${CHECKS}" -- ${CXXFLAGS} \;
   find . -name "*.${ext}" -exec clang-format -i {} \;
 done
 
@@ -26,7 +29,7 @@ git checkout -b local-master-formatted master
 for ext in cc hh h
 do
   echo "Updating *.${ext}..."
-  find . -name "*.${ext}" -exec clang-tidy {} -fix-errors -checks="readability-braces-around-statements,modernize-use-override" -- -std=c++14 -I./include/ \;
+  find . -name "*.${ext}" -exec clang-tidy {} -fix-errors -checks=${CHECKS} -- ${CXXFLAGS} \;
   find . -name "*.${ext}" -exec clang-format -i {} \;
 done
 
@@ -36,3 +39,21 @@ git commit -am "Code formatted" || echo "Nada a ser feito"
 
 # git checkout master
 
+# clang-tidy --list-checks -checks='*' | grep "modernize"
+#    modernize-avoid-bind
+#    modernize-deprecated-headers
+#    modernize-loop-convert
+#    modernize-make-shared
+#    modernize-make-unique
+#    modernize-pass-by-value
+#    modernize-raw-string-literal
+#    modernize-redundant-void-arg
+#    modernize-replace-auto-ptr
+#    modernize-shrink-to-fit
+#    modernize-use-auto
+#    modernize-use-bool-literals
+#    modernize-use-default
+#    modernize-use-emplace
+#    modernize-use-nullptr
+#    modernize-use-override
+#    modernize-use-using
