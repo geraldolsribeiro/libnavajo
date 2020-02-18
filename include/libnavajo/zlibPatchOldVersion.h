@@ -84,7 +84,8 @@ struct inflate_state2 {
 inline int ZEXPORT;
 inflateGetDictionary( z_streamp strm, Bytef *dictionary, uInt *dictLength )
 {
-  struct inflate_state2 FAR *state;
+  struct inflate_state2 FAR;
+  *state;
   /* check state */
   if( strm == Z_NULL || strm->state == Z_NULL )
     return Z_STREAM_ERROR;
