@@ -320,7 +320,12 @@ public:
    */
   void addRepository( WebRepository *repo )
   {
-    webRepositories.push_back( repo );
+    if( repo != NULL ) {
+      webRepositories.push_back( repo );
+    }
+    else {
+      fatalError( "addRepository Failed: try to add a NULL pointer repository" );
+    }
   };
 
   /**
@@ -330,7 +335,12 @@ public:
    */
   void addWebSocket( const std::string endPoint, WebSocket *websocket ) // GLSR FIXME
   {
-    webSocketEndPoints[endPoint] = websocket;
+    if( websocket != NULL ) {
+      webSocketEndPoints[endPoint] = websocket;
+    }
+    else {
+      fatalError( "addWebSocket Failed: try to add a NULL pointer websocket" );
+    }
   };
 
   /**

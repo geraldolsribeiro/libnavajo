@@ -161,7 +161,7 @@ bool LocalRepository::getFile( HttpRequest *request, HttpResponse *response )
 
   if( ( webpage = (unsigned char *)malloc( webpageLen + 1 * sizeof( char ) ) ) == NULL ) {
     GR_JUMP_TRACE;
-    fclose( pFile );
+    // fclose( pFile ); // GLSR FIXME resource leak
     return false;
   }
   size_t nb = fread( webpage, 1, webpageLen, pFile );
