@@ -67,8 +67,9 @@ public:
 
     do {
       id.clear();
-      for( size_t i = 0; i < idLength; ++i )
+      for( size_t i = 0; i < idLength; ++i ) {
         id += elements[rand() % ( nbElements - 1 )];
+      }
     } while( find( id ) );
 
     pthread_mutex_lock( &sessions_mutex );
@@ -90,8 +91,9 @@ public:
   static void updateExpiration( const std::string &id )
   {
     time_t *expiration = (time_t *)getAttribute( id, "session_expiration" );
-    if( expiration != NULL )
+    if( expiration != NULL ) {
       *expiration = time( NULL ) + sessionLifeTime;
+    }
   };
 
   /**********************************************************************/
@@ -99,8 +101,9 @@ public:
   static void noExpiration( const std::string &id )
   {
     time_t *expiration = (time_t *)getAttribute( id, "session_expiration" );
-    if( expiration != NULL )
+    if( expiration != NULL ) {
       *expiration = 0;
+    }
   };
 
   /**********************************************************************/
@@ -114,8 +117,9 @@ public:
       std::map<std::string, SessionAttribute> *         attributesMap = it->second;
       std::map<std::string, SessionAttribute>::iterator it2           = attributesMap->find( "session_expiration" );
       time_t *                                          expiration    = NULL;
-      if( it2 != attributesMap->end() )
+      if( it2 != attributesMap->end() ) {
         expiration = (time_t *)it2->second.ptr;
+      }
 
       if( expiration != NULL && *expiration && *expiration > time( NULL ) ) {
         ++it;
@@ -150,8 +154,9 @@ public:
     pthread_mutex_lock( &sessions_mutex );
     res = sessions.size() && sessions.find( id ) != sessions.end();
     pthread_mutex_unlock( &sessions_mutex );
-    if( res )
+    if( res ) {
       updateExpiration( id );
+    }
 
     return res;
   }
@@ -226,8 +231,9 @@ public:
     std::map<std::string, SessionAttribute>::iterator it2        = sessionMap->find( name );
     pthread_mutex_unlock( &sessions_mutex );
 
-    if( it2 != sessionMap->end() && ( it2->second.type == SessionAttribute::OBJECT ) )
+    if( it2 != sessionMap->end() && ( it2->second.type == SessionAttribute::OBJECT ) ) {
       return it2->second.obj;
+    }
     return NULL;
   }
 
@@ -246,8 +252,9 @@ public:
     std::map<std::string, SessionAttribute>::iterator it2        = sessionMap->find( name );
     pthread_mutex_unlock( &sessions_mutex );
 
-    if( it2 != sessionMap->end() && ( it2->second.type == SessionAttribute::BASIC ) )
+    if( it2 != sessionMap->end() && ( it2->second.type == SessionAttribute::BASIC ) ) {
       return it2->second.ptr;
+    }
     return NULL;
   }
 
@@ -256,13 +263,16 @@ public:
   static void removeAllAttribute( std::map<std::string, SessionAttribute> *attributesMap )
   {
     std::map<std::string, SessionAttribute>::iterator iter = attributesMap->begin();
-    for( ; iter != attributesMap->end(); ++iter )
+    for( ; iter != attributesMap->end(); ++iter ) {
       if( iter->second.ptr != NULL ) {
-        if( iter->second.type == SessionAttribute::OBJECT )
+        if( iter->second.type == SessionAttribute::OBJECT ) {
           delete iter->second.obj;
-        else
+        }
+        else {
           free( iter->second.ptr );
+        }
       }
+    }
   }
 
   /**********************************************************************/
@@ -279,10 +289,12 @@ public:
     std::map<std::string, SessionAttribute>::iterator it2           = attributesMap->find( name );
     if( it2 != attributesMap->end() ) {
       if( it2->second.ptr != NULL ) {
-        if( it2->second.type == SessionAttribute::OBJECT )
+        if( it2->second.type == SessionAttribute::OBJECT ) {
           delete it2->second.obj;
-        else
+        }
+        else {
           free( it2->second.ptr );
+        }
       }
       attributesMap->erase( it2 );
     }
@@ -299,8 +311,9 @@ public:
     if( it != sessions.end() ) {
       std::map<std::string, SessionAttribute> *         attributesMap = it->second;
       std::map<std::string, SessionAttribute>::iterator iter          = attributesMap->begin();
-      for( ; iter != attributesMap->end(); ++iter )
+      for( ; iter != attributesMap->end(); ++iter ) {
         res.push_back( iter->first );
+      }
     }
     pthread_mutex_unlock( &sessions_mutex );
     return res;
@@ -316,9 +329,11 @@ public:
       std::map<std::string, SessionAttribute> *attributesMap = it->second;
       printf( "Session SID : '%s' \n", it->first.c_str() );
       std::map<std::string, SessionAttribute>::iterator iter = attributesMap->begin();
-      for( ; iter != attributesMap->end(); ++iter )
-        if( iter->second.ptr != NULL )
+      for( ; iter != attributesMap->end(); ++iter ) {
+        if( iter->second.ptr != NULL ) {
           printf( "\t'%s'\n", iter->first.c_str() );
+        }
+      }
     }
     pthread_mutex_unlock( &sessions_mutex );
   }

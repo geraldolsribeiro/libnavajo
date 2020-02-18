@@ -11,8 +11,11 @@
  */
 //********************************************************
 
-//#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
-#define GR_JUMP_TRACE {}
+//#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ <<
+//std::endl;
+#define GR_JUMP_TRACE                                                                                                  \
+  {                                                                                                                    \
+  }
 
 #include <iostream>
 
@@ -33,8 +36,9 @@ void dump_buffer( FILE *f, unsigned n, const unsigned char *buf )
   while( n-- > 0 ) {
     cptLine++;
     fprintf( f, "0x%02X", *buf++ );
-    if( n > 0 )
+    if( n > 0 ) {
       fprintf( f, ", " );
+    }
     if( cptLine == 16 ) {
       fputs( "\n    ", f );
       cptLine = 0;
@@ -84,15 +88,18 @@ bool loadFilename_dir( const std::string &path, const std::string &subpath = "" 
   std::string fullPath = path + '/' + subpath;
 
   std::string spath = subpath;
-  if( subpath != "" )
+  if( subpath != "" ) {
     spath += '/';
+  }
 
   dir = opendir( fullPath.c_str() );
-  if( dir == NULL )
+  if( dir == NULL ) {
     return false;
+  }
   while( ( entry = readdir( dir ) ) != NULL ) {
-    if( !strcmp( entry->d_name, "." ) || !strcmp( entry->d_name, ".." ) || !strlen( entry->d_name ) )
+    if( !strcmp( entry->d_name, "." ) || !strcmp( entry->d_name, ".." ) || !strlen( entry->d_name ) ) {
       continue;
+    }
 
     std::string filepath = fullPath + '/' + entry->d_name;
 
@@ -104,13 +111,15 @@ bool loadFilename_dir( const std::string &path, const std::string &subpath = "" 
     int type = s.st_mode & S_IFMT;
     if( ( type == S_IFREG || type == S_IFLNK )
         && ( std::find( listExcludeDir.begin(), listExcludeDir.end(), spath + entry->d_name )
-             == listExcludeDir.end() ) )
+             == listExcludeDir.end() ) ) {
       filenamesVec.push_back( spath + entry->d_name );
+    }
 
     if( type == S_IFDIR
         && ( std::find( listExcludeDir.begin(), listExcludeDir.end(), spath + entry->d_name )
-             == listExcludeDir.end() ) )
+             == listExcludeDir.end() ) ) {
       loadFilename_dir( path, spath + entry->d_name );
+    }
   }
 
   closedir( dir );
@@ -124,11 +133,13 @@ void parseDirectory( const std::string &dirPath )
   GR_JUMP_TRACE;
   char resolved_path[4096];
 
-  if( realpath( dirPath.c_str(), resolved_path ) == NULL )
+  if( realpath( dirPath.c_str(), resolved_path ) == NULL ) {
     return;
+  }
 
-  if( !loadFilename_dir( resolved_path ) )
+  if( !loadFilename_dir( resolved_path ) ) {
     return;
+  }
 }
 
 /**********************************************************************/
@@ -150,12 +161,15 @@ int main( int argc, char *argv[] )
   int param = 1;
 
   std::string directory = argv[param];
-  while( directory.length() && directory[directory.length() - 1] == '/' )
+  while( directory.length() && directory[directory.length() - 1] == '/' ) {
     directory = directory.substr( 0, directory.length() - 1 );
+  }
 
-  if( strcmp( argv[param], "--exclude" ) != 0 )
-    for( ; param < argc; param++ )
+  if( strcmp( argv[param], "--exclude" ) != 0 ) {
+    for( ; param < argc; param++ ) {
       listExcludeDir.push_back( std::string( argv[param] ) );
+    }
+  }
 
   parseDirectory( directory );
 

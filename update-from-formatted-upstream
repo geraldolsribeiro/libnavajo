@@ -13,6 +13,7 @@ git checkout -b upstream-master-formatted upstream/master
 
 for ext in cc hh h
 do
+  echo "updating *.${ext}..."
   find . -name "*.${ext}" -exec clang-tidy {} -fix -checks="readability-braces-around-statements,modernize-use-override" -- -std=c++14 \;
   find . -name "*.${ext}" -exec clang-format -i {} \;
 done

@@ -14,8 +14,11 @@
 #ifndef HTTPREQUEST_HH_
 #define HTTPREQUEST_HH_
 
-// #define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
-#define GR_JUMP_TRACE {}
+// #define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ <<
+// std::endl;
+#define GR_JUMP_TRACE                                                                                                  \
+  {                                                                                                                    \
+  }
 
 #include <iostream>
 
@@ -412,8 +415,7 @@ public:
     GR_JUMP_TRACE;
     if( sessionId == "" ) {
       return std::vector<std::string>();
-    }
-    ;
+    };
     return HttpSession::getAttributeNames( sessionId );
   }
 
@@ -561,7 +563,8 @@ public:
     GR_JUMP_TRACE;
     if( params != NULL ) {
       std::cerr << "params: " << strlen( params ) << " - " << params << std::endl;
-    } else {
+    }
+    else {
       std::cerr << "params: NULL" << std::endl;
     }
     if( params != NULL && strlen( params ) ) {
