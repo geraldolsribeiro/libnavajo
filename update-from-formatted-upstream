@@ -13,17 +13,21 @@ git checkout -b upstream-master-formatted upstream/master
 
 for ext in cc hh h
 do
-  echo "updating *.${ext}..."
-  find . -name "*.${ext}" -exec clang-tidy {} -fix -checks="readability-braces-around-statements,modernize-use-override" -- -std=c++14 \;
+  echo "Updating *.${ext}..."
+  find . -name "*.${ext}" -exec clang-tidy {} -fix-errors -checks="readability-braces-around-statements,modernize-use-override" -- -std=c++14 -I./include/ \;
   find . -name "*.${ext}" -exec clang-format -i {} \;
 done
 
 git commit -am "Code formatted"
 
 git checkout -b local-master-formatted master
-find . -name "*.cc" -exec clang-format -i {} \;
-find . -name "*.hh" -exec clang-format -i {} \;
-find . -name "*.h" -exec clang-format -i {} \;
+for ext in cc hh h
+do
+  echo "Updating *.${ext}..."
+  find . -name "*.${ext}" -exec clang-tidy {} -fix-errors -checks="readability-braces-around-statements,modernize-use-override" -- -std=c++14 -I./include/ \;
+  find . -name "*.${ext}" -exec clang-format -i {} \;
+done
+
 git commit -am "Code formatted" || echo "Nada a ser feito"
 
 #git merge upstream-master-formatted --no-commit --no-ff
