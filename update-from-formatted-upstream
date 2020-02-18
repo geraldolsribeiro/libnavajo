@@ -14,7 +14,7 @@ git checkout -b upstream-master-formatted upstream/master
 for ext in cc hh h
 do
   echo "Updating *.${ext}..."
-  find . -name "*.${ext}" -exec sed -i "s/mutipartContentParser/multipartContentParser/g" {} \;
+  find . -name "*.${ext}" -exec sed -i "s/mutipart/multipart/g" {} \;
   find . -name "*.${ext}" -exec clang-tidy {} -fix-errors -checks="readability-braces-around-statements,modernize-use-override" -- -std=c++14 -I./include/ \;
   find . -name "*.${ext}" -exec clang-format -i {} \;
 done
