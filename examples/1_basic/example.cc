@@ -20,12 +20,13 @@ WebServer *webServer = NULL;
 
 void exitFunction( int dummy )
 {
-  if( webServer != NULL )
+  if( webServer != NULL ) {
     webServer->stopService();
+  }
 }
 
 class MyDynamicPage : public DynamicPage {
-  bool getPage( HttpRequest *request, HttpResponse *response )
+  bool getPage( HttpRequest *request, HttpResponse *response ) override
   {
     // example using session's object
     int *cptExample = NULL;
@@ -36,8 +37,9 @@ class MyDynamicPage : public DynamicPage {
       *cptExample = 0;
       request->setSessionAttribute( "myAttribute", (void *)cptExample );
     }
-    else
+    else {
       cptExample = (int *)request->getSessionAttribute( "myAttribute" );
+    }
 
     *cptExample = *cptExample + 1;
     //
@@ -48,8 +50,9 @@ class MyDynamicPage : public DynamicPage {
       // int pint=getValue<int>(param);
       content += "param1 has been set to " + param;
     }
-    else
+    else {
       content += "param1 hasn't been set";
+    }
 
     std::stringstream myAttributess;
     myAttributess << *cptExample;

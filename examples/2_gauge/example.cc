@@ -20,8 +20,9 @@ WebServer *webServer = NULL;
 
 void exitFunction( int dummy )
 {
-  if( webServer != NULL )
+  if( webServer != NULL ) {
     webServer->stopService();
+  }
 }
 
 /***********************************************************************/
@@ -82,7 +83,7 @@ class MyDynamicRepository : public DynamicRepository {
   };
 
   class Auth : public MyDynamicPage {
-    bool getPage( HttpRequest *request, HttpResponse *response )
+    bool getPage( HttpRequest *request, HttpResponse *response ) override
     {
       std::string login, password;
       // User libnavajo/libnavajo is allowed
@@ -98,11 +99,11 @@ class MyDynamicRepository : public DynamicRepository {
   } auth;
 
   class CpuValue : public MyDynamicPage {
-    bool getPage( HttpRequest *request, HttpResponse *response )
+    bool getPage( HttpRequest *request, HttpResponse *response ) override
     {
-      if( !isValidSession( request ) )
+      if( !isValidSession( request ) ) {
         return fromString( "ERR", response );
-      ;
+      };
       std::ostringstream ss;
       ss << getCpuLoad();
       return fromString( ss.str(), response );
@@ -110,7 +111,7 @@ class MyDynamicRepository : public DynamicRepository {
   } cpuValue;
 
   class Controller : public MyDynamicPage {
-    bool getPage( HttpRequest *request, HttpResponse *response )
+    bool getPage( HttpRequest *request, HttpResponse *response ) override
     {
       std::string param;
 
@@ -119,13 +120,16 @@ class MyDynamicRepository : public DynamicRepository {
         return true;
       }
 
-      if( request->hasParameter( "disconnect" ) ) // Button disconnect
+      if( request->hasParameter( "disconnect" ) ) { // Button disconnect
         request->removeSession();
+      }
 
-      if( !isValidSession( request ) )
+      if( !isValidSession( request ) ) {
         response->forwardTo( "login.html" );
-      else
+      }
+      else {
         response->forwardTo( "gauge.html" );
+      }
 
       return true;
     }

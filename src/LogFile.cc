@@ -12,7 +12,7 @@
 //********************************************************
 
 //#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ <<
-//std::endl;
+// std::endl;
 #define GR_JUMP_TRACE                                                                                                  \
   {                                                                                                                    \
   }
@@ -31,8 +31,9 @@
 void LogFile::append( const NvjLogSeverity & /*l*/, const std::string &message, const std::string & /*details*/ )
 {
   GR_JUMP_TRACE;
-  if( file != NULL )
+  if( file != NULL ) {
     ( *file ) << message << std::endl;
+  }
 }
 
 /***********************************************************************/

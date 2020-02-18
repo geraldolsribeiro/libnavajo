@@ -27,10 +27,10 @@
 class LogFile : public LogOutput {
 public:
   LogFile( const char *filename );
-  ~LogFile();
+  ~LogFile() override;
 
-  void append( const NvjLogSeverity &l, const std::string &m, const std::string &details = "" );
-  void initialize();
+  void append( const NvjLogSeverity &l, const std::string &m, const std::string &details = "" ) override;
+  void initialize() override;
 
 private:
   char           filename[30];

@@ -41,8 +41,9 @@ public:
    */
   inline static LogRecorder *getInstance()
   {
-    if( theLogRecorder == NULL )
+    if( theLogRecorder == NULL ) {
       theLogRecorder = new LogRecorder;
+    }
     return theLogRecorder;
   };
 
@@ -52,8 +53,9 @@ public:
 
   static void freeInstance()
   {
-    if( theLogRecorder != NULL )
+    if( theLogRecorder != NULL ) {
       delete theLogRecorder;
+    }
 
     theLogRecorder = NULL;
   }

@@ -37,13 +37,16 @@ public:
   PrecompiledRepository( const std::string &l = "" )
   {
     location = l;
-    while( location.size() && location[0] == '/' )
+    while( location.size() && location[0] == '/' ) {
       location.erase( 0, 1 );
-    while( location.size() && location[location.size() - 1] == '/' )
+    }
+    while( location.size() && location[location.size() - 1] == '/' ) {
       location.erase( location.size() - 1 );
+    }
     pthread_mutex_init( &_mutex, NULL );
-    if( !indexMap.size() )
+    if( !indexMap.size() ) {
       initIndexMap();
+    }
   };
   virtual ~PrecompiledRepository()
   {
@@ -57,7 +60,7 @@ public:
    * called from WebServer::accept_request() method
    * @param webpage: a pointer to the generated page
    */
-  inline void freeFile( unsigned char *webpage ){};
+  inline void freeFile( unsigned char *webpage ) override{};
 
   /**
    * Try to resolve an http request by requesting the PrecompiledRepository.
@@ -67,17 +70,20 @@ public:
    * @param response: a pointer to the new generated response
    * \return true if the repository contains the requested resource
    */
-  inline virtual bool getFile( HttpRequest *request, HttpResponse *response )
+  inline bool getFile( HttpRequest *request, HttpResponse *response ) override
   {
     std::string url = request->getUrl();
-    if( url.compare( 0, location.length(), location ) != 0 )
+    if( url.compare( 0, location.length(), location ) != 0 ) {
       return false;
+    }
 
     url.erase( 0, location.length() );
-    while( url.size() && url[0] == '/' )
+    while( url.size() && url[0] == '/' ) {
       url.erase( 0, 1 );
-    if( !url.size() )
+    }
+    if( !url.size() ) {
       url = "index.html";
+    }
 
     size_t         webpageLen;
     unsigned char *webpage;
@@ -89,8 +95,9 @@ public:
         pthread_mutex_unlock( &_mutex );
         return false;
       }
-      else
+      else {
         response->setIsZipped( true );
+      }
     }
 
     webpage    = (unsigned char *)( ( i->second ).data );

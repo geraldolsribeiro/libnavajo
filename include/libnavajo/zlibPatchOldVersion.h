@@ -76,11 +76,13 @@ struct inflate_state2 {
   /* valid bytes in the window */
   unsigned wnext;
   /* window write index */
-  unsigned char FAR *window; /* allocated sliding window, if needed */
+  unsigned char FAR;
+  *window; /* allocated sliding window, if needed */
 };
 
 
-inline int ZEXPORT inflateGetDictionary( z_streamp strm, Bytef *dictionary, uInt *dictLength )
+inline int ZEXPORT;
+inflateGetDictionary( z_streamp strm, Bytef *dictionary, uInt *dictLength )
 {
   struct inflate_state2 FAR *state;
   /* check state */

@@ -35,15 +35,17 @@ public:
   template <class T>
   static inline T getValue( const std::string &s )
   {
-    if( !s.length() )
+    if( !s.length() ) {
       throw std::bad_cast();
+    }
 
     std::istringstream iss( s );
     T                  tmp;
     iss >> tmp;
 
-    if( iss.fail() )
+    if( iss.fail() ) {
       throw std::bad_cast();
+    }
 
     return tmp;
   };
@@ -74,8 +76,9 @@ public:
   {
     size_t         webpageLen;
     unsigned char *webpage;
-    if( ( webpage = (unsigned char *)malloc( resultat.size() + 1 * sizeof( char ) ) ) == NULL )
+    if( ( webpage = (unsigned char *)malloc( resultat.size() + 1 * sizeof( char ) ) ) == NULL ) {
       return false;
+    }
     webpageLen = resultat.size();
     strcpy( (char *)webpage, resultat.c_str() );
     response->setContent( webpage, webpageLen );

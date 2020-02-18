@@ -22,10 +22,10 @@
 class LogStdOutput : public LogOutput {
 public:
   LogStdOutput();
-  ~LogStdOutput();
+  ~LogStdOutput() override;
 
-  void append( const NvjLogSeverity &l, const std::string &m, const std::string &details = "" );
-  void initialize();
+  void append( const NvjLogSeverity &l, const std::string &m, const std::string &details = "" ) override;
+  void initialize() override;
 };
 
 #endif

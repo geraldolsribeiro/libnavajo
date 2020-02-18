@@ -12,7 +12,7 @@
 //********************************************************
 
 //#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ <<
-//std::endl;
+// std::endl;
 #define GR_JUMP_TRACE                                                                                                  \
   {                                                                                                                    \
   }
@@ -37,10 +37,12 @@ LocalRepository::LocalRepository( const std::string &alias, const std::string &d
   pthread_mutex_init( &_mutex, NULL );
 
   aliasName = alias;
-  while( aliasName.size() && aliasName[0] == '/' )
+  while( aliasName.size() && aliasName[0] == '/' ) {
     aliasName.erase( 0, 1 );
-  while( aliasName.size() && aliasName[aliasName.size() - 1] == '/' )
+  }
+  while( aliasName.size() && aliasName[aliasName.size() - 1] == '/' ) {
     aliasName.erase( aliasName.size() - 1 );
+  }
 
   if( realpath( dirPath.c_str(), resolved_path ) != NULL ) {
     fullPathToLocalDir = resolved_path;
@@ -70,11 +72,13 @@ bool LocalRepository::loadFilename_dir( const std::string &alias, const std::str
   std::string    fullPath = path + subpath;
 
   dir = opendir( fullPath.c_str() );
-  if( dir == NULL )
+  if( dir == NULL ) {
     return false;
+  }
   while( ( entry = readdir( dir ) ) != NULL ) {
-    if( !strcmp( entry->d_name, "." ) || !strcmp( entry->d_name, ".." ) || !strlen( entry->d_name ) )
+    if( !strcmp( entry->d_name, "." ) || !strcmp( entry->d_name, ".." ) || !strlen( entry->d_name ) ) {
       continue;
+    }
 
     std::string filepath = fullPath + '/' + entry->d_name;
 
@@ -89,13 +93,15 @@ bool LocalRepository::loadFilename_dir( const std::string &alias, const std::str
     int type = s.st_mode & S_IFMT;
     if( type == S_IFREG || type == S_IFLNK ) {
       std::string filename = alias + subpath + "/" + entry->d_name;
-      while( filename.size() && filename[0] == '/' )
+      while( filename.size() && filename[0] == '/' ) {
         filename.erase( 0, 1 );
+      }
       filenamesSet.insert( filename );
     }
 
-    if( type == S_IFDIR )
+    if( type == S_IFDIR ) {
       loadFilename_dir( alias, path, subpath + "/" + entry->d_name );
+    }
   }
 
   closedir( dir );

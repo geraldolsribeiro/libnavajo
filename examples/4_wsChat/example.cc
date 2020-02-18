@@ -22,8 +22,9 @@ WebServer *webServer = NULL;
 
 void exitFunction( int dummy )
 {
-  if( webServer != NULL )
+  if( webServer != NULL ) {
     webServer->stopService();
+  }
 }
 
 /***********************************************************************/
@@ -41,8 +42,9 @@ bool isValidSession( HttpRequest *request )
 void setSessionIsConnected( HttpRequest *request, const bool b )
 {
   bool *connect = (bool *)request->getSessionAttribute( "wschat" );
-  if( connect != NULL )
+  if( connect != NULL ) {
     *connect = b;
+  }
 }
 
 /***********************************************************************/
@@ -57,7 +59,7 @@ bool checkMessage( HttpRequest *request, const std::string &msg )
 
 class MyDynamicRepository : public DynamicRepository {
   class Connect : public DynamicPage {
-    bool getPage( HttpRequest *request, HttpResponse *response )
+    bool getPage( HttpRequest *request, HttpResponse *response ) override
     {
 #ifdef DEBUG_TRACES
       NVJ_LOG->append( NVJ_DEBUG, "Connect" );
@@ -83,7 +85,7 @@ class MyDynamicRepository : public DynamicRepository {
   } connect;
 
   class Disconnect : public DynamicPage {
-    bool getPage( HttpRequest *request, HttpResponse *response )
+    bool getPage( HttpRequest *request, HttpResponse *response ) override
     {
       request->removeSession();
       return noContent( response );
@@ -101,20 +103,21 @@ public:
 /***********************************************************************/
 
 class MyWebSocket : public WebSocket {
-  bool onOpening( HttpRequest *request )
+  bool onOpening( HttpRequest *request ) override
   {
     printf(
         "New Websocket (host '%s' - socketId=%d)\n",
         request->getPeerIpAddress().str().c_str(),
         request->getClientSockData()->socketId );
     fflush( NULL );
-    if( !isValidSession( request ) )
+    if( !isValidSession( request ) ) {
       return false;
+    }
     setSessionIsConnected( request, true );
     return true;
   }
 
-  void onClosing( WebSocketClient *client )
+  void onClosing( WebSocketClient *client ) override
   {
     HttpRequest *request = client->getHttpRequest();
     printf(
@@ -124,17 +127,19 @@ class MyWebSocket : public WebSocket {
     setSessionIsConnected( request, false );
   }
 
-  void onTextMessage( WebSocketClient *client, const std::string &message, const bool fin )
+  void onTextMessage( WebSocketClient *client, const std::string &message, const bool fin ) override
   {
     HttpRequest *request = client->getHttpRequest();
     printf( "Message: '%s' received from host '%s'\n", message.c_str(), request->getPeerIpAddress().str().c_str() );
     // check username
-    if( checkMessage( request, message ) )
+    if( checkMessage( request, message ) ) {
       sendBroadcastTextMessage( message );
-    else
+    }
+    else {
       client->sendCloseCtrlFrame( "Not allowed message format" );
+    }
   };
-  void onBinaryMessage( WebSocketClient *client, const unsigned char *message, size_t len, const bool fin ){};
+  void onBinaryMessage( WebSocketClient *client, const unsigned char *message, size_t len, const bool fin ) override{};
 } myWebSocket;
 
 /***********************************************************************/

@@ -15,7 +15,7 @@
 #define DYNAMICREPOSITORY_HH_
 
 //#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ <<
-//std::endl;
+// std::endl;
 #define GR_JUMP_TRACE                                                                                                  \
   {                                                                                                                    \
   }
@@ -48,7 +48,7 @@ public:
    * called from WebServer::accept_request() method
    * @param webpage: a pointer to the generated page
    */
-  inline void freeFile( unsigned char *webpage )
+  inline void freeFile( unsigned char *webpage ) override
   {
     GR_JUMP_TRACE;
     ::free( webpage );
@@ -116,12 +116,13 @@ public:
    * @param response: a pointer to the new generated response
    * \return true if the repository contains the requested resource
    */
-  inline virtual bool getFile( HttpRequest *request, HttpResponse *response )
+  inline bool getFile( HttpRequest *request, HttpResponse *response ) override
   {
     GR_JUMP_TRACE;
     std::string url = request->getUrl();
-    while( url.size() && url[0] == '/' )
+    while( url.size() && url[0] == '/' ) {
       url.erase( 0, 1 );
+    }
     pthread_mutex_lock( &_mutex );
     IndexMap::const_iterator i = indexMap.find( url );
     if( i == indexMap.end() ) {
@@ -133,8 +134,9 @@ public:
       GR_JUMP_TRACE;
       pthread_mutex_unlock( &_mutex );
       bool res = i->second->getPage( request, response );
-      if( request->getSessionId().size() )
+      if( request->getSessionId().size() ) {
         response->addSessionCookie( request->getSessionId() );
+      }
       return res;
     }
   };

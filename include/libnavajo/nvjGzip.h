@@ -330,8 +330,9 @@ inline size_t nvj_gunzip_websocket_v2(
 
   unsigned char *reallocDst = (unsigned char *)realloc( *dst, ( sizeDst ) * sizeof( unsigned char ) );
 
-  if( reallocDst != NULL )
+  if( reallocDst != NULL ) {
     *dst = reallocDst;
+  }
   else {
     free( reallocDst );
     free( *dst );

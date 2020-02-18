@@ -160,8 +160,9 @@ inline bool setSocketSndRcvTimeout( int socket, time_t seconds, long int usecond
   tv2.tv_usec = useconds;
 
   if( ( setsockoptCompat( socket, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof( struct timeval ) ) == 0 )
-      && ( setsockoptCompat( socket, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv2, sizeof( struct timeval ) ) == 0 ) )
+      && ( setsockoptCompat( socket, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv2, sizeof( struct timeval ) ) == 0 ) ) {
     return true;
+  }
 #endif
 
   return false;

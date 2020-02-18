@@ -125,8 +125,9 @@ public:
   {
     pthread_mutex_lock( &webSocketClientList_mutex );
     for( std::list<WebSocketClient *>::iterator it = webSocketClientList.begin(); it != webSocketClientList.end();
-         ++it )
+         ++it ) {
       ( *it )->sendTextMessage( message, fin );
+    }
     pthread_mutex_unlock( &webSocketClientList_mutex );
   };
 
@@ -140,8 +141,9 @@ public:
   {
     pthread_mutex_lock( &webSocketClientList_mutex );
     for( std::list<WebSocketClient *>::iterator it = webSocketClientList.begin(); it != webSocketClientList.end();
-         ++it )
+         ++it ) {
       ( *it )->sendBinaryMessage( message, length, fin );
+    }
     pthread_mutex_unlock( &webSocketClientList_mutex );
   };
 
@@ -154,8 +156,9 @@ public:
   {
     pthread_mutex_lock( &webSocketClientList_mutex );
     for( std::list<WebSocketClient *>::iterator it = webSocketClientList.begin(); it != webSocketClientList.end();
-         ++it )
+         ++it ) {
       ( *it )->sendCloseCtrlFrame( message, length );
+    }
     pthread_mutex_unlock( &webSocketClientList_mutex );
   };
 
@@ -177,8 +180,9 @@ public:
   {
     pthread_mutex_lock( &webSocketClientList_mutex );
     for( std::list<WebSocketClient *>::iterator it = webSocketClientList.begin(); it != webSocketClientList.end();
-         ++it )
+         ++it ) {
       ( *it )->sendPingCtrlFrame( message, length );
+    }
     pthread_mutex_unlock( &webSocketClientList_mutex );
   };
 
@@ -200,8 +204,9 @@ public:
   {
     pthread_mutex_lock( &webSocketClientList_mutex );
     for( std::list<WebSocketClient *>::iterator it = webSocketClientList.begin(); it != webSocketClientList.end();
-         ++it )
+         ++it ) {
       ( *it )->sendPongCtrlFrame( message, length );
+    }
     pthread_mutex_unlock( &webSocketClientList_mutex );
   }
 
@@ -223,10 +228,12 @@ public:
   {
     pthread_mutex_lock( &webSocketClientList_mutex );
 
-    if( onOpening( request ) )
+    if( onOpening( request ) ) {
       webSocketClientList.push_back( new WebSocketClient( this, request ) );
-    else
+    }
+    else {
       WebServer::freeClientSockData( request->getClientSockData() );
+    }
 
     pthread_mutex_unlock( &webSocketClientList_mutex );
   };
@@ -252,14 +259,17 @@ public:
    */
   inline void removeClient( WebSocketClient *client, bool cs = false )
   {
-    if( !cs )
+    if( !cs ) {
       pthread_mutex_lock( &webSocketClientList_mutex );
+    }
     std::list<WebSocketClient *>::iterator it
         = std::find( webSocketClientList.begin(), webSocketClientList.end(), client );
-    if( it != webSocketClientList.end() )
+    if( it != webSocketClientList.end() ) {
       webSocketClientList.erase( it );
-    if( !cs )
+    }
+    if( !cs ) {
       pthread_mutex_unlock( &webSocketClientList_mutex );
+    }
   }
 
   /**

@@ -276,8 +276,9 @@ public:
    */
   std::string getHttpReturnCodeStr()
   {
-    if( httpReturnCode == unsetHttpReturnCodeMessage )
+    if( httpReturnCode == unsetHttpReturnCodeMessage ) {
       setHttpReturnCode( 204 );
+    }
 
     std::ostringstream httpRetCodeSS; // stream used for the conversion
     httpRetCodeSS << httpReturnCode;

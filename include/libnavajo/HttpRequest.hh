@@ -89,11 +89,13 @@ class HttpRequest {
       size_t len = paramstr.length() - end - 1;
       switch( paramstr[end] ) {
       case '%':
-        if( paramstr[end + 1] == '%' && len )
+        if( paramstr[end + 1] == '%' && len ) {
           paramstr = paramstr.erase( end + 1, 1 );
+        }
         else {
-          if( len < 2 )
+          if( len < 2 ) {
             break;
+          }
 
           unsigned int      specar;
           std::string       hexChar = paramstr.substr( end + 1, 2 );
@@ -119,8 +121,9 @@ class HttpRequest {
     while( !islastParam ) {
       GR_JUMP_TRACE;
       islastParam = ( end = paramstr.find( '&', start ) ) == std::string::npos;
-      if( islastParam )
+      if( islastParam ) {
         end = paramstr.size();
+      }
 
       std::string theParam = paramstr.substr( start, end - start );
 
@@ -196,8 +199,9 @@ class HttpRequest {
     GR_JUMP_TRACE;
     sessionId = getCookie( "SID" );
 
-    if( sessionId.length() && HttpSession::find( sessionId ) )
+    if( sessionId.length() && HttpSession::find( sessionId ) ) {
       return;
+    }
 
     initSessionId();
   };
@@ -245,8 +249,9 @@ public:
   {
     GR_JUMP_TRACE;
     std::vector<std::string> res;
-    for( HttpRequestCookiesMap::const_iterator iter = cookies.begin(); iter != cookies.end(); ++iter )
+    for( HttpRequestCookiesMap::const_iterator iter = cookies.begin(); iter != cookies.end(); ++iter ) {
       res.push_back( iter->first );
+    }
     return res;
   }
 

@@ -48,24 +48,29 @@ inline void create_thread(
 
 
   rc = pthread_attr_init( &thread_attr );
-  if( rc != 0 )
+  if( rc != 0 ) {
     fprintf( stderr, "pthread_attr_init(): %s\n", STRERROR( rc ) );
+  }
 
   rc = pthread_attr_setdetachstate( &thread_attr, joinable ? PTHREAD_CREATE_JOINABLE : PTHREAD_CREATE_DETACHED );
-  if( rc != 0 )
+  if( rc != 0 ) {
     fprintf( stderr, "pthread_attr_setdetachstate(): %s\n", STRERROR( rc ) );
+  }
 
   rc = pthread_attr_setstacksize( &thread_attr, stackSize );
-  if( rc != 0 )
+  if( rc != 0 ) {
     fprintf( stderr, "pthread_attr_setstacksize(): %s\n", STRERROR( rc ) );
+  }
 
   rc = pthread_create( thread_p, &thread_attr, thread_rtn, data_p );
-  if( rc != 0 )
+  if( rc != 0 ) {
     fprintf( stderr, "pthread_create(): %s\n", STRERROR( rc ) );
+  }
 
   rc = pthread_attr_destroy( &thread_attr );
-  if( rc != 0 )
+  if( rc != 0 ) {
     fprintf( stderr, "pthread_attr_destroy(): %s\n", STRERROR( rc ) );
+  }
 
   return;
 }
@@ -84,8 +89,9 @@ inline void cancel_thread( pthread_t thread )
 
   rc = pthread_cancel( thread );
 
-  if( rc != 0 )
+  if( rc != 0 ) {
     fprintf( stderr, "pthread_cancel(): %s\n", STRERROR( rc ) );
+  }
 
   return;
 }
@@ -102,8 +108,9 @@ inline void wait_for_thread( pthread_t thread )
   STRERROR_BUF; /* Buffer for strerror_r()           */
 
   rc = pthread_join( thread, NULL );
-  if( rc != 0 )
+  if( rc != 0 ) {
     fprintf( stderr, "pthread_join(): %s\n", STRERROR( rc ) );
+  }
 
   return;
 }
@@ -116,12 +123,14 @@ inline void cancelstate_thread( void )
   STRERROR_BUF; /* Buffer for strerror_r()           */
 
   rc = pthread_setcancelstate( PTHREAD_CANCEL_ENABLE, NULL );
-  if( rc != 0 )
+  if( rc != 0 ) {
     fprintf( stderr, "pthread_setcancelstate(): %s\n", STRERROR( rc ) );
+  }
 
   rc = pthread_setcanceltype( PTHREAD_CANCEL_DEFERRED, NULL );
-  if( rc != 0 )
+  if( rc != 0 ) {
     fprintf( stderr, "pthread_setcanceltype(): %s\n", STRERROR( rc ) );
+  }
 }
 
 /***********************************************************************/
@@ -143,11 +152,13 @@ inline void *thread_timeout_scheduler( void *arg )
   timespec t1 = {ca->s, ca->ns};
   timespec t2;
 
-  if( nanosleep( &t1, &t2 ) == -1 )
+  if( nanosleep( &t1, &t2 ) == -1 ) {
     pthread_exit( 0 );
+  }
 
-  if( t2.tv_nsec > 0 )
+  if( t2.tv_nsec > 0 ) {
     pthread_exit( 0 );
+  }
 
   cancel_thread( thread_to_kill );
   wait_for_thread( thread_to_kill );

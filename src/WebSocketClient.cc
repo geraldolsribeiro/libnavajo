@@ -13,7 +13,7 @@
 //********************************************************
 
 //#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ <<
-//std::endl;
+// std::endl;
 #define GR_JUMP_TRACE                                                                                                  \
   {                                                                                                                    \
   }
@@ -47,11 +47,13 @@ void WebSocketClient::sendingThread()
   pthread_mutex_lock( &sendingQueueMutex );
 
   for( ;; ) {
-    while( sendingQueue.empty() && !closing )
+    while( sendingQueue.empty() && !closing ) {
       pthread_cond_wait( &sendingNotification, &sendingQueueMutex );
+    }
 
-    if( closing )
+    if( closing ) {
       break;
+    }
 
     MessageContent *msg = sendingQueue.front();
     sendingQueue.pop();
@@ -99,13 +101,14 @@ void WebSocketClient::receivingThread()
     return;
   }
 
-  if( !websocket->isUsingNaggleAlgo() )
+  if( !websocket->isUsingNaggleAlgo() ) {
     if( !setSocketNagleAlgo( client->socketId, false ) ) // Disable Naggle Algorithm
     {
       NVJ_LOG->appendUniq( NVJ_ERROR, "WebSocketClient : setSocketNagleAlgo error" );
       closeRecv();
       return;
     }
+  }
 
   bool          fin = false;
   unsigned char rsv = 0, opcode = 0;
@@ -127,17 +130,20 @@ void WebSocketClient::receivingThread()
       if( client->bio != NULL && client->ssl != NULL ) {
         n = BIO_read( client->bio, bufferRecv + it, length - it );
 
-        if( SSL_get_error( client->ssl, n ) == SSL_ERROR_ZERO_RETURN )
+        if( SSL_get_error( client->ssl, n ) == SSL_ERROR_ZERO_RETURN ) {
           closing = true;
-        if( ( n == 0 ) || ( n == -1 ) )
+        }
+        if( ( n == 0 ) || ( n == -1 ) ) {
           continue;
+        }
       }
       else {
         n = recv( client->socketId, bufferRecv + it, length - it, 0 );
 
         if( n <= 0 ) {
-          if( errno == ENOTCONN || errno == EBADF || errno == ECONNRESET )
+          if( errno == ENOTCONN || errno == EBADF || errno == ECONNRESET ) {
             closing = true;
+          }
           continue;
         }
       }
@@ -145,8 +151,9 @@ void WebSocketClient::receivingThread()
       it += n;
     } while( it != length && !closing );
 
-    if( closing )
+    if( closing ) {
       continue;
+    }
 
     // Decode message header
     switch( step ) {
@@ -237,10 +244,12 @@ void WebSocketClient::receivingThread()
       NVJ_LOG->append( NVJ_DEBUG, buf );
       if( msgContent != NULL ) {
         for( size_t i = 0; i < length; i++ ) {
-          if( msgMask )
+          if( msgMask ) {
             msgContent[msgContentIt] = bufferRecv[i] ^ msgKeys[msgContentIt % 4];
-          else
+          }
+          else {
             msgContent[msgContentIt] = bufferRecv[i];
+          }
 
           msgContentIt++;
         }
@@ -266,10 +275,12 @@ void WebSocketClient::receivingThread()
 
         switch( opcode ) {
         case 0x1:
-          if( msgLength )
+          if( msgLength ) {
             websocket->onTextMessage( this, std::string( (char *)msgContent, msgLength ), fin );
-          else
+          }
+          else {
             websocket->onTextMessage( this, "", fin );
+          }
           break;
         case 0x2:
           websocket->onBinaryMessage( this, msgContent, msgLength, fin );
@@ -282,8 +293,9 @@ void WebSocketClient::receivingThread()
           }
           break;
         case 0x9:
-          if( websocket->onPingCtrlFrame( this, msgContent, msgLength ) )
+          if( websocket->onPingCtrlFrame( this, msgContent, msgLength ) ) {
             sendPongCtrlFrame( msgContent, msgLength );
+          }
           break;
         case 0xa:
           websocket->onPongCtrlFrame( this, msgContent, msgLength );
@@ -300,8 +312,9 @@ void WebSocketClient::receivingThread()
           break;
         }
 
-        if( ( client->compression == ZLIB ) && ( rsv & 4 ) && msgLength )
+        if( ( client->compression == ZLIB ) && ( rsv & 4 ) && msgLength ) {
           free( msgContent );
+        }
 
         fin          = false;
         rsv          = 0;
@@ -371,16 +384,18 @@ void WebSocketClient::noSessionExpiration( HttpRequest *request )
 {
   GR_JUMP_TRACE;
   std::string sessionId = request->getSessionId();
-  if( sessionId != "" )
+  if( sessionId != "" ) {
     HttpSession::noExpiration( request->getSessionId() );
+  }
 }
 
 void WebSocketClient::restoreSessionExpiration( HttpRequest *request )
 {
   GR_JUMP_TRACE;
   std::string sessionId = request->getSessionId();
-  if( sessionId != "" )
+  if( sessionId != "" ) {
     HttpSession::updateExpiration( request->getSessionId() );
+  }
 }
 
 /***********************************************************************/
@@ -396,8 +411,9 @@ bool WebSocketClient::sendMessage( const MessageContent *msgContent )
   size_t         msgLen    = 0;
   bool           result    = true;
 
-  if( client == NULL )
+  if( client == NULL ) {
     return false;
+  }
 
   headerBuffer[0] = 0x80 | ( msgContent->opcode & 0xf ); // FIN & OPCODE:0x1
   if( client->compression == ZLIB ) {
@@ -415,8 +431,9 @@ bool WebSocketClient::sendMessage( const MessageContent *msgContent )
     msgLen = msgContent->length;
   }
 
-  if( msgLen < 126 )
+  if( msgLen < 126 ) {
     headerBuffer[1] = msgLen;
+  }
   else {
     if( msgLen < 0xFFFF ) {
       headerBuffer[1]                    = 126;
@@ -430,11 +447,13 @@ bool WebSocketClient::sendMessage( const MessageContent *msgContent )
     }
   }
 
-  if( !WebServer::httpSend( client, headerBuffer, headerLen ) || !WebServer::httpSend( client, msg, msgLen ) )
+  if( !WebServer::httpSend( client, headerBuffer, headerLen ) || !WebServer::httpSend( client, msg, msgLen ) ) {
     result = false;
+  }
 
-  if( client->compression == ZLIB )
+  if( client->compression == ZLIB ) {
     free( msg );
+  }
 
   return result;
 }
@@ -445,8 +464,9 @@ void WebSocketClient::addSendingQueue( MessageContent *msgContent )
 {
   GR_JUMP_TRACE;
   pthread_mutex_lock( &sendingQueueMutex );
-  if( !closing )
+  if( !closing ) {
     sendingQueue.push( msgContent );
+  }
   pthread_mutex_unlock( &sendingQueueMutex );
   pthread_cond_broadcast( &sendingNotification );
 }

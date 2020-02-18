@@ -21,12 +21,13 @@ WebServer *webServer = NULL;
 
 void exitFunction( int dummy )
 {
-  if( webServer != NULL )
+  if( webServer != NULL ) {
     webServer->stopService();
+  }
 }
 
 class MyWebSocket : public WebSocket {
-  bool onOpening( HttpRequest *request )
+  bool onOpening( HttpRequest *request ) override
   {
     printf(
         "New Websocket from host '%s' - socketId=%d\n",
@@ -35,7 +36,7 @@ class MyWebSocket : public WebSocket {
     return true;
   }
 
-  void onTextMessage( WebSocketClient *client, const std::string &message, const bool fin )
+  void onTextMessage( WebSocketClient *client, const std::string &message, const bool fin ) override
   {
     printf(
         "Message: '%s' received from host '%s'\n",

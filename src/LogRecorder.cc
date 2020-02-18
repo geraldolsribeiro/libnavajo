@@ -12,7 +12,7 @@
 //********************************************************
 
 //#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ <<
-//std::endl;
+// std::endl;
 #define GR_JUMP_TRACE                                                                                                  \
   {                                                                                                                    \
   }
@@ -63,13 +63,16 @@ void LogRecorder::append( const NvjLogSeverity &l, const std::string &m, const s
     for( std::list<LogOutput *>::iterator it = logOutputsList_.begin(); it != logOutputsList_.end(); ++it ) {
       std::string msg;
 
-      if( ( *it )->isWithDateTime() )
+      if( ( *it )->isWithDateTime() ) {
         msg = getDateStr() + m;
-      else
+      }
+      else {
         msg = m;
+      }
 
-      if( ( *it )->isWithEndline() )
+      if( ( *it )->isWithEndline() ) {
         msg += std::string( "\n" );
+      }
 
       ( *it )->append( l, msg, details );
     }
@@ -97,8 +100,9 @@ void LogRecorder::addLogOutput( LogOutput *output )
 void LogRecorder::removeLogOutputs()
 {
   GR_JUMP_TRACE;
-  for( std::list<LogOutput *>::iterator it = logOutputsList_.begin(); it != logOutputsList_.end(); ++it )
+  for( std::list<LogOutput *>::iterator it = logOutputsList_.begin(); it != logOutputsList_.end(); ++it ) {
     delete *it;
+  }
 
   logOutputsList_.clear();
 }

@@ -15,7 +15,7 @@
 #define LOCALREPOSITORY_HH_
 
 //#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ <<
-//std::endl;
+// std::endl;
 #define GR_JUMP_TRACE                                                                                                  \
   {                                                                                                                    \
   }
@@ -50,7 +50,7 @@ public:
    * @param response: a pointer to the new generated response
    * \return true if the repository contains the requested resource
    */
-  virtual bool getFile( HttpRequest *request, HttpResponse *response ) override;
+  bool getFile( HttpRequest *request, HttpResponse *response ) override;
 
   /**
    * Free resources after use. Inherited from class WebRepository
@@ -58,7 +58,7 @@ public:
    * @param webpage: a pointer to the generated page
    */
   // GLSR FIXME override
-  virtual void freeFile( unsigned char *webpage )
+  void freeFile( unsigned char *webpage ) override
   {
     GR_JUMP_TRACE;
     ::free( webpage );

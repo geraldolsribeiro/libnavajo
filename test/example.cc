@@ -30,8 +30,9 @@ LocalRepository *myUploadRepo = NULL;
 
 void exitFunction( int dummy )
 {
-  if( webServer != NULL )
+  if( webServer != NULL ) {
     webServer->stopService();
+  }
 }
 
 /***********************************************************************/
@@ -67,8 +68,9 @@ inline std::string escape_json( const std::string &s )
       if( '\x00' <= s[i] && s[i] <= '\x1f' ) {
         o << "\\u" << std::hex << std::setw( 4 ) << std::setfill( '0' ) << (int)s[i];
       }
-      else
+      else {
         o << s[i];
+      }
     }
   }
   return o.str();
@@ -79,20 +81,22 @@ inline std::string escape_json( const std::string &s )
 class MyDynamicRepository : public DynamicRepository {
 
   class Uploader : public DynamicPage {
-    bool getPage( HttpRequest *request, HttpResponse *response )
+    bool getPage( HttpRequest *request, HttpResponse *response ) override
     {
-      if( !request->isMultipartContent() )
+      if( !request->isMultipartContent() ) {
         return false;
+      }
 
       MPFD::Parser *parser = request->getMPFDparser();
 
       std::map<std::string, MPFD::Field *>           fields = parser->GetFieldsMap();
       std::map<std::string, MPFD::Field *>::iterator it;
       for( it = fields.begin(); it != fields.end(); ++it ) {
-        if( fields[it->first]->GetType() == MPFD::Field::TextType )
+        if( fields[it->first]->GetType() == MPFD::Field::TextType ) {
           NVJ_LOG->append(
               NVJ_INFO,
               "Got text field: [" + it->first + "], value: [" + fields[it->first]->GetTextTypeContent() + "]" );
+        }
         else {
           NVJ_LOG->append(
               NVJ_INFO,
@@ -103,10 +107,12 @@ class MyDynamicRepository : public DynamicRepository {
           std::ifstream src( fields[it->first]->GetTempFileName().c_str(), std::ios::binary );
           std::string   dstFilename = std::string( UPLOAD_DIR ) + '/' + fields[it->first]->GetFileName();
           std::ofstream dst( dstFilename.c_str(), std::ios::binary );
-          if( !src || !dst )
+          if( !src || !dst ) {
             NVJ_LOG->append( NVJ_ERROR, "Copy error: check read/write permissions" );
-          else
+          }
+          else {
             dst << src.rdbuf();
+          }
           src.close();
           dst.close();
           myUploadRepo->reload();
@@ -118,15 +124,16 @@ class MyDynamicRepository : public DynamicRepository {
   } uploader;
 
   class ListUploadedFiles : public DynamicPage {
-    bool getPage( HttpRequest *request, HttpResponse *response )
+    bool getPage( HttpRequest *request, HttpResponse *response ) override
     {
       std::string                     json      = "{ \"data\" : [";
       std::set<std::string> *         filenames = myUploadRepo->getFilenames();
       std::set<std::string>::iterator it        = filenames->begin();
       while( it != filenames->end() ) {
         json += std::string( "\"" ) + escape_json( it->c_str() ) + '\"';
-        if( ++it != filenames->end() )
+        if( ++it != filenames->end() ) {
           json += ", ";
+        }
       }
       json += "] }";
 
@@ -136,12 +143,13 @@ class MyDynamicRepository : public DynamicRepository {
   } listUploadedFiles;
 
   class TestForm01 : public DynamicPage {
-    bool getPage( HttpRequest *request, HttpResponse *response )
+    bool getPage( HttpRequest *request, HttpResponse *response ) override
     {
       string content;
 
-      if( !request->isMultipartContent() )
+      if( !request->isMultipartContent() ) {
         return false;
+      }
 
       MPFD::Parser *parser = request->getMPFDparser();
 

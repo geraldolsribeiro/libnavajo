@@ -14,7 +14,7 @@
 //********************************************************
 
 //#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ <<
-//std::endl;
+// std::endl;
 #define GR_JUMP_TRACE                                                                                                  \
   {                                                                                                                    \
   }
@@ -110,8 +110,9 @@ void WebServer::updatePeerIpHistory( IpAddress &ip )
     dispPeer          = true;
   }
 
-  if( dispPeer )
+  if( dispPeer ) {
     NVJ_LOG->append( NVJ_DEBUG, std::string( "WebServer: Connection from IP: " ) + ip.str() );
+  }
 }
 
 /*********************************************************************/
@@ -134,8 +135,9 @@ void WebServer::updatePeerDnHistory( std::string dn )
     dispPeer          = true;
   }
 
-  if( dispPeer )
+  if( dispPeer ) {
     NVJ_LOG->append( NVJ_DEBUG, "WebServer: Authorized DN: " + dn );
+  }
 
   pthread_mutex_unlock( &peerDnHistory_mutex );
 }
@@ -182,18 +184,22 @@ bool WebServer::isUserAllowed( const std::string &pwdb64, std::string &login )
   std::vector<std::string> httpAuthLoginPwd = authLoginPwdList;
   if( httpAuthLoginPwd.size() ) {
     std::string logPass = login + ':' + pwd;
-    for( std::vector<std::string>::iterator it = httpAuthLoginPwd.begin(); it != httpAuthLoginPwd.end(); ++it )
-      if( logPass == *it )
+    for( std::vector<std::string>::iterator it = httpAuthLoginPwd.begin(); it != httpAuthLoginPwd.end(); ++it ) {
+      if( logPass == *it ) {
         authOK = true;
+      }
+    }
   }
 
   if( authOK ) {
     NVJ_LOG->append( NVJ_INFO, "WebServer: Authentification passed for user '" + login + "'" );
-    if( i == usersAuthHistory.end() )
+    if( i == usersAuthHistory.end() ) {
       usersAuthHistory[pwdb64] = t;
+    }
   }
-  else
+  else {
     NVJ_LOG->append( NVJ_DEBUG, "WebServer: Authentification failed for user '" + login + "'" );
+  }
 
   pthread_mutex_unlock( &usersAuthHistory_mutex );
   return authOK;
@@ -319,8 +325,9 @@ size_t WebServer::recvLine( int client, char *bufLine, size_t nsize )
   do {
     n = recv( client, &c, 1, 0 );
 
-    if( n > 0 )
+    if( n > 0 ) {
       bufLine[bufLineLen++] = c;
+    }
   } while( ( bufLineLen + 1 < nsize ) && ( c != '\n' ) && ( n > 0 ) );
   bufLine[bufLineLen] = '\0';
 
@@ -436,8 +443,9 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         switch( SSL_get_error( client->ssl, r ) ) {
         case SSL_ERROR_NONE:
           GR_JUMP_TRACE;
-          if( ( r == 0 ) || ( r == -1 ) )
+          if( ( r == 0 ) || ( r == -1 ) ) {
             continue;
+          }
           bufLineLen = r;
           std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
           break;
@@ -599,8 +607,9 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         if( strncasecmp( bufLine + j, "Sec-WebSocket-Extensions: ", 26 ) == 0 ) {
           GR_JUMP_TRACE;
           j += 26;
-          if( strstr( bufLine + j, "permessage-deflate" ) != NULL )
+          if( strstr( bufLine + j, "permessage-deflate" ) != NULL ) {
             client->compression = ZLIB;
+          }
           continue;
         }
 
@@ -683,8 +692,9 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
             i = 0;
             j++;
             requestParams = (char *)malloc( BUFSIZE * sizeof( char ) );
-            while( !isspace( (int)( bufLine[j] ) ) && ( i < BUFSIZE - 1 ) && ( j < (unsigned)bufLineLen ) )
+            while( !isspace( (int)( bufLine[j] ) ) && ( i < BUFSIZE - 1 ) && ( j < (unsigned)bufLineLen ) ) {
               requestParams[i++] = bufLine[j++];
+            }
             requestParams[i] = '\0';
           }
 
@@ -831,8 +841,9 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
           switch( SSL_get_error( client->ssl, r ) ) {
           case SSL_ERROR_NONE:
             GR_JUMP_TRACE;
-            if( ( r == 0 ) || ( r == -1 ) )
+            if( ( r == 0 ) || ( r == -1 ) ) {
               continue;
+            }
             bufLineLen = r;
             std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
             break;
@@ -925,8 +936,9 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
       {
         GR_JUMP_TRACE;
         WebSocket *webSocket = it->second;
-        if( !webSocket->isUsingCompression() )
+        if( !webSocket->isUsingCompression() ) {
           client->compression = NONE;
+        }
 
         std::string header
             = getHttpWebSocketHeader( "101 Switching Protocols", webSocketClientKey, client->compression == ZLIB );
@@ -952,20 +964,27 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         GR_JUMP_TRACE;
         webSocket->newConnectionRequest( request );
 
-        if( urlBuffer != NULL )
+        if( urlBuffer != NULL ) {
           free( urlBuffer );
-        if( requestParams != NULL )
+        }
+        if( requestParams != NULL ) {
           free( requestParams );
-        if( requestCookies != NULL )
+        }
+        if( requestCookies != NULL ) {
           free( requestCookies );
-        if( requestOrigin != NULL )
+        }
+        if( requestOrigin != NULL ) {
           free( requestOrigin );
-        if( webSocketClientKey != NULL )
+        }
+        if( webSocketClientKey != NULL ) {
           free( webSocketClientKey );
-        if( multipartContent != NULL )
+        }
+        if( multipartContent != NULL ) {
           free( multipartContent );
-        if( multipartContentParser != NULL )
+        }
+        if( multipartContentParser != NULL ) {
           delete multipartContentParser;
+        }
         GR_JUMP_TRACE;
         return false;
       }
@@ -1007,8 +1026,9 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
     GR_JUMP_TRACE;
     const char *mime = get_mime_type( urlBuffer );
     std::string mimeStr;
-    if( mime != NULL )
+    if( mime != NULL ) {
       mimeStr = mime;
+    }
     HttpResponse response( mimeStr );
 
     std::vector<WebRepository *>::const_iterator repo = webRepositories.begin();
@@ -1055,8 +1075,9 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
       if( webpage == NULL || !webpageLen ) {
         std::string msg = getHttpHeader( response.getHttpReturnCodeStr().c_str(), 0, false ); // getNoContentErrorMsg();
         httpSend( client, (const void *)msg.c_str(), msg.length() );
-        if( webpage != NULL )
+        if( webpage != NULL ) {
           ( *repo )->freeFile( webpage );
+        }
         goto FREE_RETURN_TRUE;
       }
 
@@ -1120,8 +1141,9 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
       }
     }
 
-    if( keepAlive && ( --nbFileKeepAlive <= 0 ) ) // GLSR aqui eu havia trocado para ==
+    if( keepAlive && ( --nbFileKeepAlive <= 0 ) ) { // GLSR aqui eu havia trocado para ==
       closing = true;
+    }
 
     if( sizeZip > 0 && ( client->compression == GZIP ) ) {
       std::string header
@@ -1158,27 +1180,35 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
       free( webpage );
       ( *repo )->freeFile( gzipWebPage );
     }
-    else
+    else {
       ( *repo )->freeFile( webpage );
+    }
   } while( keepAlive && !closing && !exiting );
 
 /////////////////
 FREE_RETURN_TRUE:
 
-  if( urlBuffer != NULL )
+  if( urlBuffer != NULL ) {
     free( urlBuffer );
-  if( requestParams != NULL )
+  }
+  if( requestParams != NULL ) {
     free( requestParams );
-  if( requestCookies != NULL )
+  }
+  if( requestCookies != NULL ) {
     free( requestCookies );
-  if( requestOrigin != NULL )
+  }
+  if( requestOrigin != NULL ) {
     free( requestOrigin );
-  if( webSocketClientKey != NULL )
+  }
+  if( webSocketClientKey != NULL ) {
     free( webSocketClientKey );
-  if( multipartContent != NULL )
+  }
+  if( multipartContent != NULL ) {
     free( multipartContent );
-  if( multipartContentParser != NULL )
+  }
+  if( multipartContentParser != NULL ) {
     delete multipartContentParser;
+  }
 
   return true;
 }
@@ -1206,10 +1236,12 @@ bool WebServer::httpSend( ClientSockData *client, const void *buf, size_t len )
   int    sent      = 0;
 
   do {
-    if( useSSL )
+    if( useSSL ) {
       sent = BIO_write( client->bio, buf, len );
-    else
+    }
+    else {
       sent = sendCompat( client->socketId, buf, len, MSG_NOSIGNAL );
+    }
 
     if( sent <= 0 ) {
       if( ( sent < 0 ) || ( errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR )
@@ -1223,13 +1255,15 @@ bool WebServer::httpSend( ClientSockData *client, const void *buf, size_t len )
         continue;
       }
     }
-    if( sent > 0 )
+    if( sent > 0 ) {
       totalSent += (size_t)sent;
+    }
 
   } while( sent >= 0 && totalSent != len );
 
-  if( useSSL )
+  if( useSSL ) {
     BIO_flush( client->bio );
+  }
 
   //  pthread_mutex_unlock( &client->client_mutex );
 
@@ -1258,70 +1292,99 @@ const char *WebServer::get_mime_type( const char *name )
 {
   GR_JUMP_TRACE;
   char *ext = strrchr( const_cast<char *>( name ), '.' );
-  if( !ext )
+  if( !ext ) {
     return NULL;
+  }
 
   char     extLowerCase[6];
   unsigned i = 0;
   for( ; i < 5 && i < strlen( ext ); i++ ) {
     extLowerCase[i] = ext[i];
-    if( ( extLowerCase[i] >= 'A' ) && ( extLowerCase[i] <= 'Z' ) )
+    if( ( extLowerCase[i] >= 'A' ) && ( extLowerCase[i] <= 'Z' ) ) {
       extLowerCase[i] += 'a' - 'A';
+    }
   }
   extLowerCase[i] = '\0';
 
-  if( strcmp( extLowerCase, ".html" ) == 0 || strcmp( extLowerCase, ".htm" ) == 0 )
+  if( strcmp( extLowerCase, ".html" ) == 0 || strcmp( extLowerCase, ".htm" ) == 0 ) {
     return "text/html";
-  if( strcmp( extLowerCase, ".js" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".js" ) == 0 ) {
     return "application/javascript";
-  if( strcmp( extLowerCase, ".json" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".json" ) == 0 ) {
     return "application/json";
-  if( strcmp( extLowerCase, ".xml" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".xml" ) == 0 ) {
     return "application/xml";
-  if( strcmp( extLowerCase, ".jpg" ) == 0 || strcmp( extLowerCase, ".jpeg" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".jpg" ) == 0 || strcmp( extLowerCase, ".jpeg" ) == 0 ) {
     return "image/jpeg";
-  if( strcmp( extLowerCase, ".gif" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".gif" ) == 0 ) {
     return "image/gif";
-  if( strcmp( extLowerCase, ".png" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".png" ) == 0 ) {
     return "image/png";
-  if( strcmp( extLowerCase, ".css" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".css" ) == 0 ) {
     return "text/css";
-  if( strcmp( extLowerCase, ".txt" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".txt" ) == 0 ) {
     return "text/plain";
-  if( strcmp( extLowerCase, ".svg" ) == 0 || strcmp( extLowerCase, ".svgz" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".svg" ) == 0 || strcmp( extLowerCase, ".svgz" ) == 0 ) {
     return "image/svg+xml";
-  if( strcmp( extLowerCase, ".cache" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".cache" ) == 0 ) {
     return "text/cache-manifest";
-  if( strcmp( extLowerCase, ".au" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".au" ) == 0 ) {
     return "audio/basic";
-  if( strcmp( extLowerCase, ".wav" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".wav" ) == 0 ) {
     return "audio/wav";
-  if( strcmp( extLowerCase, ".avi" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".avi" ) == 0 ) {
     return "video/x-msvideo";
-  if( strcmp( extLowerCase, ".mpeg" ) == 0 || strcmp( extLowerCase, ".mpg" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".mpeg" ) == 0 || strcmp( extLowerCase, ".mpg" ) == 0 ) {
     return "video/mpeg";
-  if( strcmp( extLowerCase, ".mp3" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".mp3" ) == 0 ) {
     return "audio/mpeg";
-  if( strcmp( extLowerCase, ".csv" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".csv" ) == 0 ) {
     return "text/csv";
-  if( strcmp( extLowerCase, ".mp4" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".mp4" ) == 0 ) {
     return "application/mp4";
-  if( strcmp( extLowerCase, ".bin" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".bin" ) == 0 ) {
     return "application/octet-stream";
-  if( strcmp( extLowerCase, ".doc" ) == 0 || strcmp( extLowerCase, ".docx" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".doc" ) == 0 || strcmp( extLowerCase, ".docx" ) == 0 ) {
     return "application/msword";
-  if( strcmp( extLowerCase, ".pdf" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".pdf" ) == 0 ) {
     return "application/pdf";
-  if( strcmp( extLowerCase, ".ps" ) == 0 || strcmp( extLowerCase, ".eps" ) == 0 || strcmp( extLowerCase, ".ai" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".ps" ) == 0 || strcmp( extLowerCase, ".eps" ) == 0
+      || strcmp( extLowerCase, ".ai" ) == 0 ) {
     return "application/postscript";
-  if( strcmp( extLowerCase, ".tar" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".tar" ) == 0 ) {
     return "application/x-tar";
-  if( strcmp( extLowerCase, ".h264" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".h264" ) == 0 ) {
     return "video/h264";
-  if( strcmp( extLowerCase, ".dv" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".dv" ) == 0 ) {
     return "video/dv";
-  if( strcmp( extLowerCase, ".qt" ) == 0 || strcmp( extLowerCase, ".mov" ) == 0 )
+  }
+  if( strcmp( extLowerCase, ".qt" ) == 0 || strcmp( extLowerCase, ".mov" ) == 0 ) {
     return "video/quicktime";
+  }
 
   return NULL;
 }
@@ -1363,10 +1426,11 @@ std::string WebServer::getHttpHeader(
       header += authBearerAdditionalHeaders;
       header += "\r\n";
     }
-    else
+    else {
       header += std::string(
           "WWW-Authenticate: Basic realm=\"Restricted area: "
           "please enter Login/Password\"\r\n" );
+    }
   }
 
   if( response != NULL ) {
@@ -1383,24 +1447,29 @@ std::string WebServer::getHttpHeader(
     header += response->getSpecificHeaders();
 
     std::vector<std::string> &cookies = response->getCookies();
-    for( unsigned i = 0; i < cookies.size(); i++ )
+    for( unsigned i = 0; i < cookies.size(); i++ ) {
       header += "Set-Cookie: " + cookies[i] + "\r\n";
+    }
   }
 
   header += "Accept-Ranges: bytes\r\n";
 
-  if( keepAlive )
+  if( keepAlive ) {
     header += "Connection: Keep-Alive\r\n";
-  else
+  }
+  else {
     header += "Connection: close\r\n";
+  }
 
   std::string mimetype = "text/html";
-  if( response != NULL )
+  if( response != NULL ) {
     mimetype = response->getMimeType();
+  }
   header += "Content-Type: " + mimetype + "\r\n";
 
-  if( zipped )
+  if( zipped ) {
     header += "Content-Encoding: gzip\r\n";
+  }
 
   if( len ) {
     std::stringstream lenSS;
@@ -1578,12 +1647,14 @@ u_short WebServer::init()
   char portStr[10];
   snprintf( portStr, 10, "%d", tcpPort );
 
-  if( getaddrinfo( NULL, portStr, &hints, &result ) != 0 )
+  if( getaddrinfo( NULL, portStr, &hints, &result ) != 0 ) {
     fatalError( "WebServer : getaddrinfo error " );
+  }
 
   for( rp = result; rp != NULL && nbServerSock < sizeof( server_sock ) / sizeof( int ); rp = rp->ai_next ) {
-    if( ( server_sock[nbServerSock] = socket( rp->ai_family, rp->ai_socktype, rp->ai_protocol ) ) == -1 )
+    if( ( server_sock[nbServerSock] = socket( rp->ai_family, rp->ai_socktype, rp->ai_protocol ) ) == -1 ) {
       continue;
+    }
 
     setSocketReuseAddr( server_sock[nbServerSock] );
 
@@ -1595,12 +1666,14 @@ u_short WebServer::init()
 #endif
     }
 
-    if( rp->ai_family == PF_INET && disableIpV4 )
+    if( rp->ai_family == PF_INET && disableIpV4 ) {
       continue;
+    }
 
     if( rp->ai_family == PF_INET6 ) {
-      if( disableIpV6 )
+      if( disableIpV6 ) {
         continue;
+      }
 #if defined( IPV6_V6ONLY )
 
       // Disable IPv4 mapped addresses.
@@ -1614,18 +1687,20 @@ u_short WebServer::init()
       continue;
 #endif
     }
-    if( bind( server_sock[nbServerSock], rp->ai_addr, rp->ai_addrlen ) == 0 )
+    if( bind( server_sock[nbServerSock], rp->ai_addr, rp->ai_addrlen ) == 0 ) {
       if( listen( server_sock[nbServerSock], 128 ) >= 0 ) {
         nbServerSock++; /* Success */
         continue;
       }
+    }
 
     close( server_sock[nbServerSock] );
   }
   freeaddrinfo( result ); /* No longer needed */
 
-  if( nbServerSock == 0 )
+  if( nbServerSock == 0 ) {
     fatalError( "WebServer : Init Failed ! (nbServerSock == 0)" );
+  }
 
   return ( tcpPort );
 }
@@ -1641,8 +1716,9 @@ void WebServer::exit()
   exiting = true;
 
   for( std::map<std::string, WebSocket *>::iterator it = webSocketEndPoints.begin(); it != webSocketEndPoints.end();
-       ++it )
+       ++it ) {
     it->second->removeAllClients();
+  }
 
   while( nbServerSock > 0 ) {
     shutdown( server_sock[--nbServerSock], 2 );
@@ -1658,8 +1734,9 @@ void WebServer::exit()
 int WebServer::password_cb( char *buf, int num, int /*rwflag*/, void * /*userdata*/ )
 {
   GR_JUMP_TRACE;
-  if( (size_t)num < strlen( certpass ) + 1 )
+  if( (size_t)num < strlen( certpass ) + 1 ) {
     return ( 0 );
+  }
 
   strcpy( buf, certpass );
   return ( strlen( certpass ) );
@@ -1763,8 +1840,9 @@ bool WebServer::isAuthorizedDN( const std::string str ) // GLSR FIXME
 {
   GR_JUMP_TRACE;
   bool res = false;
-  for( std::vector<std::string>::const_iterator i = authDnList.begin(); i != authDnList.end() && !res; ++i )
+  for( std::vector<std::string>::const_iterator i = authDnList.begin(); i != authDnList.end() && !res; ++i ) {
     res = ( *i == str );
+  }
   return res;
 }
 
@@ -1784,8 +1862,9 @@ void WebServer::poolThreadProcessing()
   while( !exiting ) {
     pthread_mutex_lock( &clientsQueue_mutex );
 
-    while( clientsQueue.empty() && !exiting )
+    while( clientsQueue.empty() && !exiting ) {
       pthread_cond_wait( &clientsQueue_cond, &clientsQueue_mutex );
+    }
 
     if( exiting ) {
       pthread_mutex_unlock( &clientsQueue_mutex );
@@ -1821,8 +1900,9 @@ void WebServer::poolThreadProcessing()
       if( SSL_accept( client->ssl ) <= 0 ) {
         const char *sslmsg = ERR_reason_error_string( ERR_get_error() );
         std::string msg    = "SSL accept error ";
-        if( sslmsg != NULL )
+        if( sslmsg != NULL ) {
           msg += ": " + std::string( sslmsg );
+        }
         NVJ_LOG->append( NVJ_DEBUG, msg );
         freeClientSockData( client );
         pthread_mutex_unlock( &clientsQueue_mutex );
@@ -1846,8 +1926,9 @@ void WebServer::poolThreadProcessing()
           }
         }
       }
-      else
+      else {
         authSSL = true;
+      }
 
       //----------------------------------------------------------------------------------------------------------------
 
@@ -1869,8 +1950,9 @@ void WebServer::poolThreadProcessing()
 
     pthread_mutex_unlock( &clientsQueue_mutex );
 
-    if( accept_request( client, authSSL ) )
+    if( accept_request( client, authSSL ) ) {
       freeClientSockData( client );
+    }
   }
   exitedThread++;
 }
@@ -1931,8 +2013,9 @@ void WebServer::threadProcessing()
   NVJ_LOG->append( NVJ_DEBUG, buf );
 
   struct pollfd *pfd;
-  if( ( pfd = (pollfd *)malloc( nbServerSock * sizeof( struct pollfd ) ) ) == NULL )
+  if( ( pfd = (pollfd *)malloc( nbServerSock * sizeof( struct pollfd ) ) ) == NULL ) {
     fatalError( "WebServer : malloc error " );
+  }
 
   unsigned idx;
   int      status;
@@ -1950,8 +2033,9 @@ void WebServer::threadProcessing()
 
     for( idx = 0; idx < nbServerSock && !exiting; idx++ ) {
 
-      if( !( pfd[idx].revents & POLLIN ) )
+      if( !( pfd[idx].revents & POLLIN ) ) {
         continue;
+      }
 
       client_sock = accept( pfd[idx].fd, (struct sockaddr *)&clientAddress, &clientAddressLength );
 
@@ -1981,20 +2065,24 @@ void WebServer::threadProcessing()
       //
 
       updatePeerIpHistory( webClientAddr );
-      if( client_sock == -1 )
+      if( client_sock == -1 ) {
         NVJ_LOG->appendUniq(
             NVJ_ERROR,
             "WebServer : An error occurred when "
             "attempting to access the socket "
             "(accept == -1)" );
+      }
       else {
-        if( socketTimeoutInSecond )
-          if( !setSocketSndRcvTimeout( client_sock, socketTimeoutInSecond, 0 ) )
+        if( socketTimeoutInSecond ) {
+          if( !setSocketSndRcvTimeout( client_sock, socketTimeoutInSecond, 0 ) ) {
             NVJ_LOG->appendUniq(
                 NVJ_ERROR, std::string( "WebServer : setSocketSndRcvTimeout error - " ) + strerror( errno ) );
-        if( !setSocketNoSigpipe( client_sock ) )
+          }
+        }
+        if( !setSocketNoSigpipe( client_sock ) ) {
           NVJ_LOG->appendUniq(
               NVJ_ERROR, std::string( "WebServer : setSocketNoSigpipe error - " ) + strerror( errno ) );
+        }
 
         ClientSockData *client = (ClientSockData *)malloc( sizeof( ClientSockData ) );
         client->socketId       = client_sock;
@@ -2063,32 +2151,37 @@ std::string WebServer::base64_decode( const std::string &encoded_string )
     char_array_4[i++] = encoded_string[in_];
     in_++;
     if( i == 4 ) {
-      for( i = 0; i < 4; i++ )
+      for( i = 0; i < 4; i++ ) {
         char_array_4[i] = base64_chars.find( char_array_4[i] );
+      }
 
       char_array_3[0] = ( char_array_4[0] << 2 ) + ( ( char_array_4[1] & 0x30 ) >> 4 );
       char_array_3[1] = ( ( char_array_4[1] & 0xf ) << 4 ) + ( ( char_array_4[2] & 0x3c ) >> 2 );
       char_array_3[2] = ( ( char_array_4[2] & 0x3 ) << 6 ) + char_array_4[3];
 
-      for( i = 0; ( i < 3 ); i++ )
+      for( i = 0; ( i < 3 ); i++ ) {
         ret += char_array_3[i];
+      }
       i = 0;
     }
   }
 
   if( i ) {
-    for( j = i; j < 4; j++ )
+    for( j = i; j < 4; j++ ) {
       char_array_4[j] = 0;
+    }
 
-    for( j = 0; j < 4; j++ )
+    for( j = 0; j < 4; j++ ) {
       char_array_4[j] = base64_chars.find( char_array_4[j] );
+    }
 
     char_array_3[0] = ( char_array_4[0] << 2 ) + ( ( char_array_4[1] & 0x30 ) >> 4 );
     char_array_3[1] = ( ( char_array_4[1] & 0xf ) << 4 ) + ( ( char_array_4[2] & 0x3c ) >> 2 );
     char_array_3[2] = ( ( char_array_4[2] & 0x3 ) << 6 ) + char_array_4[3];
 
-    for( j = 0; ( j < i - 1 ); j++ )
+    for( j = 0; ( j < i - 1 ); j++ ) {
       ret += char_array_3[j];
+    }
   }
 
   return ret;
@@ -2111,26 +2204,30 @@ std::string WebServer::base64_encode( unsigned char const *bytes_to_encode, unsi
       char_array_4[2] = ( ( char_array_3[1] & 0x0f ) << 2 ) + ( ( char_array_3[2] & 0xc0 ) >> 6 );
       char_array_4[3] = char_array_3[2] & 0x3f;
 
-      for( i = 0; ( i < 4 ); i++ )
+      for( i = 0; ( i < 4 ); i++ ) {
         ret += base64_chars[char_array_4[i]];
+      }
       i = 0;
     }
   }
 
   if( i ) {
-    for( j = i; j < 3; j++ )
+    for( j = i; j < 3; j++ ) {
       char_array_3[j] = '\0';
+    }
 
     char_array_4[0] = ( char_array_3[0] & 0xfc ) >> 2;
     char_array_4[1] = ( ( char_array_3[0] & 0x03 ) << 4 ) + ( ( char_array_3[1] & 0xf0 ) >> 4 );
     char_array_4[2] = ( ( char_array_3[1] & 0x0f ) << 2 ) + ( ( char_array_3[2] & 0xc0 ) >> 6 );
     char_array_4[3] = char_array_3[2] & 0x3f;
 
-    for( j = 0; ( j < i + 1 ); j++ )
+    for( j = 0; ( j < i + 1 ); j++ ) {
       ret += base64_chars[char_array_4[j]];
+    }
 
-    while( ( i++ < 3 ) )
+    while( ( i++ < 3 ) ) {
       ret += '=';
+    }
   }
   return ret;
 }
@@ -2193,8 +2290,9 @@ std::string WebServer::getHttpWebSocketHeader(
 
   header += "Sec-WebSocket-Accept: " + generateWebSocketServerKey( webSocketClientKey ) + "\r\n";
 
-  if( webSocketDeflate )
+  if( webSocketDeflate ) {
     header += "Sec-WebSocket-Extensions: permessage-deflate\r\n"; // x-webkit-deflate-frame
+  }
 
   header += "\r\n";
 
