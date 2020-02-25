@@ -35,7 +35,7 @@ public:
   DynamicRepository()
   {
     GR_JUMP_TRACE;
-    pthread_mutex_init( &_mutex, NULL );
+    pthread_mutex_init( &_mutex, nullptr );
   };
   virtual ~DynamicRepository()
   {

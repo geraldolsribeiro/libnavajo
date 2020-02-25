@@ -16,11 +16,11 @@
 #include <csignal>
 #include <cstring>
 
-WebServer *webServer = NULL;
+WebServer *webServer = nullptr;
 
 void exitFunction( int dummy )
 {
-  if( webServer != NULL ) {
+  if( webServer != nullptr ) {
     webServer->stopService();
   }
 }
@@ -32,7 +32,7 @@ unsigned long cpu_work = 0, cpu_total = 0;
 int getCpuLoad( void )
 {
 #ifndef LINUX
-  srand( time( NULL ) );
+  srand( time( nullptr ) );
   return 40 + rand() % 40;
 #else
   char          buf[1024];
@@ -78,7 +78,7 @@ class MyDynamicRepository : public DynamicRepository {
     bool isValidSession( HttpRequest *request )
     {
       void *myAttribute = request->getSessionAttribute( "username" );
-      return myAttribute != NULL;
+      return myAttribute != nullptr;
     }
   };
 

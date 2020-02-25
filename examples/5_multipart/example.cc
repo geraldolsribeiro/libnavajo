@@ -20,13 +20,13 @@
 
 #define UPLOAD_DIR "./upload"
 
-WebServer *webServer = NULL;
+WebServer *webServer = nullptr;
 
-LocalRepository *myUploadRepo = NULL;
+LocalRepository *myUploadRepo = nullptr;
 
 void exitFunction( int dummy )
 {
-  if( webServer != NULL ) {
+  if( webServer != nullptr ) {
     webServer->stopService();
   }
 }

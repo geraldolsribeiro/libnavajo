@@ -26,14 +26,14 @@ MPFD::Field *MPFD::Parser::GetField( std::string Name )
     return Fields[Name];
   }
   else {
-    return NULL;
+    return nullptr;
   }
 }
 
 MPFD::Parser::Parser()
 {
   GR_JUMP_TRACE;
-  DataCollector                  = NULL;
+  DataCollector                  = nullptr;
   DataCollectorLength            = 0;
   _HeadersOfTheFieldAreProcessed = false;
   CurrentStatus                  = Status_LookingForStartingBoundary;
@@ -81,7 +81,7 @@ void MPFD::Parser::AcceptSomeData( const char *data, const long length )
   std::cout << "DEBUG: AcceptSomeData " << length << std::endl;
   if( Boundary.length() > 0 ) {
     // Append data to existing accumulator
-    if( DataCollector == NULL ) {
+    if( DataCollector == nullptr ) {
       DataCollector = new char[length];
       memcpy( DataCollector, data, length );
       DataCollectorLength = length;

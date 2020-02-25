@@ -66,7 +66,7 @@ public:
 
   inline bool noContent( HttpResponse *response )
   {
-    response->setContent( NULL, 0 );
+    response->setContent( nullptr, 0 );
     return true;
   }
 
@@ -76,7 +76,7 @@ public:
   {
     size_t         webpageLen;
     unsigned char *webpage;
-    if( ( webpage = (unsigned char *)malloc( resultat.size() + 1 * sizeof( char ) ) ) == NULL ) {
+    if( ( webpage = (unsigned char *)malloc( resultat.size() + 1 * sizeof( char ) ) ) == nullptr ) {
       return false;
     }
     webpageLen = resultat.size();

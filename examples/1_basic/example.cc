@@ -16,11 +16,11 @@
 #include <csignal>
 #include <cstring>
 
-WebServer *webServer = NULL;
+WebServer *webServer = nullptr;
 
 void exitFunction( int dummy )
 {
-  if( webServer != NULL ) {
+  if( webServer != nullptr ) {
     webServer->stopService();
   }
 }
@@ -29,10 +29,10 @@ class MyDynamicPage : public DynamicPage {
   bool getPage( HttpRequest *request, HttpResponse *response ) override
   {
     // example using session's object
-    int *cptExample = NULL;
+    int *cptExample = nullptr;
 
     void *myAttribute = request->getSessionAttribute( "myAttribute" );
-    if( myAttribute == NULL ) {
+    if( myAttribute == nullptr ) {
       cptExample  = (int *)malloc( sizeof( int ) );
       *cptExample = 0;
       request->setSessionAttribute( "myAttribute", (void *)cptExample );

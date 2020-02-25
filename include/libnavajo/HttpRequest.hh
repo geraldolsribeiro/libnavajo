@@ -391,7 +391,7 @@ public:
     GR_JUMP_TRACE;
     if( sessionId.empty() ) {
       GR_JUMP_TRACE;
-      return NULL;
+      return nullptr;
     }
     return HttpSession::getAttribute( sessionId, name );
   }
@@ -406,7 +406,7 @@ public:
     GR_JUMP_TRACE;
     if( sessionId.empty() ) {
       GR_JUMP_TRACE;
-      return NULL;
+      return nullptr;
     }
     return HttpSession::getObjectAttribute( sessionId, name );
   }
@@ -473,8 +473,8 @@ public:
       const std::string &     username,
       ClientSockData *        client,
       const char *            mimeType,
-      std::vector<uint8_t> *  payload = NULL,
-      MPFD::Parser *          parser  = NULL )
+      std::vector<uint8_t> *  payload = nullptr,
+      MPFD::Parser *          parser  = nullptr )
   {
     GR_JUMP_TRACE;
     this->httpMethod             = type;
@@ -488,7 +488,7 @@ public:
 
     setParams( params );
 
-    if( cookies != NULL && strlen( cookies ) ) {
+    if( cookies != nullptr && strlen( cookies ) ) {
       GR_JUMP_TRACE;
       decodCookies( cookies );
     }
@@ -503,7 +503,7 @@ public:
   inline bool isMultipartContent() const
   {
     GR_JUMP_TRACE;
-    return multipartContentParser != NULL;
+    return multipartContentParser != nullptr;
   };
 
   /**********************************************************************/
@@ -566,13 +566,13 @@ public:
   inline void setParams( const char *params )
   {
     GR_JUMP_TRACE;
-    if( params != NULL ) {
+    if( params != nullptr ) {
       std::cerr << "params: " << strlen( params ) << " - " << params << std::endl;
     }
     else {
       std::cerr << "params: NULL" << std::endl;
     }
-    if( params != NULL && strlen( params ) ) {
+    if( params != nullptr && strlen( params ) ) {
       GR_JUMP_TRACE;
       decodParams( params );
     }
@@ -652,7 +652,7 @@ public:
   inline bool isX509auth()
   {
     GR_JUMP_TRACE;
-    return clientSockData->peerDN != NULL;
+    return clientSockData->peerDN != nullptr;
   }
 
   /**********************************************************************/

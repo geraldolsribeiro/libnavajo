@@ -66,9 +66,9 @@ class WebServer {
       const char *  messageType,
       const size_t  len                         = 0,
       const bool    keepAlive                   = true,
-      const char *  authBearerAdditionalHeaders = NULL,
+      const char *  authBearerAdditionalHeaders = nullptr,
       const bool    zipped                      = false,
-      HttpResponse *response                    = NULL );
+      HttpResponse *response                    = nullptr );
   static const char *get_mime_type( const char *name );
   u_short            init();
 
@@ -82,8 +82,8 @@ class WebServer {
   inline static void *startPoolThread( void *t )
   {
     static_cast<WebServer *>( t )->poolThreadProcessing();
-    pthread_exit( NULL );
-    return NULL;
+    pthread_exit( nullptr );
+    return nullptr;
   };
   void poolThreadProcessing();
 
@@ -320,7 +320,7 @@ public:
    */
   void addRepository( WebRepository *repo )
   {
-    if( repo != NULL ) {
+    if( repo != nullptr ) {
       webRepositories.push_back( repo );
     }
     else {
@@ -335,7 +335,7 @@ public:
    */
   void addWebSocket( const std::string endPoint, WebSocket *websocket ) // GLSR FIXME
   {
-    if( websocket != NULL ) {
+    if( websocket != nullptr ) {
       webSocketEndPoints[endPoint] = websocket;
     }
     else {
@@ -427,17 +427,17 @@ public:
   {
     closeSocket( client );
 
-    if( client->ssl != NULL ) {
-      if( client->peerDN != NULL ) {
+    if( client->ssl != nullptr ) {
+      if( client->peerDN != nullptr ) {
         delete client->peerDN;
-        client->peerDN = NULL;
+        client->peerDN = nullptr;
       }
       BIO_free_all( client->bio );
       /*        SSL_free (client->ssl);
               if ( client->bio != NULL )
                 BIO_free (client->bio);*/
-      client->ssl = NULL;
-      client->bio = NULL;
+      client->ssl = nullptr;
+      client->bio = nullptr;
     }
     free( client );
   };

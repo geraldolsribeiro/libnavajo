@@ -17,11 +17,11 @@
 #include <csignal>
 #include <cstring>
 
-WebServer *webServer = NULL;
+WebServer *webServer = nullptr;
 
 void exitFunction( int dummy )
 {
-  if( webServer != NULL ) {
+  if( webServer != nullptr ) {
     webServer->stopService();
   }
 }

@@ -11,8 +11,8 @@ git branch -D local-master-formatted    || echo "Branch local-master-formatted n
 
 git checkout -b upstream-master-formatted upstream/master
 
-CHECKS="readability-braces-around-statements,modernize-use-override,modernize-raw-string-literal,modernize-deprecated-headers,modernize-loop-convert"
-CXXFLAGS="-std=c++14 -I./include/"
+CHECKS="readability-braces-around-statements,modernize-use-nullptr,modernize-use-override,modernize-raw-string-literal,modernize-deprecated-headers,modernize-loop-convert"
+CXXFLAGS="-std=c++11 -I./include/"
 
 for ext in cc hh h
 do

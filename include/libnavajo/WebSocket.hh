@@ -40,7 +40,7 @@ public:
         websocketTimeoutInMilliSecond( DEFAULT_WEBSOCKET_TIMEOUT )
 
   {
-    pthread_mutex_init( &webSocketClientList_mutex, NULL );
+    pthread_mutex_init( &webSocketClientList_mutex, nullptr );
   }
 
   ~WebSocket()

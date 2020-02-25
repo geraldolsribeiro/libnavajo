@@ -18,7 +18,7 @@ MPFD::Field::Field()
 {
   GR_JUMP_TRACE;
   type         = 0;
-  FieldContent = NULL;
+  FieldContent = nullptr;
 
   FieldContentLength = 0;
 }
@@ -65,7 +65,7 @@ void MPFD::Field::AcceptSomeData( char *data, long length )
 {
   GR_JUMP_TRACE;
   if( type == TextType ) {
-    if( FieldContent == NULL ) {
+    if( FieldContent == nullptr ) {
       FieldContent = new char[length + 1];
     }
     else {
@@ -118,7 +118,7 @@ void MPFD::Field::AcceptSomeData( char *data, long length )
       }
     }
     else { // If files are stored in memory
-      if( FieldContent == NULL ) {
+      if( FieldContent == nullptr ) {
         FieldContent = new char[length];
       }
       else {
@@ -196,7 +196,7 @@ std::string MPFD::Field::GetTextTypeContent()
       throw MPFD::Exception( "Trying to get content of the field, but the type is not text." );
     }
     else {
-      if( FieldContent == NULL ) {
+      if( FieldContent == nullptr ) {
         return std::string();
       }
       else {

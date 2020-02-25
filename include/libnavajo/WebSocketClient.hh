@@ -58,16 +58,16 @@ class WebSocketClient {
   {
     WebSocketClient *_this = static_cast<WebSocketClient *>( t );
     _this->receivingThread();
-    pthread_exit( NULL );
-    return NULL;
+    pthread_exit( nullptr );
+    return nullptr;
   };
 
   inline static void *startSendingThread( void *t )
   {
     WebSocketClient *_this = static_cast<WebSocketClient *>( t );
     _this->sendingThread();
-    pthread_exit( NULL );
-    return NULL;
+    pthread_exit( nullptr );
+    return nullptr;
   };
 
   void startWebSocketThreads()

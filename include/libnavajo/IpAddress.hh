@@ -90,7 +90,7 @@ public:
   IpAddress( const std::string &value )
   {
     init();
-    if( index( value.c_str(), ':' ) != NULL ) // IPv6
+    if( index( value.c_str(), ':' ) != nullptr ) // IPv6
     {
       struct sockaddr_in6 tmp;
       if( inet_pton( AF_INET6, value.c_str(), &( tmp.sin6_addr ) ) == 0 ) {
@@ -200,7 +200,7 @@ public:
     }
     else { // IPv6
       char ipStr[INET6_ADDRSTRLEN];
-      if( inet_ntop( AF_INET6, &( ip.v6 ), ipStr, INET6_ADDRSTRLEN ) == NULL ) {
+      if( inet_ntop( AF_INET6, &( ip.v6 ), ipStr, INET6_ADDRSTRLEN ) == nullptr ) {
         res += "ERROR !";
       }
       else {
@@ -226,12 +226,12 @@ public:
       struct in_addr addr;
       addr.s_addr  = ip.v4;
       sin.sin_addr = addr;
-      error        = getnameinfo( (sockaddr *)&sin, sizeof sin, hname, maxlength, NULL, 0, NI_NAMEREQD );
+      error        = getnameinfo( (sockaddr *)&sin, sizeof sin, hname, maxlength, nullptr, 0, NI_NAMEREQD );
     }
     else { // IPv6
       sin6.sin6_family = AF_INET6;
       sin6.sin6_addr   = ip.v6;
-      error            = getnameinfo( (sockaddr *)&sin6, sizeof sin6, hname, maxlength, NULL, 0, NI_NAMEREQD );
+      error            = getnameinfo( (sockaddr *)&sin6, sizeof sin6, hname, maxlength, nullptr, 0, NI_NAMEREQD );
     }
 
     pthread_mutex_unlock( &resolvIP_mutex );
@@ -244,27 +244,27 @@ public:
     int              status;
     struct addrinfo  hints, *p;
     struct addrinfo *servinfo;
-    IpAddress *      newIp4 = NULL, *newIp6 = NULL;
+    IpAddress *      newIp4 = nullptr, *newIp6 = nullptr;
 
     memset( &hints, 0, sizeof hints );
     hints.ai_family   = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags    = AI_PASSIVE;
 
-    if( ( status = getaddrinfo( hostname.c_str(), NULL, &hints, &servinfo ) ) != 0 ) {
-      return NULL;
+    if( ( status = getaddrinfo( hostname.c_str(), nullptr, &hints, &servinfo ) ) != 0 ) {
+      return nullptr;
     }
 
-    for( p = servinfo; p != NULL; p = p->ai_next ) {
+    for( p = servinfo; p != nullptr; p = p->ai_next ) {
       if( p->ai_family == AF_INET ) {
         struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
-        if( newIp4 == NULL ) {
+        if( newIp4 == nullptr ) {
           newIp4 = new IpAddress( (in_addr_t)ipv4->sin_addr.s_addr );
         }
       }
       else {
         struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
-        if( newIp6 == NULL ) {
+        if( newIp6 == nullptr ) {
           newIp6 = new IpAddress( ipv6->sin6_addr );
         }
       }
@@ -272,43 +272,43 @@ public:
 
     freeaddrinfo( servinfo );
 
-    if( newIp4 != NULL && !newIp4->isNull() && preferIpv4 ) {
-      if( newIp6 != NULL ) {
+    if( newIp4 != nullptr && !newIp4->isNull() && preferIpv4 ) {
+      if( newIp6 != nullptr ) {
         delete newIp6;
       }
       return newIp4;
     }
 
-    if( newIp6 != NULL && !newIp6->isNull() ) {
-      if( newIp4 != NULL ) {
+    if( newIp6 != nullptr && !newIp6->isNull() ) {
+      if( newIp4 != nullptr ) {
         delete newIp4;
       }
       return newIp6;
     }
 
-    if( newIp6 != NULL ) {
+    if( newIp6 != nullptr ) {
       delete newIp6;
     }
-    if( newIp4 != NULL ) {
+    if( newIp4 != nullptr ) {
       delete newIp4;
     }
 
-    return NULL;
+    return nullptr;
   }
 
   inline static IpAddress *fromString( const std::string &value )
   {
     IpAddress *newIp = new IpAddress( value );
 
-    if( newIp != NULL && !newIp->isNull() ) {
+    if( newIp != nullptr && !newIp->isNull() ) {
       return newIp;
     }
 
-    if( newIp != NULL ) {
+    if( newIp != nullptr ) {
       delete newIp;
     }
 
-    return NULL;
+    return nullptr;
   }
 };
 
@@ -440,13 +440,13 @@ public:
 
   inline static IpNetwork *fromString( const std::string &value )
   {
-    IpNetwork * ipNet = NULL;
+    IpNetwork * ipNet = nullptr;
     std::string ipstr;
     size_t      found = value.find_first_of( '/' );
     if( found == std::string::npos ) {
       IpAddress *addr = IpAddress::fromString( value );
-      if( addr == NULL ) {
-        return NULL;
+      if( addr == nullptr ) {
+        return nullptr;
       }
       ipNet = new IpNetwork( *addr );
       delete addr;
@@ -456,8 +456,8 @@ public:
 
       IpAddress *addr = IpAddress::fromString( ipstr );
 
-      if( addr == NULL ) {
-        return NULL;
+      if( addr == nullptr ) {
+        return nullptr;
       }
 
       u_int8_t    maskDec = 0;
@@ -468,7 +468,7 @@ public:
       {
         if( addr->ipversion == 6 ) {
           delete addr;
-          return NULL;
+          return nullptr;
         }
 
         struct in_addr tmp;
@@ -476,7 +476,7 @@ public:
         //	if (inet_aton(maskStr.c_str(), &tmp) == 0)
         {
           delete addr;
-          return NULL;
+          return nullptr;
         }
         else {
           u_int32_t netmask      = ntohl( tmp.s_addr );
@@ -489,7 +489,7 @@ public:
               }
               else {
                 delete addr;
-                return NULL;
+                return nullptr;
               }
             }
             else {
@@ -521,7 +521,7 @@ public:
         }
 
         if( e == s || j != maskStr.length() ) {
-          return NULL;
+          return nullptr;
         }
 
         maskDec = atoi( maskStr.substr( s, e - s + 1 ).c_str() );
@@ -529,7 +529,7 @@ public:
 
       if( ( maskDec > 32 && addr->ipversion == 4 ) || ( maskDec > 128 && addr->ipversion == 6 ) ) {
         delete addr;
-        return NULL;
+        return nullptr;
       }
 
       ipNet = new IpNetwork( *addr, maskDec );
@@ -541,7 +541,7 @@ public:
   IpNetwork( const std::string &value )
   {
     IpNetwork *net = fromString( value );
-    if( net != NULL ) {
+    if( net != nullptr ) {
       *this = *net;
       delete net;
     }

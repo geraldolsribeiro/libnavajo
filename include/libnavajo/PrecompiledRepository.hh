@@ -43,7 +43,7 @@ public:
     while( location.size() && location[location.size() - 1] == '/' ) {
       location.erase( location.size() - 1 );
     }
-    pthread_mutex_init( &_mutex, NULL );
+    pthread_mutex_init( &_mutex, nullptr );
     if( !indexMap.size() ) {
       initIndexMap();
     }

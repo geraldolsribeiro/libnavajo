@@ -18,11 +18,11 @@
 #include <cstring>
 #include <pwd.h>
 
-WebServer *webServer = NULL;
+WebServer *webServer = nullptr;
 
 void exitFunction( int dummy )
 {
-  if( webServer != NULL ) {
+  if( webServer != nullptr ) {
     webServer->stopService();
   }
 }
@@ -34,7 +34,7 @@ bool isValidSession( HttpRequest *request )
   void *username = request->getSessionAttribute( "username" );
   bool *connect  = (bool *)request->getSessionAttribute( "wschat" );
 
-  return username != NULL && connect != NULL && !( *connect );
+  return username != nullptr && connect != nullptr && !( *connect );
 }
 
 /***********************************************************************/
@@ -42,7 +42,7 @@ bool isValidSession( HttpRequest *request )
 void setSessionIsConnected( HttpRequest *request, const bool b )
 {
   bool *connect = (bool *)request->getSessionAttribute( "wschat" );
-  if( connect != NULL ) {
+  if( connect != nullptr ) {
     *connect = b;
   }
 }
@@ -109,7 +109,7 @@ class MyWebSocket : public WebSocket {
         "New Websocket (host '%s' - socketId=%d)\n",
         request->getPeerIpAddress().str().c_str(),
         request->getClientSockData()->socketId );
-    fflush( NULL );
+    fflush( nullptr );
     if( !isValidSession( request ) ) {
       return false;
     }
