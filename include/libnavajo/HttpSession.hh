@@ -21,6 +21,11 @@
 
 #include <cstdlib>
 
+#include <iostream>
+
+#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ << std::endl;
+// #define GR_JUMP_TRACE { }
+
 class SessionAttributeObject {
 public:
   virtual ~SessionAttributeObject(){};
@@ -60,7 +65,7 @@ public:
 
   static void create( std::string &id )
   {
-
+    GR_JUMP_TRACE;
     const size_t idLength   = 128;
     const char   elements[] = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const size_t nbElements = sizeof( elements ) / sizeof( char );
@@ -93,6 +98,7 @@ public:
 
   static void updateExpiration( const std::string &id )
   {
+    GR_JUMP_TRACE;
     time_t *expiration = (time_t *)getAttribute( id, "session_expiration" );
     if( expiration != nullptr ) {
       *expiration = time( nullptr ) + sessionLifeTime;
@@ -103,6 +109,7 @@ public:
 
   static void noExpiration( const std::string &id )
   {
+    GR_JUMP_TRACE;
     time_t *expiration = (time_t *)getAttribute( id, "session_expiration" );
     if( expiration != nullptr ) {
       *expiration = 0;
@@ -113,6 +120,7 @@ public:
 
   static void removeExpiredSession()
   {
+    GR_JUMP_TRACE;
 
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::iterator it = sessions.begin();
@@ -140,6 +148,7 @@ public:
 
   static void removeAllSession()
   {
+    GR_JUMP_TRACE;
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::iterator it = sessions.begin();
     for( ; it != sessions.end(); ) {
@@ -152,6 +161,7 @@ public:
 
   static bool find( const std::string &id )
   {
+    GR_JUMP_TRACE;
 
     bool res;
     pthread_mutex_lock( &sessions_mutex );
@@ -168,6 +178,7 @@ public:
 
   static void remove( const std::string &sid )
   {
+    GR_JUMP_TRACE;
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::iterator it = sessions.find( sid );
     if( it == sessions.end() ) {
@@ -185,6 +196,7 @@ public:
   static void
   setObjectAttribute( const std::string &sid, const std::string &name, SessionAttributeObject *sessionAttributeObject )
   {
+    GR_JUMP_TRACE;
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::const_iterator it = sessions.find( sid );
 
@@ -204,6 +216,7 @@ public:
 
   static void setAttribute( const std::string &sid, const std::string &name, void *value )
   {
+    GR_JUMP_TRACE;
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::const_iterator it = sessions.find( sid );
 
@@ -223,6 +236,7 @@ public:
 
   static SessionAttributeObject *getObjectAttribute( const std::string &sid, const std::string &name )
   {
+    GR_JUMP_TRACE;
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::iterator it = sessions.find( sid );
     if( it == sessions.end() ) {
@@ -244,6 +258,7 @@ public:
 
   static void *getAttribute( const std::string &sid, const std::string &name )
   {
+    GR_JUMP_TRACE;
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::iterator it = sessions.find( sid );
     if( it == sessions.end() ) {
@@ -265,6 +280,7 @@ public:
 
   static void removeAllAttribute( std::map<std::string, SessionAttribute> *attributesMap )
   {
+    GR_JUMP_TRACE;
     std::map<std::string, SessionAttribute>::iterator iter = attributesMap->begin();
     for( ; iter != attributesMap->end(); ++iter ) {
       if( iter->second.ptr != nullptr ) {
@@ -282,6 +298,7 @@ public:
 
   static void removeAttribute( const std::string &sid, const std::string &name )
   {
+    GR_JUMP_TRACE;
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::iterator it = sessions.find( sid );
     if( it == sessions.end() ) {
@@ -310,6 +327,7 @@ public:
 
   static std::vector<std::string> getAttributeNames( const std::string &sid )
   {
+    GR_JUMP_TRACE;
     pthread_mutex_lock( &sessions_mutex );
     std::vector<std::string>           res;
     HttpSessionsContainerMap::iterator it = sessions.find( sid );
@@ -328,6 +346,7 @@ public:
 
   static void printAll()
   {
+    GR_JUMP_TRACE;
     pthread_mutex_lock( &sessions_mutex );
     HttpSessionsContainerMap::iterator it = sessions.begin();
     for( ; it != sessions.end(); ++it ) {
