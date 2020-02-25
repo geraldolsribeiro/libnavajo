@@ -325,7 +325,7 @@ public:
   inline bool isSessionValid()
   {
     GR_JUMP_TRACE;
-    return sessionId != "";
+    return !sessionId.empty();
   }
 
   /**********************************************************************/
@@ -344,7 +344,7 @@ public:
   inline void removeSession()
   {
     GR_JUMP_TRACE;
-    if( sessionId == "" ) {
+    if( sessionId.empty() ) {
       GR_JUMP_TRACE;
       return;
     }
@@ -359,7 +359,7 @@ public:
   void setSessionAttribute( const std::string &name, void *value )
   {
     GR_JUMP_TRACE;
-    if( sessionId == "" ) {
+    if( sessionId.empty() ) {
       GR_JUMP_TRACE;
       createSession();
     }
@@ -374,7 +374,7 @@ public:
   void setSessionObjectAttribute( const std::string &name, SessionAttributeObject *value )
   {
     GR_JUMP_TRACE;
-    if( sessionId == "" ) {
+    if( sessionId.empty() ) {
       GR_JUMP_TRACE;
       createSession();
     }
@@ -389,7 +389,7 @@ public:
   void *getSessionAttribute( const std::string &name )
   {
     GR_JUMP_TRACE;
-    if( sessionId == "" ) {
+    if( sessionId.empty() ) {
       GR_JUMP_TRACE;
       return NULL;
     }
@@ -404,7 +404,7 @@ public:
   SessionAttributeObject *getSessionObjectAttribute( const std::string &name )
   {
     GR_JUMP_TRACE;
-    if( sessionId == "" ) {
+    if( sessionId.empty() ) {
       GR_JUMP_TRACE;
       return NULL;
     }
@@ -418,7 +418,7 @@ public:
   inline std::vector<std::string> getSessionAttributeNames()
   {
     GR_JUMP_TRACE;
-    if( sessionId == "" ) {
+    if( sessionId.empty() ) {
       return std::vector<std::string>();
     };
     return HttpSession::getAttributeNames( sessionId );
@@ -431,7 +431,7 @@ public:
   inline void getSessionRemoveAttribute( const std::string &name )
   {
     GR_JUMP_TRACE;
-    if( sessionId != "" ) {
+    if( !sessionId.empty() ) {
       GR_JUMP_TRACE;
       HttpSession::removeAttribute( sessionId, name );
     }
