@@ -28,10 +28,13 @@ public:
 
 class HttpSession {
   typedef struct {
-    enum { BASIC, OBJECT } type;
+    enum {
+      BASIC, /**< objetos fundamentais criados com malloc */
+      OBJECT /**< objetos C++ criados com new */
+    } type;
     union {
-      void *                  ptr;
-      SessionAttributeObject *obj;
+      void *                  ptr; // usado pelo BASIC
+      SessionAttributeObject *obj; // usado pelo OBJECT
     };
   } SessionAttribute;
 
@@ -288,11 +291,13 @@ public:
     std::map<std::string, SessionAttribute> *         attributesMap = it->second;
     std::map<std::string, SessionAttribute>::iterator it2           = attributesMap->find( name );
     if( it2 != attributesMap->end() ) {
-      if( it2->second.ptr != NULL ) {
-        if( it2->second.type == SessionAttribute::OBJECT ) {
+      if( it2->second.type == SessionAttribute::OBJECT ) {
+        if( it2->second.obj != NULL ) {
           delete it2->second.obj;
         }
-        else {
+      }
+      else if( it2->second.type == SessionAttribute::BASIC ) {
+        if( it2->second.ptr != NULL ) {
           free( it2->second.ptr );
         }
       }
@@ -309,8 +314,8 @@ public:
     std::vector<std::string>           res;
     HttpSessionsContainerMap::iterator it = sessions.find( sid );
     if( it != sessions.end() ) {
-      std::map<std::string, SessionAttribute> *         attributesMap = it->second;
-      std::map<std::string, SessionAttribute>::iterator iter          = attributesMap->begin();
+      std::map<std::string, SessionAttribute> *attributesMap           = it->second;
+      std::map<std::string, SessionAttribute>::iterator iter = attributesMap->begin();
       for( ; iter != attributesMap->end(); ++iter ) {
         res.push_back( iter->first );
       }
