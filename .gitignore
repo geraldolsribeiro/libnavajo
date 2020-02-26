@@ -1,6 +1,7 @@
 *.o
 *.swp
 build
+docs
 examples/1_basic/PrecompiledRepository.cc
 examples/3_websocket/PrecompiledRepository.cc
 examples/3_websocket/example
