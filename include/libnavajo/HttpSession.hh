@@ -126,8 +126,8 @@ public:
     GR_JUMP_TRACE;
 
     pthread_mutex_lock( &sessions_mutex );
-    HttpSessionsContainerMap::iterator it = sessions.begin();
-    for( ; it != sessions.end(); ) {
+    auto it = sessions.cbegin();
+    while( it != sessions.cend() ) {
       std::map<std::string, SessionAttribute> *         attributesMap = it->second;
       std::map<std::string, SessionAttribute>::iterator it2           = attributesMap->find( "session_expiration" );
       time_t *                                          expiration    = nullptr;
@@ -142,7 +142,7 @@ public:
 
       removeAllAttribute( attributesMap );
       delete attributesMap;
-      it = sessions.erase( it );
+      it = sessions.erase( it ); // c++11
     }
     pthread_mutex_unlock( &sessions_mutex );
   }

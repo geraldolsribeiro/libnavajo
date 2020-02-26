@@ -5,7 +5,9 @@
 #         cmake -G Xcode .                                             #
 ###############             cmake version          #####################
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.1)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_CXX_STANDARD 11)
 
 ###############              Project name          #####################
 project(libnavajo)
@@ -15,9 +17,10 @@ set(LIBNAVAJO_MVERSION "1")
 set(LIBNAVAJO_VERSION "1.5.0")
 set(LIBNAVAJO_BUILD_DATE `/bin/date +%s`)
 
+
 ###############            Minimal flags           #####################
 IF(${UNIX})
-  set (CMAKE_CXX_FLAGS " -Wall -O3 -DLINUX -Wextra -Wno-unused -fexceptions -fPIC -D_REENTRANT -DLIBNAVAJO_SOFTWARE_VERSION=\"\\\"${LIBNAVAJO_VERSION}\\\"\" -DDEBUG_TRACES")
+  set (CMAKE_CXX_FLAGS " -Wall -std=c++11 -O3 -DLINUX -Wextra -Wno-unused -fexceptions -fPIC -D_REENTRANT -DLIBNAVAJO_SOFTWARE_VERSION=\"\\\"${LIBNAVAJO_VERSION}\\\"\" -DDEBUG_TRACES")
 ENDIF(${UNIX})
 
 IF(${APPLE})
