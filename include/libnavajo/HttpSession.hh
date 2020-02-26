@@ -127,6 +127,7 @@ public:
     pthread_mutex_lock( &sessions_mutex );
     auto it = sessions.cbegin();
     while( it != sessions.cend() ) {
+      cout << "DEBUG: Removendo sessão expirada: " << it->first << endl;
       std::map<std::string, SessionAttribute> *         attributesMap = it->second;
       std::map<std::string, SessionAttribute>::iterator it2           = attributesMap->find( "session_expiration" );
       time_t *                                          expiration    = nullptr;
@@ -141,7 +142,7 @@ public:
 
       removeAllAttribute( attributesMap );
       delete attributesMap;
-      it = sessions.erase( it ); // c++11
+      sessions.erase( it++ );
     }
     pthread_mutex_unlock( &sessions_mutex );
   }
@@ -300,6 +301,7 @@ public:
   {
     GR_JUMP_TRACE;
     for( auto &iter : *attributesMap ) {
+      cout << "DEBUG: Removendo atributo " << iter.first << endl;
       if( iter.second.type == SessionAttribute::OBJECT ) {
         if( iter.second.obj ) {
           delete iter.second.obj;
