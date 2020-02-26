@@ -185,10 +185,10 @@ public:
     bool res;
     pthread_mutex_lock( &sessions_mutex );
     res = sessions.size() && sessions.find( id ) != sessions.end();
+    pthread_mutex_unlock( &sessions_mutex );
     if( res ) {
       updateExpiration( id );
     }
-    pthread_mutex_unlock( &sessions_mutex );
 
     return res;
   }
