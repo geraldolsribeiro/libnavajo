@@ -142,7 +142,7 @@ public:
 
       removeAllAttribute( attributesMap );
       delete attributesMap;
-      sessions.erase( ++it );
+      it = sessions.erase( it );
     }
     pthread_mutex_unlock( &sessions_mutex );
   }
