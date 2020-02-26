@@ -72,12 +72,26 @@ time_t                           HttpSession::sessionLifeTime          = 20 * 60
 
 /*********************************************************************/
 
-WebServer::WebServer()
-    : sslCtx( nullptr ), s_server_session_id_context( 1 ), tokDecodeCallback( nullptr ),
-      authBearTokDecExpirationCb( nullptr ), authBearTokDecScopesCb( nullptr ), authBearerEnabled( false ),
-      httpdAuth( false ), exiting( false ), exitedThread( 0 ), nbServerSock( 0 ), disableIpV4( false ),
-      disableIpV6( false ), socketTimeoutInSecond( DEFAULT_HTTP_SERVER_SOCKET_TIMEOUT ), tcpPort( DEFAULT_HTTP_PORT ),
-      threadsPoolSize( 64 ), multipartMaxCollectedDataLength( 20 * 1024 ), sslEnabled( false ), authPeerSsl( false )
+// clang-format off
+WebServer::WebServer() :
+  sslCtx( nullptr ),
+  s_server_session_id_context( 1 ),
+  tokDecodeCallback( nullptr ),
+  authBearTokDecExpirationCb( nullptr ),
+  authBearTokDecScopesCb( nullptr ),
+  authBearerEnabled( false ),
+  httpdAuth( false ),
+  exiting( false ),
+  exitedThread( 0 ),
+  nbServerSock( 0 ),
+  disableIpV4( false ),
+  disableIpV6( false ),
+  socketTimeoutInSecond( DEFAULT_HTTP_SERVER_SOCKET_TIMEOUT ),
+  tcpPort( DEFAULT_HTTP_PORT ),
+  threadsPoolSize( 64 ),
+  multipartMaxCollectedDataLength( 20 * 1024 ),
+  mIsSSLEnabled( false ),
+  mIsAuthPeerSSL( false )
 {
   GR_JUMP_TRACE;
 
@@ -91,6 +105,7 @@ WebServer::WebServer()
   pthread_mutex_init( &usersAuthHistory_mutex, nullptr );
   pthread_mutex_init( &tokensAuthHistory_mutex, nullptr );
 }
+// clang-format on
 
 /*********************************************************************/
 
@@ -340,7 +355,7 @@ size_t WebServer::recvLine( int client, char *bufLine, size_t nsize )
  * \return true if the socket must to close
  ***********************************************************************/
 
-bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
+bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/ )
 {
   GR_JUMP_TRACE;
   char              bufLine[BUFSIZE];
@@ -435,12 +450,12 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
       bufLineLen = 0;
       *bufLine   = '\0';
 
-      if( sslEnabled ) {
+      if( mIsSSLEnabled ) {
         GR_JUMP_TRACE;
         std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
-        int r = BIO_gets( client->bio, bufLine, BUFSIZE - 1 );
+        int r = BIO_gets( clientSockData->bio, bufLine, BUFSIZE - 1 );
 
-        switch( SSL_get_error( client->ssl, r ) ) {
+        switch( SSL_get_error( clientSockData->ssl, r ) ) {
         case SSL_ERROR_NONE:
           GR_JUMP_TRACE;
           if( ( r == 0 ) || ( r == -1 ) ) {
@@ -460,7 +475,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
       }
       else {
         GR_JUMP_TRACE;
-        bufLineLen = recvLine( client->socketId, bufLine, BUFSIZE - 1 );
+        bufLineLen = recvLine( clientSockData->socketId, bufLine, BUFSIZE - 1 );
         std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
       }
 
@@ -537,7 +552,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
           j += 17;
           if( strstr( bufLine + j, "gzip" ) != nullptr ) {
             GR_JUMP_TRACE;
-            client->compression = GZIP;
+            clientSockData->compression = GZIP;
           }
           continue;
         }
@@ -609,7 +624,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
           GR_JUMP_TRACE;
           j += 26;
           if( strstr( bufLine + j, "permessage-deflate" ) != nullptr ) {
-            client->compression = ZLIB;
+            clientSockData->compression = ZLIB;
           }
           continue;
         }
@@ -736,14 +751,14 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
       GR_JUMP_TRACE;
       const char *abh = authRespHeader.empty() ? nullptr : authRespHeader.c_str();
       std::string msg = getHttpHeader( "401 Authorization Required", 0, false, abh );
-      httpSend( client, (const void *)msg.c_str(), msg.length() );
+      httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
       goto FREE_RETURN_TRUE;
     }
 
     if( requestMethod == UNKNOWN_METHOD ) {
       GR_JUMP_TRACE;
       std::string msg = getNotImplementedErrorMsg();
-      httpSend( client, (const void *)msg.c_str(), msg.length() );
+      httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
       goto FREE_RETURN_TRUE;
     }
 
@@ -800,7 +815,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         requestCookies,
         httpVers,
         keepAlive,
-        client->compression,
+        clientSockData->compression,
         closing );
     NVJ_LOG->append( NVJ_DEBUG, logBuffer );
 #endif
@@ -835,11 +850,11 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         size_t requestedLength
             = ( requestContentLength - datalen > BUFSIZE ) ? BUFSIZE : requestContentLength - datalen;
 
-        if( sslEnabled ) {
+        if( mIsSSLEnabled ) {
           GR_JUMP_TRACE;
-          int r = BIO_gets( client->bio, buffer, requestedLength + 1 ); // BUFSIZE);
+          int r = BIO_gets( clientSockData->bio, buffer, requestedLength + 1 ); // BUFSIZE);
 
-          switch( SSL_get_error( client->ssl, r ) ) {
+          switch( SSL_get_error( clientSockData->ssl, r ) ) {
           case SSL_ERROR_NONE:
             GR_JUMP_TRACE;
             if( ( r == 0 ) || ( r == -1 ) ) {
@@ -859,7 +874,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         }
         else {
           GR_JUMP_TRACE;
-          bufLineLen = recvLine( client->socketId, buffer, requestedLength );
+          bufLineLen = recvLine( clientSockData->socketId, buffer, requestedLength );
           std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
         }
 
@@ -938,13 +953,13 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         GR_JUMP_TRACE;
         WebSocket *webSocket = it->second;
         if( !webSocket->isUsingCompression() ) {
-          client->compression = NONE;
+          clientSockData->compression = NONE;
         }
 
-        std::string header
-            = getHttpWebSocketHeader( "101 Switching Protocols", webSocketClientKey, client->compression == ZLIB );
+        std::string header = getHttpWebSocketHeader(
+            "101 Switching Protocols", webSocketClientKey, clientSockData->compression == ZLIB );
 
-        if( !httpSend( client, (const void *)header.c_str(), header.length() ) ) {
+        if( !httpSend( clientSockData, (const void *)header.c_str(), header.length() ) ) {
           GR_JUMP_TRACE;
           goto FREE_RETURN_TRUE;
         }
@@ -957,7 +972,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
             requestCookies,
             requestOrigin,
             username,
-            client,
+            clientSockData,
             mimeType,
             &payload,
             multipartContentParser );
@@ -996,7 +1011,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         NVJ_LOG->append( NVJ_WARNING, bufLinestr );
 
         std::string msg = getNotFoundErrorMsg();
-        httpSend( client, (const void *)msg.c_str(), msg.length() );
+        httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
 
         goto FREE_RETURN_TRUE;
       }
@@ -1019,7 +1034,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         requestCookies,
         requestOrigin,
         username,
-        client,
+        clientSockData,
         mimeType,
         &payload,
         multipartContentParser );
@@ -1059,12 +1074,13 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
 
     if( !fileFound ) {
       GR_JUMP_TRACE;
+      // GLSR Verificar se este tamanho é suficiente
       char bufLinestr[300];
       snprintf( bufLinestr, 300, "Webserver: page not found %s", urlBuffer );
       NVJ_LOG->append( NVJ_DEBUG, bufLinestr );
 
       std::string msg = getNotFoundErrorMsg();
-      httpSend( client, (const void *)msg.c_str(), msg.length() );
+      httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
 
       goto FREE_RETURN_TRUE;
     }
@@ -1075,7 +1091,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
 
       if( webpage == nullptr || !webpageLen ) {
         std::string msg = getHttpHeader( response.getHttpReturnCodeStr().c_str(), 0, false ); // getNoContentErrorMsg();
-        httpSend( client, (const void *)msg.c_str(), msg.length() );
+        httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
         if( webpage != nullptr ) {
           ( *repo )->freeFile( webpage );
         }
@@ -1094,14 +1110,14 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
     NVJ_LOG->append( NVJ_DEBUG, bufLinestr );
 #endif
 
-    if( ( client->compression == NONE ) && zippedFile ) {
+    if( ( clientSockData->compression == NONE ) && zippedFile ) {
       GR_JUMP_TRACE;
       // Need to uncompress
       try {
         if( (int)( webpageLen = nvj_gunzip( &webpage, gzipWebPage, sizeZip ) ) < 0 ) {
           NVJ_LOG->append( NVJ_ERROR, "Webserver: gunzip decompression failed !" );
           std::string msg = getInternalServerErrorMsg();
-          httpSend( client, (const void *)msg.c_str(), msg.length() );
+          httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
           ( *repo )->freeFile( gzipWebPage );
           goto FREE_RETURN_TRUE;
         }
@@ -1109,14 +1125,14 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
       catch( ... ) {
         NVJ_LOG->append( NVJ_ERROR, "Webserver: nvj_gunzip raised an exception" );
         std::string msg = getInternalServerErrorMsg();
-        httpSend( client, (const void *)msg.c_str(), msg.length() );
+        httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
         ( *repo )->freeFile( gzipWebPage );
         goto FREE_RETURN_TRUE;
       }
     }
 
     // Need to compress
-    if( !zippedFile && ( client->compression == GZIP ) && ( webpageLen > 2048 ) ) {
+    if( !zippedFile && ( clientSockData->compression == GZIP ) && ( webpageLen > 2048 ) ) {
       const char *mimetype = response.getMimeType().c_str();
       if( mimetype != nullptr
           && ( strncmp( mimetype, "application", 11 ) == 0 || strncmp( mimetype, "text", 4 ) == 0 ) ) {
@@ -1124,7 +1140,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
           if( (int)( sizeZip = nvj_gzip( &gzipWebPage, webpage, webpageLen ) ) < 0 ) {
             NVJ_LOG->append( NVJ_ERROR, "Webserver: gunzip compression failed !" );
             std::string msg = getInternalServerErrorMsg();
-            httpSend( client, (const void *)msg.c_str(), msg.length() );
+            httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
             ( *repo )->freeFile( webpage );
             goto FREE_RETURN_TRUE;
           }
@@ -1136,7 +1152,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
         catch( ... ) {
           NVJ_LOG->append( NVJ_ERROR, "Webserver: nvj_gzip raised an exception" );
           std::string msg = getInternalServerErrorMsg();
-          httpSend( client, (const void *)msg.c_str(), msg.length() );
+          httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
           ( *repo )->freeFile( webpage );
           goto FREE_RETURN_TRUE;
         }
@@ -1147,11 +1163,11 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
       closing = true;
     }
 
-    if( sizeZip > 0 && ( client->compression == GZIP ) ) {
+    if( sizeZip > 0 && ( clientSockData->compression == GZIP ) ) {
       std::string header
           = getHttpHeader( response.getHttpReturnCodeStr().c_str(), sizeZip, keepAlive, nullptr, true, &response );
-      if( !httpSend( client, (const void *)header.c_str(), header.length() )
-          || !httpSend( client, (const void *)gzipWebPage, sizeZip ) ) {
+      if( !httpSend( clientSockData, (const void *)header.c_str(), header.length() )
+          || !httpSend( clientSockData, (const void *)gzipWebPage, sizeZip ) ) {
         NVJ_LOG->append(
             NVJ_ERROR,
             std::string( "Webserver: httpSend failed sending the zipped page: " ) + urlBuffer + std::string( "- err: " )
@@ -1162,8 +1178,8 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
     else {
       std::string header
           = getHttpHeader( response.getHttpReturnCodeStr().c_str(), webpageLen, keepAlive, nullptr, false, &response );
-      if( !httpSend( client, (const void *)header.c_str(), header.length() )
-          || !httpSend( client, (const void *)webpage, webpageLen ) ) {
+      if( !httpSend( clientSockData, (const void *)header.c_str(), header.length() )
+          || !httpSend( clientSockData, (const void *)webpage, webpageLen ) ) {
         NVJ_LOG->append(
             NVJ_ERROR,
             std::string( "Webserver: httpSend failed sending the page: " ) + urlBuffer + std::string( "- err: " )
@@ -1177,7 +1193,7 @@ bool WebServer::accept_request( ClientSockData *client, bool /*authSSL*/ )
       free( gzipWebPage );
       ( *repo )->freeFile( webpage );
     }
-    else if( ( client->compression == NONE ) && zippedFile ) // cas décompression = double desalloc
+    else if( ( clientSockData->compression == NONE ) && zippedFile ) // cas décompression = double desalloc
     {
       free( webpage );
       ( *repo )->freeFile( gzipWebPage );
@@ -1629,7 +1645,7 @@ u_short WebServer::init()
 {
   GR_JUMP_TRACE;
   // Build SSL context
-  if( sslEnabled ) {
+  if( mIsSSLEnabled ) {
     initialize_ctx( sslCertFile.c_str(), sslCaFile.c_str(), sslCertPwd.c_str() );
   }
 
@@ -1823,7 +1839,7 @@ void WebServer::initialize_ctx( const char *certfile, const char *cafile, const 
   SSL_CTX_set_session_id_context(
       sslCtx, (const unsigned char *)&s_server_session_id_context, sizeof s_server_session_id_context );
 
-  if( authPeerSsl ) {
+  if( mIsAuthPeerSSL ) {
     if( !( SSL_CTX_load_verify_locations( sslCtx, cafile, nullptr ) ) ) {
       NVJ_LOG->append( NVJ_FATAL, "OpenSSL error: Can't read CA list" );
       ::exit( 1 );
@@ -1852,13 +1868,14 @@ bool WebServer::isAuthorizedDN( const std::string str ) // GLSR FIXME
 void WebServer::poolThreadProcessing()
 {
   GR_JUMP_TRACE;
-  X509 *peer    = nullptr;
-  bool  authSSL = false;
+  X509 *          peer           = nullptr;
+  bool            authSSL        = false;
+  ClientSockData *clientSockData = nullptr;
 
-  sigset_t set;
-  sigemptyset( &set );
-  sigaddset( &set, SIGPIPE );
-  sigprocmask( SIG_BLOCK, &set, nullptr );
+  sigset_t sigset;
+  sigemptyset( &sigset );
+  sigaddset( &sigset, SIGPIPE );
+  sigprocmask( SIG_BLOCK, &sigset, nullptr );
 
   while( !exiting ) {
     pthread_mutex_lock( &clientsQueue_mutex );
@@ -1873,53 +1890,53 @@ void WebServer::poolThreadProcessing()
     }
 
     // clientsQueue is not empty
-    ClientSockData *client = clientsQueue.front();
+    clientSockData = clientsQueue.front();
     clientsQueue.pop();
 
-    if( sslEnabled ) {
+    if( mIsSSLEnabled ) {
       BIO *bio = nullptr;
 
-      if( ( bio = BIO_new_socket( client->socketId, BIO_NOCLOSE ) ) == nullptr ) {
+      if( !( bio = BIO_new_socket( clientSockData->socketId, BIO_NOCLOSE ) ) ) {
         NVJ_LOG->append( NVJ_DEBUG, "BIO_new_socket failed !" );
-        freeClientSockData( client );
+        freeClientSockData( clientSockData );
         pthread_mutex_unlock( &clientsQueue_mutex );
         continue;
       }
 
-      if( ( client->ssl = SSL_new( sslCtx ) ) == nullptr ) {
+      if( !( clientSockData->ssl = SSL_new( sslCtx ) ) ) {
         NVJ_LOG->append( NVJ_DEBUG, "SSL_new failed !" );
-        freeClientSockData( client );
+        freeClientSockData( clientSockData );
         pthread_mutex_unlock( &clientsQueue_mutex );
         continue;
       }
 
-      SSL_set_bio( client->ssl, bio, bio );
+      SSL_set_bio( clientSockData->ssl, bio, bio );
 
       ERR_clear_error();
 
       // SIGSEGV
-      if( SSL_accept( client->ssl ) <= 0 ) {
+      if( SSL_accept( clientSockData->ssl ) <= 0 ) {
         const char *sslmsg = ERR_reason_error_string( ERR_get_error() );
         std::string msg    = "SSL accept error ";
         if( sslmsg != nullptr ) {
           msg += ": " + std::string( sslmsg );
         }
         NVJ_LOG->append( NVJ_DEBUG, msg );
-        freeClientSockData( client );
+        freeClientSockData( clientSockData );
         pthread_mutex_unlock( &clientsQueue_mutex );
         continue;
       }
 
-      if( authPeerSsl ) {
-        if( ( peer = SSL_get_peer_certificate( client->ssl ) ) != nullptr ) {
-          if( SSL_get_verify_result( client->ssl ) == X509_V_OK ) {
-            // The client sent a certificate which verified OK
+      if( mIsAuthPeerSSL ) {
+        if( ( peer = SSL_get_peer_certificate( clientSockData->ssl ) ) != nullptr ) {
+          if( SSL_get_verify_result( clientSockData->ssl ) == X509_V_OK ) {
+            // The clientSockData sent a certificate which verified OK
             char *str = X509_NAME_oneline( X509_get_subject_name( peer ), nullptr, 0 );
 
             if( ( authSSL = isAuthorizedDN( str ) ) == true ) {
-              authSSL        = true;
-              client->peerDN = new std::string( str );
-              updatePeerDnHistory( *( client->peerDN ) );
+              authSSL                = true;
+              clientSockData->peerDN = new std::string( str );
+              updatePeerDnHistory( *( clientSockData->peerDN ) );
             }
 
             free( str );
@@ -1935,15 +1952,15 @@ void WebServer::poolThreadProcessing()
 
       BIO *ssl_bio = nullptr;
 
-      client->bio = BIO_new( BIO_f_buffer() );
-      ssl_bio     = BIO_new( BIO_f_ssl() );
-      BIO_set_ssl( ssl_bio, client->ssl, BIO_CLOSE );
-      BIO_push( client->bio, ssl_bio );
+      clientSockData->bio = BIO_new( BIO_f_buffer() );
+      ssl_bio             = BIO_new( BIO_f_ssl() );
+      BIO_set_ssl( ssl_bio, clientSockData->ssl, BIO_CLOSE );
+      BIO_push( clientSockData->bio, ssl_bio );
 
-      if( authPeerSsl && !authSSL ) {
-        std::string msg = getHttpHeader( "403 Forbidden Client Certificate Required", 0, false );
-        httpSend( client, (const void *)msg.c_str(), msg.length() );
-        freeClientSockData( client );
+      if( mIsAuthPeerSSL && !authSSL ) {
+        std::string msg = getHttpHeader( "403 Forbidden clientSockData Certificate Required", 0, false );
+        httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
+        freeClientSockData( clientSockData );
         pthread_mutex_unlock( &clientsQueue_mutex );
         continue;
       }
@@ -1951,8 +1968,8 @@ void WebServer::poolThreadProcessing()
 
     pthread_mutex_unlock( &clientsQueue_mutex );
 
-    if( accept_request( client, authSSL ) ) {
-      freeClientSockData( client );
+    if( accept_request( clientSockData, authSSL ) ) {
+      freeClientSockData( clientSockData );
     }
   }
   exitedThread++;
@@ -2115,19 +2132,19 @@ void WebServer::threadProcessing()
 
 /***********************************************************************/
 
-void WebServer::closeSocket( ClientSockData *client )
+void WebServer::closeSocket( ClientSockData *clientSockData )
 {
   GR_JUMP_TRACE;
-  if( client->ssl != nullptr ) {
-    int n = SSL_shutdown( client->ssl );
+  if( clientSockData->ssl ) {
+    int n = SSL_shutdown( clientSockData->ssl );
     if( !n ) {
-      shutdown( client->socketId, 1 );
-      SSL_shutdown( client->ssl );
+      shutdown( clientSockData->socketId, 1 );
+      SSL_shutdown( clientSockData->ssl );
     }
   }
-  shutdown( client->socketId, SHUT_RDWR );
-  close( client->socketId );
-  client->socketId = 0;
+  shutdown( clientSockData->socketId, SHUT_RDWR );
+  close( clientSockData->socketId );
+  clientSockData->socketId = 0;
 }
 
 /***********************************************************************

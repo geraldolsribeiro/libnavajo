@@ -60,7 +60,7 @@ class WebServer {
   bool isAuthorizedDN( const std::string str ); // GLSR FIXME
 
   size_t             recvLine( int client, char *bufLine, size_t );
-  bool               accept_request( ClientSockData *client, bool authSSL );
+  bool               accept_request( ClientSockData *clientSockData, bool authSSL );
   void               fatalError( const char * );
   static std::string getHttpHeader(
       const char *  messageType,
@@ -123,10 +123,10 @@ class WebServer {
   std::string multipartTempDirForFileUpload;
   long        multipartMaxCollectedDataLength;
 
-  bool                         sslEnabled;
+  bool                         mIsSSLEnabled;
   std::string                  sslCertFile, sslCaFile, sslCertPwd;
   std::vector<std::string>     authLoginPwdList;
-  bool                         authPeerSsl;
+  bool                         mIsAuthPeerSSL;
   std::vector<std::string>     authDnList;
   std::vector<IpNetwork>       hostsAllowed;
   std::vector<WebRepository *> webRepositories;
@@ -137,7 +137,7 @@ class WebServer {
   static const std::string           base64_chars;
   static std::string                 base64_decode( const std::string &encoded_string );
   static std::string                 base64_encode( unsigned char const *bytes_to_encode, unsigned int in_len );
-  static void                        closeSocket( ClientSockData *client );
+  static void                        closeSocket( ClientSockData *clientSockData );
   std::map<std::string, WebSocket *> webSocketEndPoints;
   static std::string                 SHA1_encode( const std::string &input );
   static const std::string           webSocketMagicString;
@@ -202,30 +202,30 @@ public:
    */
   inline void setUseSSL( bool ssl, const char *certFile = "", const char *certPwd = "" )
   {
-    sslEnabled  = ssl;
-    sslCertFile = certFile;
-    sslCertPwd  = certPwd;
+    mIsSSLEnabled = ssl;
+    sslCertFile   = certFile;
+    sslCertPwd    = certPwd;
   };
 
   inline bool isUseSSL()
   {
-    return sslEnabled;
+    return mIsSSLEnabled;
   };
 
   /**
    * Enabled or disabled X509 authentification
-   * @param a: boolean. X509 authentification is required if a is true.
+   * @param authPeerSSL: boolean. X509 authentification is required if a is true.
    * @param caFile: the path to cachain file
    */
-  inline void setAuthPeerSSL( const bool a = true, const char *caFile = "" )
+  inline void setAuthPeerSSL( const bool authPeerSSL = true, const char *caFile = "" )
   {
-    authPeerSsl = a;
-    sslCaFile   = caFile;
+    mIsAuthPeerSSL = authPeerSSL;
+    sslCaFile      = caFile;
   };
 
   inline bool isAuthPeerSSL()
   {
-    return authPeerSsl;
+    return mIsAuthPeerSSL;
   };
 
   /**
@@ -423,23 +423,23 @@ public:
 
   static bool httpSend( ClientSockData *client, const void *buf, size_t len );
 
-  inline static void freeClientSockData( ClientSockData *client )
+  inline static void freeClientSockData( ClientSockData *clientSockData )
   {
-    closeSocket( client );
+    closeSocket( clientSockData );
 
-    if( client->ssl != nullptr ) {
-      if( client->peerDN != nullptr ) {
-        delete client->peerDN;
-        client->peerDN = nullptr;
+    if( clientSockData->ssl ) {
+      if( clientSockData->peerDN ) {
+        delete clientSockData->peerDN;
+        clientSockData->peerDN = nullptr;
       }
-      BIO_free_all( client->bio );
-      /*        SSL_free (client->ssl);
-              if ( client->bio != NULL )
-                BIO_free (client->bio);*/
-      client->ssl = nullptr;
-      client->bio = nullptr;
+      BIO_free_all( clientSockData->bio );
+      /*        SSL_free (clientSockData->ssl);
+              if ( clientSockData->bio != NULL )
+                BIO_free (clientSockData->bio);*/
+      clientSockData->ssl = nullptr;
+      clientSockData->bio = nullptr;
     }
-    free( client );
+    free( clientSockData );
   };
 };
 

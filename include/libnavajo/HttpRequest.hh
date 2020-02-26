@@ -65,7 +65,7 @@ class HttpRequest {
   HttpRequestMethod        httpMethod;
   HttpRequestCookiesMap    cookies;
   HttpRequestParametersMap parameters;
-  std::string              sessionId;
+  std::string              mSessionId;
   MPFD::Parser *           multipartContentParser;
   const char *             mimeType;
   std::vector<uint8_t> *   payload;
@@ -194,9 +194,9 @@ class HttpRequest {
   inline void getSession()
   {
     GR_JUMP_TRACE;
-    sessionId = getCookie( "SID" );
+    mSessionId = getCookie( "SID" );
 
-    if( sessionId.length() && HttpSession::find( sessionId ) ) {
+    if( mSessionId.length() && HttpSession::updateExpirationIfExists( mSessionId ) ) {
       return;
     }
 
@@ -322,7 +322,7 @@ public:
   inline bool isSessionValid()
   {
     GR_JUMP_TRACE;
-    return !sessionId.empty();
+    return !mSessionId.empty();
   }
 
   /**********************************************************************/
@@ -332,7 +332,7 @@ public:
   inline void createSession()
   {
     GR_JUMP_TRACE;
-    HttpSession::create( sessionId );
+    HttpSession::create( mSessionId );
   }
 
   /**
@@ -341,11 +341,11 @@ public:
   inline void removeSession()
   {
     GR_JUMP_TRACE;
-    if( sessionId.empty() ) {
+    if( mSessionId.empty() ) {
       GR_JUMP_TRACE;
       return;
     }
-    HttpSession::remove( sessionId );
+    HttpSession::remove( mSessionId );
   }
 
   /**
@@ -356,11 +356,11 @@ public:
   void setSessionAttribute( const std::string &name, void *value )
   {
     GR_JUMP_TRACE;
-    if( sessionId.empty() ) {
+    if( mSessionId.empty() ) {
       GR_JUMP_TRACE;
       createSession();
     }
-    HttpSession::setAttribute( sessionId, name, value );
+    HttpSession::setAttribute( mSessionId, name, value );
   }
 
   /**
@@ -371,11 +371,11 @@ public:
   void setSessionObjectAttribute( const std::string &name, SessionAttributeObject *value )
   {
     GR_JUMP_TRACE;
-    if( sessionId.empty() ) {
+    if( mSessionId.empty() ) {
       GR_JUMP_TRACE;
       createSession();
     }
-    HttpSession::setObjectAttribute( sessionId, name, value );
+    HttpSession::setObjectAttribute( mSessionId, name, value );
   }
 
   /**
@@ -386,11 +386,11 @@ public:
   void *getSessionAttribute( const std::string &name )
   {
     GR_JUMP_TRACE;
-    if( sessionId.empty() ) {
+    if( mSessionId.empty() ) {
       GR_JUMP_TRACE;
       return nullptr;
     }
-    return HttpSession::getAttribute( sessionId, name );
+    return HttpSession::getAttribute( mSessionId, name );
   }
 
   /**
@@ -401,11 +401,11 @@ public:
   SessionAttributeObject *getSessionObjectAttribute( const std::string &name )
   {
     GR_JUMP_TRACE;
-    if( sessionId.empty() ) {
+    if( mSessionId.empty() ) {
       GR_JUMP_TRACE;
       return nullptr;
     }
-    return HttpSession::getObjectAttribute( sessionId, name );
+    return HttpSession::getObjectAttribute( mSessionId, name );
   }
 
   /**
@@ -415,10 +415,10 @@ public:
   inline std::vector<std::string> getSessionAttributeNames()
   {
     GR_JUMP_TRACE;
-    if( sessionId.empty() ) {
+    if( mSessionId.empty() ) {
       return std::vector<std::string>();
     };
-    return HttpSession::getAttributeNames( sessionId );
+    return HttpSession::getAttributeNames( mSessionId );
   }
 
   /**
@@ -428,29 +428,29 @@ public:
   inline void getSessionRemoveAttribute( const std::string &name )
   {
     GR_JUMP_TRACE;
-    if( !sessionId.empty() ) {
+    if( !mSessionId.empty() ) {
       GR_JUMP_TRACE;
-      HttpSession::removeAttribute( sessionId, name );
+      HttpSession::removeAttribute( mSessionId, name );
     }
   }
 
   /**
-   * initialize sessionId value
+   * initialize mSessionId value
    */
   inline void initSessionId()
   {
     GR_JUMP_TRACE;
-    sessionId = "";
+    mSessionId = "";
   };
 
   /**
-   * get sessionId value
-   * @return the sessionId value
+   * get mSessionId value
+   * @return the mSessionId value
    */
   std::string getSessionId() const
   {
     GR_JUMP_TRACE;
-    return sessionId;
+    return mSessionId;
   };
 
   /**********************************************************************/

@@ -28,10 +28,12 @@
 
 class SessionAttributeObject {
 public:
+  SessionAttributeObject() = default;
   virtual ~SessionAttributeObject(){};
 };
 
 class HttpSession {
+
   typedef struct {
     enum {
       BASIC, /**< objetos fundamentais criados com malloc */
@@ -78,10 +80,11 @@ public:
       for( size_t i = 0; i < idLength; ++i ) {
         id += elements[rand() % ( nbElements - 1 )];
       }
-    } while( find( id ) );
+    } while( exists( id ) ); // GLSR aqui usava updateExpirationIfExists, antiga find
 
     pthread_mutex_lock( &sessions_mutex );
     sessions[id] = new std::map<std::string, SessionAttribute>();
+    updateExpiration( id );
     pthread_mutex_unlock( &sessions_mutex );
     time_t *expiration = (time_t *)malloc( sizeof( time_t ) );
     *expiration        = time( nullptr ) + sessionLifeTime;
@@ -100,7 +103,7 @@ public:
   {
     GR_JUMP_TRACE;
     time_t *expiration = (time_t *)getAttribute( id, "session_expiration" );
-    if( expiration != nullptr ) {
+    if( expiration ) {
       *expiration = time( nullptr ) + sessionLifeTime;
     }
   };
@@ -146,30 +149,46 @@ public:
 
   /**********************************************************************/
 
+  // GLSR Parece que não está sendo usada
   static void removeAllSession()
   {
     GR_JUMP_TRACE;
+    // pthread_mutex_lock( &sessions_mutex ); // GLSR: Não tem unlock
+    // HttpSessionsContainerMap::iterator it = sessions.begin();
+    // for( ; it != sessions.end(); ) {
+    //   std::map<std::string, SessionAttribute> *attributesMap = it->second;
+    //   removeAllAttribute( attributesMap );
+    //   delete attributesMap;
+    //   sessions.erase( ++it );
+    // }
     pthread_mutex_lock( &sessions_mutex );
-    HttpSessionsContainerMap::iterator it = sessions.begin();
-    for( ; it != sessions.end(); ) {
-      std::map<std::string, SessionAttribute> *attributesMap = it->second;
-      removeAllAttribute( attributesMap );
-      delete attributesMap;
-      sessions.erase( ++it );
+    for( auto &session : sessions ) {
+      std::cerr << "Removendo session " << session.first << std::endl;
+      removeAllAttribute( session.second );
     }
+    sessions.clear();
+    pthread_mutex_unlock( &sessions_mutex );
   }
 
-  static bool find( const std::string &id )
+  static bool exists( const std::string &id )
+  {
+    pthread_mutex_lock( &sessions_mutex );
+    bool ret = sessions.size() && sessions.find( id ) != sessions.end();
+    pthread_mutex_unlock( &sessions_mutex );
+    return ret;
+  }
+
+  static bool updateExpirationIfExists( const std::string &id )
   {
     GR_JUMP_TRACE;
 
     bool res;
     pthread_mutex_lock( &sessions_mutex );
     res = sessions.size() && sessions.find( id ) != sessions.end();
-    pthread_mutex_unlock( &sessions_mutex );
     if( res ) {
       updateExpiration( id );
     }
+    pthread_mutex_unlock( &sessions_mutex );
 
     return res;
   }
@@ -281,14 +300,17 @@ public:
   static void removeAllAttribute( std::map<std::string, SessionAttribute> *attributesMap )
   {
     GR_JUMP_TRACE;
-    std::map<std::string, SessionAttribute>::iterator iter = attributesMap->begin();
-    for( ; iter != attributesMap->end(); ++iter ) {
-      if( iter->second.ptr != nullptr ) {
-        if( iter->second.type == SessionAttribute::OBJECT ) {
-          delete iter->second.obj;
+    for( auto &iter : *attributesMap ) {
+      if( iter.second.type == SessionAttribute::OBJECT ) {
+        if( iter.second.obj ) {
+          delete iter.second.obj;
+          iter.second.obj = nullptr;
         }
-        else {
-          free( iter->second.ptr );
+      }
+      else if( iter.second.type == SessionAttribute::BASIC ) {
+        if( iter.second.ptr ) {
+          free( iter.second.ptr );
+          iter.second.ptr = nullptr;
         }
       }
     }
