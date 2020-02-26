@@ -84,7 +84,6 @@ public:
 
     pthread_mutex_lock( &sessions_mutex );
     sessions[id] = new std::map<std::string, SessionAttribute>();
-    updateExpiration( id );
     pthread_mutex_unlock( &sessions_mutex );
     time_t *expiration = (time_t *)malloc( sizeof( time_t ) );
     *expiration        = time( nullptr ) + sessionLifeTime;
@@ -114,7 +113,7 @@ public:
   {
     GR_JUMP_TRACE;
     time_t *expiration = (time_t *)getAttribute( id, "session_expiration" );
-    if( expiration != nullptr ) {
+    if( expiration ) {
       *expiration = 0;
     }
   };
