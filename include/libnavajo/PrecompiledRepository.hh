@@ -60,7 +60,7 @@ public:
    * called from WebServer::accept_request() method
    * @param webpage: a pointer to the generated page
    */
-  inline void freeFile( unsigned char *webpage ) override{};
+  inline void freeFile( [[maybe_unused]] unsigned char *webpage ) override{};
 
   /**
    * Try to resolve an http request by requesting the PrecompiledRepository.
