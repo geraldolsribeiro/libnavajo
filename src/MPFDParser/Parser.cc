@@ -5,11 +5,7 @@
 
 // ---- ORIGINAL -----
 
-//#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ <<
-// std::endl;
-#define GR_JUMP_TRACE                                                                                                  \
-  {                                                                                                                    \
-  }
+#include "libnavajo/GrDebug.hpp"
 
 #include "MPFDParser/Parser.h"
 

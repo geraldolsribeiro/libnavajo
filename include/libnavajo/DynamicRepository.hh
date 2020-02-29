@@ -14,11 +14,7 @@
 #ifndef DYNAMICREPOSITORY_HH_
 #define DYNAMICREPOSITORY_HH_
 
-//#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ <<
-// std::endl;
-#define GR_JUMP_TRACE                                                                                                  \
-  {                                                                                                                    \
-  }
+#include "libnavajo/GrDebug.hpp"
 
 #include <map>
 #include <string>

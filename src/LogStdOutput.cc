@@ -11,16 +11,11 @@
  */
 //********************************************************
 
-//#define GR_JUMP_TRACE std::cerr << "\nGRJMP:" << __FILE__ << "/" << __LINE__ << "/" << __PRETTY_FUNCTION__ <<
-// std::endl;
-#define GR_JUMP_TRACE                                                                                                  \
-  {                                                                                                                    \
-  }
-
 #include <iostream>
-
-#include "libnavajo/LogStdOutput.hh"
 #include <cstdio>
+
+#include "libnavajo/GrDebug.hpp"
+#include "libnavajo/LogStdOutput.hh"
 
 #define RED "\x1B[31m"
 #define GRN "\x1B[32m"
