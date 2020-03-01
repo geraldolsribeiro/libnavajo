@@ -6,6 +6,7 @@
 // ---- ORIGINAL -----
 
 #include "libnavajo/GrDebug.hpp"
+#include <spdlog/spdlog.h>
 
 #include "MPFDParser/Parser.h"
 
@@ -74,7 +75,7 @@ void MPFD::Parser::SetContentType( const std::string type )
 void MPFD::Parser::AcceptSomeData( const char *data, const long length )
 {
   GR_JUMP_TRACE;
-  std::cout << "DEBUG: AcceptSomeData " << length << std::endl;
+  spdlog::debug( "MPFD::Parser::AcceptSomeData length: {}", length );
   if( Boundary.length() > 0 ) {
     // Append data to existing accumulator
     if( DataCollector == nullptr ) {
@@ -102,7 +103,7 @@ void MPFD::Parser::AcceptSomeData( const char *data, const long length )
 void MPFD::Parser::_ProcessData()
 {
   GR_JUMP_TRACE;
-  std::cout << "DEBUG: _ProcessData" << std::endl;
+  spdlog::debug( "MPFD::Parser::_ProcessData" );
   // If some data left after truncate, process it right now.
   // Do not wait for AcceptSomeData called again
   bool NeedToRepeat;
@@ -137,7 +138,7 @@ void MPFD::Parser::_ProcessData()
 bool MPFD::Parser::ProcessContentOfTheField()
 {
   GR_JUMP_TRACE;
-  std::cout << "DEBUG: ProcessContentOfTheField" << std::endl;
+  spdlog::debug( "MPFD::Parser::ProcessContentOfTheField" );
   long BoundaryPosition = BoundaryPositionInDataCollector();
   long DataLengthToSendToField;
   if( BoundaryPosition >= 0 ) {
@@ -166,7 +167,7 @@ bool MPFD::Parser::ProcessContentOfTheField()
 bool MPFD::Parser::WaitForHeadersEndAndParseThem()
 {
   GR_JUMP_TRACE;
-  std::cout << "DEBUG: WaitForHeadersEndAndParseThem DataCollectorLength: " << DataCollectorLength << std::endl;
+  spdlog::debug( "WaitForHeadersEndAndParseThem DataCollectorLength: {}", DataCollectorLength );
 
   for( int i = 0; i < DataCollectorLength - 3; i++ ) {
     if( ( DataCollector[i] == 13 ) && ( DataCollector[i + 1] == 10 ) && ( DataCollector[i + 2] == 13 )
@@ -191,21 +192,21 @@ bool MPFD::Parser::WaitForHeadersEndAndParseThem()
 void MPFD::Parser::SetUploadedFilesStorage( int where )
 {
   GR_JUMP_TRACE;
-  std::cout << "DEBUG: SetUploadedFilesStorage " << where << std::endl;
+  spdlog::debug( "MPFD::Parser::SetUploadedFilesStorage where: {}", where );
   WhereToStoreUploadedFiles = where;
 }
 
 void MPFD::Parser::SetTempDirForFileUpload( std::string dir )
 {
   GR_JUMP_TRACE;
-  std::cout << "DEBUG: SetTempDirForFileUpload " << dir << std::endl;
+  spdlog::debug( "MPFD::Parser::SetTempDirForFileUpload dir: {}", dir );
   TempDirForFileUpload = dir;
 }
 
 void MPFD::Parser::_ParseHeaders( std::string headers )
 {
   GR_JUMP_TRACE;
-  std::cout << "DEBUG: _ParseHeaders headers " << headers << std::endl;
+  spdlog::debug( "MPDF::Parser::_ParseHeaders headers: {}", headers );
   // Check if it is form data
   if( headers.find( "Content-Disposition: form-data;" ) == std::string::npos ) {
     throw Exception(
@@ -273,20 +274,19 @@ void MPFD::Parser::_ParseHeaders( std::string headers )
       }
     }
   }
-  std::cout << "DEBUG: FIM _ParseHeaders" << std::endl;
 }
 
 void MPFD::Parser::SetMaxCollectedDataLength( long max )
 {
   GR_JUMP_TRACE;
-  std::cout << "DEBUG: SetMaxCollectedDataLength " << max << std::endl;
+  spdlog::debug( "MPFD::Parser::SetMaxCollectedDataLength max: {}", max );
   MaxDataCollectorLength = max;
 }
 
 void MPFD::Parser::TruncateDataCollectorFromTheBeginning( long n )
 {
   GR_JUMP_TRACE;
-  std::cout << "DEBUG: TruncateDataCollectorFromTheBeginning " << n << std::endl;
+  spdlog::debug( "MPFD::Parser::TruncateDataCollectorFromTheBeginning n: {}", n );
   long TruncatedDataCollectorLength = DataCollectorLength - n;
 
   char *tmp = DataCollector;
@@ -302,7 +302,6 @@ void MPFD::Parser::TruncateDataCollectorFromTheBeginning( long n )
 long MPFD::Parser::BoundaryPositionInDataCollector()
 {
   GR_JUMP_TRACE;
-  std::cout << "DEBUG: BoundaryPositionInDataCollector" << std::endl;
   const char *b  = Boundary.c_str();
   int         bl = Boundary.length();
   if( DataCollectorLength >= bl ) {
@@ -326,7 +325,6 @@ long MPFD::Parser::BoundaryPositionInDataCollector()
 bool MPFD::Parser::FindStartingBoundaryAndTruncData()
 {
   GR_JUMP_TRACE;
-  std::cout << "DEBUG: FindStartingBoundaryAndTruncData" << std::endl;
   long n = BoundaryPositionInDataCollector();
   if( n >= 0 ) {
     TruncateDataCollectorFromTheBeginning( n + Boundary.length() );

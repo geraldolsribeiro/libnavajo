@@ -18,10 +18,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
 #include <cstdlib>
-
 #include <iostream>
+
+#include <spdlog/spdlog.h>
 
 #include "libnavajo/GrDebug.hpp"
 
@@ -126,7 +126,7 @@ public:
     pthread_mutex_lock( &sessions_mutex );
     auto it = sessions.cbegin();
     while( it != sessions.cend() ) {
-      std::cout << "DEBUG: Removendo sessão expirada: " << it->first << std::endl;
+      spdlog::debug( "Removendo sessão expirada: {}", it->first );
       std::map<std::string, SessionAttribute> *         attributesMap = it->second;
       std::map<std::string, SessionAttribute>::iterator it2           = attributesMap->find( "session_expiration" );
       time_t *                                          expiration    = nullptr;
@@ -300,7 +300,7 @@ public:
   {
     GR_JUMP_TRACE;
     for( auto &iter : *attributesMap ) {
-      std::cout << "DEBUG: Removendo atributo " << iter.first << std::endl;
+      spdlog::debug( "Removendo atributo: {}", iter.first );
       if( iter.second.type == SessionAttribute::OBJECT ) {
         if( iter.second.obj ) {
           delete iter.second.obj;

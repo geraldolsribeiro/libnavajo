@@ -448,7 +448,6 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
 
       if( mIsSSLEnabled ) {
         GR_JUMP_TRACE;
-        std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
         int r = BIO_gets( clientSockData->bio, bufLine, BUFSIZE - 1 );
 
         switch( SSL_get_error( clientSockData->ssl, r ) ) {
@@ -458,7 +457,6 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
             continue;
           }
           bufLineLen = r;
-          std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
           break;
         case SSL_ERROR_ZERO_RETURN:
           GR_JUMP_TRACE;
@@ -472,7 +470,6 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
       else {
         GR_JUMP_TRACE;
         bufLineLen = recvLine( clientSockData->socketId, bufLine, BUFSIZE - 1 );
-        std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
       }
 
       if( bufLineLen == 0 || exiting ) {
@@ -857,7 +854,6 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
               continue;
             }
             bufLineLen = r;
-            std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
             break;
           case SSL_ERROR_ZERO_RETURN:
             GR_JUMP_TRACE;
@@ -871,7 +867,6 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
         else {
           GR_JUMP_TRACE;
           bufLineLen = recvLine( clientSockData->socketId, buffer, requestedLength );
-          std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
         }
 
         if( urlencodedForm ) {
@@ -895,7 +890,6 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
         }
         else {
           GR_JUMP_TRACE;
-          std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
           if( multipartContentParser != nullptr && bufLineLen ) {
             try {
               multipartContentParser->AcceptSomeData( buffer, bufLineLen );
@@ -906,7 +900,6 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
             }
           }
           else {
-            std::cerr << "DEBUG: " << __LINE__ << " bufLineLen: " << bufLineLen << std::endl;
             GR_JUMP_TRACE;
             if( !payload.size() ) {
               try {
