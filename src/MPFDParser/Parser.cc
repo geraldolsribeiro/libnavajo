@@ -157,13 +157,13 @@ bool MPFD::Parser::ProcessContentOfTheField()
     // GLSR Campos duplicados
     auto processingFieldNameArr = ProcessingFieldName + "[]";
     if( Fields.count( processingFieldNameArr ) ) {
-      Fields[processingFieldNameArr]->SetType( TextType );
+      Fields[processingFieldNameArr]->SetType( Field::TextType );
       auto currentFieldContent = Fields[processingFieldNameArr]->GetTextTypeContent();
       if( !currentFieldContent.empty() ) {
         currentFieldContent = "|";
       }
       currentFieldContent += Fields[ProcessingFieldName]->GetTextTypeContent();
-      Fields[processingFieldNameArr]->AcceptSomeData( currentFieldContent.c_str(), currentFieldContent.size() );
+      Fields[processingFieldNameArr]->AcceptSomeData( const_cast<char*>( currentFieldContent.c_str() ), currentFieldContent.size() );
       spdlog::debug( "ProcessContentOfTheField {} -> {}", ProcessingFieldName, currentFieldContent );
     }
   }
