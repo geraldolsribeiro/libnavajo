@@ -164,6 +164,7 @@ bool MPFD::Parser::ProcessContentOfTheField()
       }
       currentFieldContent += Fields[ProcessingFieldName]->GetTextTypeContent();
       Fields[processingFieldNameArr]->AcceptSomeData( currentFieldContent.c_str(), currentFieldContent.size() );
+      spdlog::debug( "ProcessContentOfTheField {} -> {}", ProcessingFieldName, currentFieldContent );
     }
   }
 
@@ -249,6 +250,7 @@ void MPFD::Parser::_ParseHeaders( std::string headers )
       // GLSR Campos duplicados
       if( Fields.count( ProcessingFieldName ) and Fields.count( ProcessingFieldName + "[]" ) ) {
         Fields[ProcessingFieldName + "[]"] = new Field();
+        spdlog::debug( "_ParseHeaders {}", ProcessingFieldName );
       }
       Fields[ProcessingFieldName] = new Field();
     }
