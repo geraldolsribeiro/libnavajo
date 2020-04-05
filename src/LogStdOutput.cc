@@ -11,8 +11,8 @@
  */
 //********************************************************
 
-#include <iostream>
 #include <cstdio>
+#include <iostream>
 
 #include "libnavajo/GrDebug.hpp"
 #include "libnavajo/LogStdOutput.hh"

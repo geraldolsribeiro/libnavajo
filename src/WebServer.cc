@@ -122,7 +122,7 @@ void WebServer::updatePeerIpHistory( IpAddress &ip )
   }
 
   if( dispPeer ) {
-    NVJ_LOG->append( NVJ_DEBUG, std::string( "WebServer: Connection from IP: " ) + ip.str() );
+    spdlog::debug( std::string( "WebServer: Connection from IP: " ) + ip.str() );
   }
 }
 
@@ -147,7 +147,7 @@ void WebServer::updatePeerDnHistory( std::string dn )
   }
 
   if( dispPeer ) {
-    NVJ_LOG->append( NVJ_DEBUG, "WebServer: Authorized DN: " + dn );
+    spdlog::debug( "WebServer: Authorized DN: " + dn );
   }
 
   pthread_mutex_unlock( &peerDnHistory_mutex );
@@ -209,7 +209,7 @@ bool WebServer::isUserAllowed( const std::string &pwdb64, std::string &login )
     }
   }
   else {
-    NVJ_LOG->append( NVJ_DEBUG, "WebServer: Authentification failed for user '" + login + "'" );
+    spdlog::debug( "WebServer: Authentification failed for user '" + login + "'" );
   }
 
   pthread_mutex_unlock( &usersAuthHistory_mutex );
@@ -243,7 +243,7 @@ bool WebServer::isTokenAllowed( const std::string &tokb64, const std::string &re
   auto i = tokensAuthHistory.find( tokb64 );
 
   if( i != tokensAuthHistory.end() ) {
-    NVJ_LOG->append( NVJ_DEBUG, "WebServer: token already authenticated" );
+    spdlog::debug( "WebServer: token already authenticated" );
 
     /* get current timeinfo and compare to the one previously stored */
     isTokenExpired = t > i->second;
@@ -251,7 +251,7 @@ bool WebServer::isTokenAllowed( const std::string &tokb64, const std::string &re
     if( isTokenExpired ) {
       /* Remove token from the map to avoid infinite grow of it */
       tokensAuthHistory.erase( tokb64 );
-      NVJ_LOG->append( NVJ_DEBUG, "WebServer: removing outdated token from cache '" + tokb64 + "'" );
+      spdlog::debug( "WebServer: removing outdated token from cache '" + tokb64 + "'" );
     }
 
     pthread_mutex_unlock( &tokensAuthHistory_mutex );
@@ -459,8 +459,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
           break;
         case SSL_ERROR_ZERO_RETURN:
           GR_JUMP_TRACE;
-          NVJ_LOG->append(
-              NVJ_DEBUG,
+          spdlog::debug(
               "WebServer::accept_request - BIO_gets() "
               "failed with SSL_ERROR_ZERO_RETURN - 1" );
           goto FREE_RETURN_TRUE;
@@ -809,7 +808,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
         keepAlive,
         clientSockData->compression,
         closing );
-    NVJ_LOG->append( NVJ_DEBUG, logBuffer );
+    spdlog::debug( logBuffer );
 #endif
 
     if( multipartContent != nullptr ) {
@@ -825,7 +824,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
       }
       catch( const MPFD::Exception &e ) {
         GR_JUMP_TRACE;
-        NVJ_LOG->append( NVJ_DEBUG, "WebServer::accept_request -  MPFD::Exception: " + e.GetError() );
+        spdlog::debug( "WebServer::accept_request -  MPFD::Exception: " + e.GetError() );
         delete multipartContentParser;
         multipartContentParser = nullptr;
       }
@@ -856,8 +855,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
             break;
           case SSL_ERROR_ZERO_RETURN:
             GR_JUMP_TRACE;
-            NVJ_LOG->append(
-                NVJ_DEBUG,
+            spdlog::debug(
                 "WebServer::accept_request - BIO_gets() "
                 "failed with SSL_ERROR_ZERO_RETURN - 2" );
             goto FREE_RETURN_TRUE;
@@ -881,7 +879,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
 
           if( requestParams == nullptr ) {
             GR_JUMP_TRACE;
-            NVJ_LOG->append( NVJ_DEBUG, "WebServer::accept_request -  memory allocation failed" );
+            spdlog::debug( "WebServer::accept_request -  memory allocation failed" );
             break;
           }
           memcpy( requestParams + datalen, buffer, bufLineLen );
@@ -894,7 +892,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
               multipartContentParser->AcceptSomeData( buffer, bufLineLen );
             }
             catch( const MPFD::Exception &e ) {
-              NVJ_LOG->append( NVJ_DEBUG, "WebServer::accept_request -  MPFD::Exception: " + e.GetError() );
+              spdlog::debug( "WebServer::accept_request -  MPFD::Exception: " + e.GetError() );
               break;
             }
           }
@@ -907,12 +905,11 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
               }
               catch( std::bad_alloc &e ) {
                 GR_JUMP_TRACE;
-                NVJ_LOG->append(
-                    NVJ_DEBUG,
+                spdlog::debug(
                     "WebServer::accept_request -  "
                     "payload.reserve() failed with "
                     "exception: "
-                        + std::string( e.what() ) );
+                    + std::string( e.what() ) );
                 break;
               }
             }
@@ -1065,7 +1062,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
       // GLSR Verificar se este tamanho é suficiente
       char bufLinestr[300];
       snprintf( bufLinestr, 300, "Webserver: page not found %s", urlBuffer );
-      NVJ_LOG->append( NVJ_DEBUG, bufLinestr );
+      spdlog::debug( bufLinestr );
 
       std::string msg = getNotFoundErrorMsg();
       httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
@@ -1095,7 +1092,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
 #ifdef DEBUG_TRACES
     char bufLinestr[300];
     snprintf( bufLinestr, 300, "Webserver: page found %s", urlBuffer );
-    NVJ_LOG->append( NVJ_DEBUG, bufLinestr );
+    spdlog::debug( bufLinestr );
 #endif
 
     if( ( clientSockData->compression == NONE ) && zippedFile ) {
@@ -1780,7 +1777,7 @@ int WebServer::verify_callback( int preverify_ok, X509_STORE_CTX *ctx )
         X509_verify_cert_error_string( err ),
         depth,
         buf );
-    NVJ_LOG->append( NVJ_DEBUG, buftmp );
+    spdlog::debug( buftmp );
   }
 
   /*
@@ -1791,7 +1788,7 @@ int WebServer::verify_callback( int preverify_ok, X509_STORE_CTX *ctx )
     X509_NAME_oneline( X509_get_issuer_name( err_cert ), buf, 256 );
     char buftmp[300];
     snprintf( buftmp, 300, "X509_verify_cert error: issuer= %s", buf );
-    NVJ_LOG->append( NVJ_DEBUG, buftmp );
+    spdlog::debug( buftmp );
   }
 
   return 1;
@@ -1885,14 +1882,14 @@ void WebServer::poolThreadProcessing()
       BIO *bio = nullptr;
 
       if( !( bio = BIO_new_socket( clientSockData->socketId, BIO_NOCLOSE ) ) ) {
-        NVJ_LOG->append( NVJ_DEBUG, "BIO_new_socket failed !" );
+        spdlog::debug( "BIO_new_socket failed !" );
         freeClientSockData( clientSockData );
         pthread_mutex_unlock( &clientsQueue_mutex );
         continue;
       }
 
       if( !( clientSockData->ssl = SSL_new( sslCtx ) ) ) {
-        NVJ_LOG->append( NVJ_DEBUG, "SSL_new failed !" );
+        spdlog::debug( "SSL_new failed !" );
         freeClientSockData( clientSockData );
         pthread_mutex_unlock( &clientsQueue_mutex );
         continue;
@@ -1909,7 +1906,7 @@ void WebServer::poolThreadProcessing()
         if( sslmsg != nullptr ) {
           msg += ": " + std::string( sslmsg );
         }
-        NVJ_LOG->append( NVJ_DEBUG, msg );
+        spdlog::debug( msg );
         freeClientSockData( clientSockData );
         pthread_mutex_unlock( &clientsQueue_mutex );
         continue;
@@ -2016,7 +2013,7 @@ void WebServer::threadProcessing()
 
   char buf[300];
   snprintf( buf, 300, "WebServer : Listen on port %d", port );
-  NVJ_LOG->append( NVJ_DEBUG, buf );
+  spdlog::debug( buf );
 
   struct pollfd *pfd;
   if( ( pfd = (pollfd *)malloc( nbServerSock * sizeof( struct pollfd ) ) ) == nullptr ) {

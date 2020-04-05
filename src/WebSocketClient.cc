@@ -236,7 +236,7 @@ void WebSocketClient::receivingThread()
           rsv,
           opcode,
           msgMask );
-      NVJ_LOG->append( NVJ_DEBUG, buf );
+      spdlog::debug( buf );
       if( msgContent != nullptr ) {
         for( size_t i = 0; i < length; i++ ) {
           if( msgMask ) {

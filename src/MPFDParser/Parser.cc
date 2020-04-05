@@ -163,7 +163,8 @@ bool MPFD::Parser::ProcessContentOfTheField()
         currentFieldContent = "|";
       }
       currentFieldContent += Fields[ProcessingFieldName]->GetTextTypeContent();
-      Fields[processingFieldNameArr]->AcceptSomeData( const_cast<char*>( currentFieldContent.c_str() ), currentFieldContent.size() );
+      Fields[processingFieldNameArr]->AcceptSomeData(
+          const_cast<char *>( currentFieldContent.c_str() ), currentFieldContent.size() );
       spdlog::debug( "ProcessContentOfTheField {} -> {}", ProcessingFieldName, currentFieldContent );
     }
   }

@@ -12,8 +12,8 @@
 //********************************************************
 
 
-#include <iostream>
 #include <ctime>
+#include <iostream>
 
 #include "libnavajo/GrDebug.hpp"
 #include "libnavajo/LogRecorder.hh"
