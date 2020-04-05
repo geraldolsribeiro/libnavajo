@@ -153,6 +153,18 @@ bool MPFD::Parser::ProcessContentOfTheField()
   if( DataLengthToSendToField > 0 ) {
     Fields[ProcessingFieldName]->AcceptSomeData( DataCollector, DataLengthToSendToField );
     TruncateDataCollectorFromTheBeginning( DataLengthToSendToField );
+
+    // GLSR Campos duplicados
+    auto processingFieldNameArr = ProcessingFieldName + "[]";
+    if( Fields.count( processingFieldNameArr ) ) {
+      Fields[processingFieldNameArr]->SetType( TextType );
+      auto currentFieldContent = Fields[processingFieldNameArr]->GetTextTypeContent();
+      if( !currentFieldContent.empty() ) {
+        currentFieldContent = "|";
+      }
+      currentFieldContent += Fields[ProcessingFieldName]->GetTextTypeContent();
+      Fields[processingFieldNameArr]->AcceptSomeData( currentFieldContent.c_str(), currentFieldContent.size() );
+    }
   }
 
   if( BoundaryPosition >= 0 ) {
@@ -233,7 +245,11 @@ void MPFD::Parser::_ParseHeaders( std::string headers )
           + headers + std::string( "\"" ) );
     }
     else {
-      ProcessingFieldName         = headers.substr( name_pos + 6, name_end_pos - ( name_pos + 6 ) );
+      ProcessingFieldName = headers.substr( name_pos + 6, name_end_pos - ( name_pos + 6 ) );
+      // GLSR Campos duplicados
+      if( Fields.count( ProcessingFieldName ) and Fields.count( ProcessingFieldName + "[]" ) ) {
+        Fields[ProcessingFieldName + "[]"] = new Field();
+      }
       Fields[ProcessingFieldName] = new Field();
     }
 

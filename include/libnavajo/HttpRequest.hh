@@ -563,10 +563,10 @@ public:
   {
     GR_JUMP_TRACE;
     if( params != nullptr ) {
-      std::cerr << "params: " << strlen( params ) << " - " << params << std::endl;
+      spdlog::debug( "setParams: {}", params );
     }
     else {
-      std::cerr << "params: NULL" << std::endl;
+      spdlog::debug( "setParams: NULL" );
     }
     if( params != nullptr && strlen( params ) ) {
       GR_JUMP_TRACE;

@@ -327,8 +327,7 @@ end:
 size_t WebServer::recvLine( int client, char *bufLine, size_t nsize )
 {
   GR_JUMP_TRACE;
-
-  std::cerr << "Params: client: " << client << " nsize: " << nsize << " bufLine: " << bufLine << std::endl;
+  // spdlog::debug( "recvLine: client {}, nsize {}, {}", client, nsize, bufLine );
 
   size_t bufLineLen = 0;
   char   c;
