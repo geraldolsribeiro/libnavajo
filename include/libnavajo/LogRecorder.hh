@@ -21,6 +21,7 @@
 #include <list>
 #include <set>
 #include <string>
+#include <spdlog/spdlog.h>
 
 #define NVJ_LOG LogRecorder::getInstance()
 #define NVJ_printf LogRecorder::getInstance()->printf
@@ -62,6 +63,12 @@ public:
   void setDebugMode( bool d = true )
   {
     debugMode = d;
+    if( debugMode ) {
+      spdlog::set_level( spdlog::level::debug );
+    }
+    else {
+      spdlog::set_level( spdlog::level::info );
+    }
   };
   void addLogOutput( LogOutput * );
   void removeLogOutputs();
