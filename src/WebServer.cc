@@ -1452,6 +1452,7 @@ std::string WebServer::getHttpHeader(
     std::vector<std::string> &cookies = response->getCookies();
     for( const auto &cookie : cookies ) {
       header += "Set-Cookie: " + cookie + "\r\n";
+      spdlog::debug( "Cabeçalho de cookie: {}", cookie );
     }
   }
 

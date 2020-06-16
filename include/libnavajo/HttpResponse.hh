@@ -147,6 +147,7 @@ public:
       cookieEntry += "; HttpOnly";
 
     responseCookies.push_back( cookieEntry );
+    spdlog::debug( "Adicionado cookie: {}", cookieEntry );
   }
 
   /************************************************************************/
