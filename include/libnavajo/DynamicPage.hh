@@ -72,7 +72,7 @@ public:
 
   /**********************************************************************/
 
-  inline bool fromString( const std::string &resultat, HttpResponse *response )
+  inline bool fromString( const std::string &resultat, HttpResponse *response ) const
   {
     size_t         webpageLen;
     unsigned char *webpage;
