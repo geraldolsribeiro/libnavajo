@@ -31,6 +31,9 @@ if(NOT DEFINED CMAKE_MACOSX_RPATH)
   set(CMAKE_MACOSX_RPATH 0)
 endif()
 
+# 1 Habilita rotinas de debug
+add_definitions(-DGR_USE_JUMP_TRACE=0)
+
 #######   Check the compiler and set the compile and link flags  #######
 set(CMAKE_BUILD_TYPE Debug)
 

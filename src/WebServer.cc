@@ -1483,6 +1483,7 @@ std::string WebServer::getHttpHeader(
 
   header += "\r\n";
 
+  spdlog::debug( "WebServer::getHttpHeader: {}", header );
   return header;
 }
 
