@@ -1342,6 +1342,26 @@ const char *WebServer::get_mime_type( const char *name )
   if( strcmp( extLowerCase, ".cache" ) == 0 ) {
     return "text/cache-manifest";
   }
+
+  // ----------------------------------------------------------------------
+  // Fontes
+  // ----------------------------------------------------------------------
+  if( strcmp( extLowerCase, ".otf" ) == 0 ) {
+    return "font/otf";
+  }
+  if( strcmp( extLowerCase, ".eot" ) == 0 ) {
+    return "font/eot";
+  }
+  if( strcmp( extLowerCase, ".ttf" ) == 0 ) {
+    return "font/ttf";
+  }
+  if( strcmp( extLowerCase, ".woff" ) == 0 ) {
+    return "font/woff";
+  }
+  if( strcmp( extLowerCase, ".woff2" ) == 0 ) {
+    return "font/woff2";
+  }
+
   if( strcmp( extLowerCase, ".au" ) == 0 ) {
     return "audio/basic";
   }
