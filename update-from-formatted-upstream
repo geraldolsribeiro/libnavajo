@@ -4,6 +4,7 @@
 # ----------------------------------------------------------------------
 
 git checkout master
+git pull
 git fetch upstream
 
 git branch -D upstream-master-formatted || echo "Branch upstream-master not found"
