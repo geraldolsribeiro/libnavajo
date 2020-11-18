@@ -564,7 +564,7 @@ inline static bool isIpBelongToIpNetwork( const IpAddress &ip, const std::vector
   }
 
   return res;
-};
+}
 
   /***********************************************************************/
 

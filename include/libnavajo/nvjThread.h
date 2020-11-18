@@ -166,7 +166,7 @@ inline void *thread_timeout_scheduler( void *arg )
 
   pthread_exit( 0 );
   return NULL;
-};
+}
 
 #endif
 
