@@ -138,8 +138,8 @@ class MyWebSocket : public WebSocket {
     else {
       client->sendCloseCtrlFrame( "Not allowed message format" );
     }
-  };
-  void onBinaryMessage( WebSocketClient *client, const unsigned char *message, size_t len, const bool fin ) override{};
+  }
+  void onBinaryMessage( WebSocketClient *client, const unsigned char *message, size_t len, const bool fin ) override{}
 } myWebSocket;
 
 /***********************************************************************/

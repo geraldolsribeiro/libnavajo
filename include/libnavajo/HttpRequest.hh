@@ -174,7 +174,7 @@ class HttpRequest {
         while( !iswgraph( theCookie[firstC] ) && firstC < posEq ) {
           GR_JUMP_TRACE;
           firstC++;
-        };
+        }
 
         if( posEq - firstC > 0 && theCookie.length() - posEq > 0 ) {
           GR_JUMP_TRACE;
@@ -183,7 +183,7 @@ class HttpRequest {
         }
       }
     }
-  };
+  }
 
   /**********************************************************************/
   /**

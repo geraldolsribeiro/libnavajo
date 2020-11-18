@@ -32,7 +32,7 @@ WebSocketClient::WebSocketClient( WebSocket *ws, HttpRequest *req ) : websocket(
   nvj_init_stream( &( gzipcontext.strm_deflate ), true );
   noSessionExpiration( request );
   startWebSocketThreads();
-};
+}
 
 /***********************************************************************/
 

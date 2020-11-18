@@ -32,12 +32,12 @@ public:
   {
     GR_JUMP_TRACE;
     pthread_mutex_init( &_mutex, nullptr );
-  };
+  }
   virtual ~DynamicRepository()
   {
     GR_JUMP_TRACE;
     indexMap.clear();
-  };
+  }
 
   /**
    * Free resources after use. Inherited from class WebRepository
@@ -48,7 +48,7 @@ public:
   {
     GR_JUMP_TRACE;
     ::free( webpage );
-  };
+  }
 
   /**
    * Add new page to the repository
@@ -67,7 +67,7 @@ public:
     pthread_mutex_lock( &_mutex );
     indexMap.insert( std::pair<std::string, DynamicPage *>( url.substr( i, url.size() - i ), page ) );
     pthread_mutex_unlock( &_mutex );
-  };
+  }
 
   /**
    * Remove page from the repository
@@ -135,6 +135,6 @@ public:
       }
       return res;
     }
-  };
+  }
 };
 #endif

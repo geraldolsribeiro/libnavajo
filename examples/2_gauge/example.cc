@@ -103,7 +103,7 @@ class MyDynamicRepository : public DynamicRepository {
     {
       if( !isValidSession( request ) ) {
         return fromString( "ERR", response );
-      };
+      }
       std::ostringstream ss;
       ss << getCpuLoad();
       return fromString( ss.str(), response );

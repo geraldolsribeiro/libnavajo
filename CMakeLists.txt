@@ -20,7 +20,7 @@ set(LIBNAVAJO_BUILD_DATE `/bin/date +%s`)
 
 ###############            Minimal flags           #####################
 IF(${UNIX})
-  set (CMAKE_CXX_FLAGS " -Wall -std=c++11 -O3 -DLINUX -Wextra -Wno-unused -fexceptions -fPIC -D_REENTRANT -DLIBNAVAJO_SOFTWARE_VERSION=\"\\\"${LIBNAVAJO_VERSION}\\\"\" -DDEBUG_TRACES")
+  set (CMAKE_CXX_FLAGS " -Wall -std=c++14 -O3 -DLINUX -Wextra -Wno-unused -Wpedantic -fsanitize=address,undefined -fexceptions -fPIC -D_REENTRANT -DLIBNAVAJO_SOFTWARE_VERSION=\"\\\"${LIBNAVAJO_VERSION}\\\"\" -DDEBUG_TRACES")
 ENDIF(${UNIX})
 
 IF(${APPLE})

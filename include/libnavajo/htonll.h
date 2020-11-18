@@ -9,7 +9,7 @@ inline static u_int64_t htonll( const u_int64_t v )
   u.lv[0] = htonl( v >> 32 );
   u.lv[1] = htonl( v & 0xFFFFFFFFULL );
   return u.llv;
-};
+}
 
 inline static u_int64_t ntohll( const u_int64_t v )
 {

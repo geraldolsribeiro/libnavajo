@@ -43,7 +43,7 @@ class MyWebSocket : public WebSocket {
         message.c_str(),
         client->getHttpRequest()->getPeerIpAddress().str().c_str() );
     client->sendTextMessage( "The message has been received!" );
-  };
+  }
 } myWebSocket;
 
 int main()
