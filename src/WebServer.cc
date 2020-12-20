@@ -1979,7 +1979,9 @@ void WebServer::poolThreadProcessing()
       freeClientSockData( clientSockData );
     }
   }
+  pthread_mutex_lock( &clientsQueue_mutex );
   exitedThread++;
+  pthread_mutex_unlock( &clientsQueue_mutex );
 }
 
 /***********************************************************************
