@@ -15,27 +15,26 @@
 #define HTTPRESPONSE_HH_
 
 class HttpResponse {
-  unsigned char *          responseContent;
-  size_t                   responseContentLength;
-  std::vector<std::string> responseCookies;
-  bool                     zippedFile;
-  std::string              mimeType;
-  std::string              forwardToUrl;
-  bool                     cors, corsCred;
-  std::string              corsDomain;
-  unsigned                 httpReturnCode;
-  std::string              httpReturnCodeMessage;
-  std::string              httpSpecificHeaders;
-
-  static const unsigned unsetHttpReturnCodeMessage = 0;
-
-  static std::map<unsigned, const char *> httpReturnCodes;
+  unsigned char *                         mResponseContent;
+  size_t                                  mResponseContentLength;
+  std::vector<std::string>                mResponseCookies;
+  bool                                    mZippedFile;
+  std::string                             mMimeType;
+  std::string                             mForwardToUrl;
+  bool                                    mCors, mCorsCred;
+  std::string                             mCorsDomain;
+  unsigned                                mHttpReturnCode;
+  std::string                             mHttpReturnCodeMessage;
+  std::string                             mHttpSpecificHeaders;
+  static const unsigned                   mUnsetHttpReturnCodeMessage = 0;
+  static std::map<unsigned, const char *> mHttpReturnCodes;
 
 public:
   HttpResponse( const std::string mime = "" )
-      : responseContent( NULL ), responseContentLength( 0 ), zippedFile( false ), mimeType( mime ), forwardToUrl( "" ),
-        cors( false ), corsCred( false ), corsDomain( "" ), httpReturnCode( unsetHttpReturnCodeMessage ),
-        httpReturnCodeMessage( "Unspecified" ), httpSpecificHeaders( "" )
+      : mResponseContent( NULL ), mResponseContentLength( 0 ), mZippedFile( false ), mMimeType( mime ),
+        mForwardToUrl( "" ), mCors( false ), mCorsCred( false ), mCorsDomain( "" ),
+        mHttpReturnCode( mUnsetHttpReturnCodeMessage ), mHttpReturnCodeMessage( "Unspecified" ),
+        mHttpSpecificHeaders( "" )
   {
     initializeHttpReturnCode();
   }
@@ -48,10 +47,10 @@ public:
    */
   inline void setContent( unsigned char *const content, const size_t length )
   {
-    responseContent       = content;
-    responseContentLength = length;
+    mResponseContent       = content;
+    mResponseContentLength = length;
 
-    if( httpReturnCode == unsetHttpReturnCodeMessage ) {
+    if( mHttpReturnCode == mUnsetHttpReturnCodeMessage ) {
       if( length )
         setHttpReturnCode( 200 );
       else
@@ -69,9 +68,9 @@ public:
    */
   inline void getContent( unsigned char **content, size_t *length, bool *zip ) const
   {
-    *content = responseContent;
-    *length  = responseContentLength;
-    *zip     = zippedFile;
+    *content = mResponseContent;
+    *length  = mResponseContentLength;
+    *zip     = mZippedFile;
   }
 
   /************************************************************************/
@@ -81,7 +80,7 @@ public:
    */
   inline void setIsZipped( bool b = true )
   {
-    zippedFile = b;
+    mZippedFile = b;
   };
 
   /************************************************************************/
@@ -90,7 +89,7 @@ public:
    */
   inline bool isZipped() const
   {
-    return zippedFile;
+    return mZippedFile;
   };
 
   /************************************************************************/
@@ -146,7 +145,7 @@ public:
     if( httpOnly )
       cookieEntry += "; HttpOnly";
 
-    responseCookies.push_back( cookieEntry );
+    mResponseCookies.push_back( cookieEntry );
     spdlog::debug( "Adicionado cookie: {}", cookieEntry );
   }
 
@@ -167,7 +166,7 @@ public:
    */
   inline std::vector<std::string> &getCookies()
   {
-    return responseCookies;
+    return mResponseCookies;
   };
 
   /************************************************************************/
@@ -177,7 +176,7 @@ public:
    */
   inline void setMimeType( const std::string &mime )
   {
-    mimeType = mime;
+    mMimeType = mime;
   }
 
   /************************************************************************/
@@ -187,7 +186,7 @@ public:
    */
   inline const std::string &getMimeType() const
   {
-    return mimeType;
+    return mMimeType;
   }
 
   /************************************************************************/
@@ -197,7 +196,7 @@ public:
    */
   void forwardTo( const std::string &url )
   {
-    forwardToUrl = url;
+    mForwardToUrl = url;
   }
 
   /************************************************************************/
@@ -207,7 +206,7 @@ public:
    */
   std::string getForwardedUrl() const
   {
-    return forwardToUrl;
+    return mForwardToUrl;
   }
 
   /************************************************************************/
@@ -218,9 +217,9 @@ public:
    */
   void setCORS( bool cors = true, bool cred = false, std::string domain = "*" )
   {
-    this->cors = cors;
-    corsCred   = cred;
-    corsDomain = domain;
+    mCors       = cors;
+    mCorsCred   = cred;
+    mCorsDomain = domain;
   }
 
   /**
@@ -229,17 +228,17 @@ public:
    */
   bool isCORS()
   {
-    return cors;
+    return mCors;
   }
 
   bool isCORSwithCredentials()
   {
-    return corsCred;
+    return mCorsCred;
   }
 
   std::string &getCORSdomain()
   {
-    return corsDomain;
+    return mCorsDomain;
   };
 
   /************************************************************************/
@@ -250,13 +249,13 @@ public:
 
   void setHttpReturnCode( const unsigned value )
   {
-    httpReturnCode = value;
+    mHttpReturnCode = value;
     std::map<unsigned, const char *>::iterator it;
-    it = httpReturnCodes.find( value );
-    if( it != httpReturnCodes.end() )
-      httpReturnCodeMessage = it->second;
+    it = mHttpReturnCodes.find( value );
+    if( it != mHttpReturnCodes.end() )
+      mHttpReturnCodeMessage = it->second;
     else
-      httpReturnCodeMessage = "Unspecified";
+      mHttpReturnCodeMessage = "Unspecified";
   }
 
   /************************************************************************/
@@ -267,8 +266,8 @@ public:
    */
   void setHttpReturnCode( const unsigned value, const std::string message )
   {
-    httpReturnCode        = value;
-    httpReturnCodeMessage = message;
+    mHttpReturnCode        = value;
+    mHttpReturnCodeMessage = message;
   }
 
   /************************************************************************/
@@ -277,13 +276,13 @@ public:
    */
   std::string getHttpReturnCodeStr()
   {
-    if( httpReturnCode == unsetHttpReturnCodeMessage ) {
+    if( mHttpReturnCode == mUnsetHttpReturnCodeMessage ) {
       setHttpReturnCode( 204 );
     }
 
     std::ostringstream httpRetCodeSS; // stream used for the conversion
-    httpRetCodeSS << httpReturnCode;
-    return httpRetCodeSS.str() + " " + httpReturnCodeMessage;
+    httpRetCodeSS << mHttpReturnCode;
+    return httpRetCodeSS.str() + " " + mHttpReturnCodeMessage;
   }
 
   /************************************************************************/
@@ -293,96 +292,98 @@ public:
    */
   void initializeHttpReturnCode() const
   {
-    if( httpReturnCodes.size() )
+    if( mHttpReturnCodes.size() )
       return;
 
     // 1xx Informational responses
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 100, "Continue" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 101, "Switching Protocols" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 102, "Processing" ) ); //(WebDAV; RFC 2518)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 100, "Continue" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 101, "Switching Protocols" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 102, "Processing" ) ); //(WebDAV; RFC 2518)
 
     // 2xx Success
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 200, "OK" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 201, "Created" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 202, "Accepted" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 203, "Non-Authoritative Information" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 204, "No Content" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 205, "Reset Content" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 206, "Partial Content" ) );  // (RFC 7233)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 207, "Multi-Status" ) );     // (WebDAV; RFC 4918)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 208, "Already Reported" ) ); // (WebDAV; RFC 5842)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 226, "IM Used" ) );          // (RFC 3229)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 200, "OK" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 201, "Created" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 202, "Accepted" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 203, "Non-Authoritative Information" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 204, "No Content" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 205, "Reset Content" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 206, "Partial Content" ) );  // (RFC 7233)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 207, "Multi-Status" ) );     // (WebDAV; RFC 4918)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 208, "Already Reported" ) ); // (WebDAV; RFC 5842)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 226, "IM Used" ) );          // (RFC 3229)
 
     // 3xx Redirection
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 300, "Multiple Choices" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 301, "Moved Permanently" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 302, "Found" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 303, "See Other" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 304, "Not Modified" ) ); // (RFC 7232)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 305, "Use Proxy" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 306, "Switch Proxy" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 307, "Temporary Redirect" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 308, "Permanent Redirect" ) ); // (RFC 7538)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 300, "Multiple Choices" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 301, "Moved Permanently" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 302, "Found" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 303, "See Other" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 304, "Not Modified" ) ); // (RFC 7232)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 305, "Use Proxy" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 306, "Switch Proxy" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 307, "Temporary Redirect" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 308, "Permanent Redirect" ) ); // (RFC 7538)
 
     // 4xx Client errors
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 400, "Bad Request" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 401, "Unauthorized" ) ); // (RFC 7235)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 402, "Payment Required" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 403, "Forbidden" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 404, "Not Found" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 405, "Method Not Allowed" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 406, "Not Acceptable" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 407, "Proxy Authentication Required" ) ); // (RFC 7235)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 408, "Request Timeout" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 409, "Conflict" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 410, "Gone" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 411, "Length Required" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 412, "Precondition Failed" ) ); // (RFC 7232)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 413, "Payload Too Large" ) );   // (RFC 7231)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 414, "URI Too Long" ) );        //(RFC 7231)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 415, "Unsupported Media Type" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 416, "Range Not Satisfiable" ) ); // (RFC 7233)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 417, "Expectation Failed" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 418, "I'm a teapot" ) );         // (RFC 2324)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 421, "Misdirected Request" ) );  // (RFC 7540)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 422, "Unprocessable Entity" ) ); // (WebDAV; RFC 4918)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 423, "Locked" ) );               // (WebDAV; RFC 4918)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 424, "Failed Dependency" ) );    // (WebDAV; RFC 4918)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 426, "Upgrade Required" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 428, "Precondition Required" ) );           // (RFC 6585)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 429, "Too Many Requests" ) );               //(RFC 6585)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 431, "Request Header Fields Too Large" ) ); // (RFC 6585)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 451, "Unavailable For Legal Reasons" ) );   // (RFC 7725)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 400, "Bad Request" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 401, "Unauthorized" ) ); // (RFC 7235)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 402, "Payment Required" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 403, "Forbidden" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 404, "Not Found" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 405, "Method Not Allowed" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 406, "Not Acceptable" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 407, "Proxy Authentication Required" ) ); // (RFC 7235)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 408, "Request Timeout" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 409, "Conflict" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 410, "Gone" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 411, "Length Required" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 412, "Precondition Failed" ) ); // (RFC 7232)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 413, "Payload Too Large" ) );   // (RFC 7231)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 414, "URI Too Long" ) );        //(RFC 7231)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 415, "Unsupported Media Type" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 416, "Range Not Satisfiable" ) ); // (RFC 7233)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 417, "Expectation Failed" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 418, "I'm a teapot" ) );         // (RFC 2324)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 421, "Misdirected Request" ) );  // (RFC 7540)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 422, "Unprocessable Entity" ) ); // (WebDAV; RFC 4918)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 423, "Locked" ) );               // (WebDAV; RFC 4918)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 424, "Failed Dependency" ) );    // (WebDAV; RFC 4918)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 426, "Upgrade Required" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 428, "Precondition Required" ) ); // (RFC 6585)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 429, "Too Many Requests" ) );     //(RFC 6585)
+    mHttpReturnCodes.insert(
+        std::pair<unsigned, const char *>( 431, "Request Header Fields Too Large" ) );                    // (RFC 6585)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 451, "Unavailable For Legal Reasons" ) ); // (RFC 7725)
 
     // 5xx Server error[edit]
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 500, "Internal Server Error" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 501, "Not Implemented" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 502, "Bad Gateway" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 503, "Service Unavailable" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 504, "Gateway Timeout" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 505, "HTTP Version Not Supported" ) );
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 506, "Variant Also Negotiates" ) ); // (RFC 2295)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 507, "Insufficient Storage" ) );    // (WebDAV; RFC 4918)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 508, "Loop Detected" ) );           // (WebDAV; RFC 5842)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 510, "Not Extended" ) );            // (RFC 2774)
-    httpReturnCodes.insert( std::pair<unsigned, const char *>( 511, "Network Authentication Required" ) ); // (RFC 6585)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 500, "Internal Server Error" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 501, "Not Implemented" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 502, "Bad Gateway" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 503, "Service Unavailable" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 504, "Gateway Timeout" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 505, "HTTP Version Not Supported" ) );
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 506, "Variant Also Negotiates" ) ); // (RFC 2295)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 507, "Insufficient Storage" ) ); // (WebDAV; RFC 4918)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 508, "Loop Detected" ) );        // (WebDAV; RFC 5842)
+    mHttpReturnCodes.insert( std::pair<unsigned, const char *>( 510, "Not Extended" ) );         // (RFC 2774)
+    mHttpReturnCodes.insert(
+        std::pair<unsigned, const char *>( 511, "Network Authentication Required" ) ); // (RFC 6585)
   }
 
   void addSpecificHeader( const char *header )
   {
-    httpSpecificHeaders += header;
-    httpSpecificHeaders += "\r\n";
+    mHttpSpecificHeaders += header;
+    mHttpSpecificHeaders += "\r\n";
   }
 
   void addSpecificHeader( const std::string &header )
   {
-    httpSpecificHeaders += header;
-    httpSpecificHeaders += "\r\n";
+    mHttpSpecificHeaders += header;
+    mHttpSpecificHeaders += "\r\n";
   }
 
   std::string getSpecificHeaders() const
   {
-    return httpSpecificHeaders;
+    return mHttpSpecificHeaders;
   }
 };
 

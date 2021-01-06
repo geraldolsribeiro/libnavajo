@@ -42,10 +42,10 @@ class WebSocketClient {
   pthread_cond_t               sendingNotification;
   void                         addSendingQueue( MessageContent *msgContent );
 
-  WebSocket *   websocket;
-  HttpRequest * request;
-  volatile bool closing;
-  pthread_t     receivingThreadId, sendingThreadId;
+  WebSocket *   mWebsocket;
+  HttpRequest * mRequest;
+  volatile bool mClosing;
+  pthread_t     mReceivingThreadId, mSendingThreadId;
 
   void receivingThread();
   void sendingThread();
@@ -72,8 +72,8 @@ class WebSocketClient {
 
   void startWebSocketThreads()
   {
-    create_thread( &receivingThreadId, WebSocketClient::startReceivingThread, static_cast<void *>( this ) );
-    create_thread( &sendingThreadId, WebSocketClient::startSendingThread, static_cast<void *>( this ) );
+    create_thread( &mReceivingThreadId, WebSocketClient::startReceivingThread, static_cast<void *>( this ) );
+    create_thread( &mSendingThreadId, WebSocketClient::startSendingThread, static_cast<void *>( this ) );
   }
 
   void freeSendingQueue()
@@ -161,7 +161,7 @@ public:
 
   HttpRequest *getHttpRequest()
   {
-    return request;
+    return mRequest;
   };
 
   void closeWS();

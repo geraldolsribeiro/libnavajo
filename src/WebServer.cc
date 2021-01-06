@@ -58,7 +58,7 @@ const std::string                     WebServer::base64_chars
       "0123456789+/";
 const std::string WebServer::webSocketMagicString = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
-std::map<unsigned, const char *> HttpResponse::httpReturnCodes;
+std::map<unsigned, const char *> HttpResponse::mHttpReturnCodes;
 time_t                           HttpSession::lastExpirationSearchTime = 0;
 time_t                           HttpSession::sessionLifeTime          = 20 * 60;
 

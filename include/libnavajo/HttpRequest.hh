@@ -57,17 +57,17 @@ class HttpRequest {
   typedef std::map<std::string, std::string> HttpRequestParametersMap;
   typedef std::map<std::string, std::string> HttpRequestCookiesMap;
 
-  const char *             url;
-  const char *             origin;
-  ClientSockData *         clientSockData;
-  std::string              httpAuthUsername;
-  HttpRequestMethod        httpMethod;
-  HttpRequestCookiesMap    cookies;
-  HttpRequestParametersMap parameters;
+  const char *             mUrl;
+  const char *             mOrigin;
+  ClientSockData *         mClientSockData;
+  std::string              mHttpAuthUsername;
+  HttpRequestMethod        mHttpMethod;
+  HttpRequestCookiesMap    mCookies;
+  HttpRequestParametersMap mParameters;
   std::string              mSessionId;
-  MPFD::Parser *           multipartContentParser;
-  const char *             mimeType;
-  std::vector<uint8_t> *   payload;
+  MPFD::Parser *           mMultipartContentParser;
+  const char *             mMimeType;
+  std::vector<uint8_t> *   mPayload;
 
   /**********************************************************************/
   /**
@@ -126,28 +126,28 @@ class HttpRequest {
       size_t posEq = 0;
       if( ( posEq = theParam.find( '=' ) ) == std::string::npos ) {
         GR_JUMP_TRACE;
-        parameters[theParam] = "";
+        mParameters[theParam] = "";
       }
       else {
         GR_JUMP_TRACE;
         std::string key   = theParam.substr( 0, posEq );
         std::string value = theParam.substr( posEq + 1 );
-        if( parameters.count( key ) == 0 ) {
+        if( mParameters.count( key ) == 0 ) {
           GR_JUMP_TRACE;
-          parameters[key] = value;
+          mParameters[key] = value;
         }
         else {
           GR_JUMP_TRACE;
           std::string arrayKey = key + "[]";
-          if( parameters.count( arrayKey ) == 1 ) {
+          if( mParameters.count( arrayKey ) == 1 ) {
             GR_JUMP_TRACE;
-            parameters[arrayKey] += "|" + value;
+            mParameters[arrayKey] += "|" + value;
           }
           else {
             GR_JUMP_TRACE;
-            parameters[arrayKey] = parameters[key] + "|" + value;
+            mParameters[arrayKey] = mParameters[key] + "|" + value;
           }
-          parameters[key] = value;
+          mParameters[key] = value;
         }
       }
 
@@ -178,7 +178,7 @@ class HttpRequest {
 
         if( posEq - firstC > 0 && theCookie.length() - posEq > 0 ) {
           GR_JUMP_TRACE;
-          cookies[theCookie.substr( firstC, posEq - firstC )]
+          mCookies[theCookie.substr( firstC, posEq - firstC )]
               = theCookie.substr( posEq + 1, theCookie.length() - posEq );
         }
       }
@@ -226,9 +226,9 @@ public:
   inline bool getCookie( const std::string &name, std::string &value ) const
   {
     GR_JUMP_TRACE;
-    if( !cookies.empty() ) {
+    if( !mCookies.empty() ) {
       HttpRequestCookiesMap::const_iterator it;
-      if( ( it = cookies.find( name ) ) != cookies.end() ) {
+      if( ( it = mCookies.find( name ) ) != mCookies.end() ) {
         value = it->second;
         return true;
       }
@@ -245,7 +245,7 @@ public:
   {
     GR_JUMP_TRACE;
     std::vector<std::string> res;
-    for( const auto &cookie : cookies ) {
+    for( const auto &cookie : mCookies ) {
       res.push_back( cookie.first );
     }
     return res;
@@ -261,9 +261,9 @@ public:
   inline bool getParameter( const std::string &name, std::string &value ) const
   {
     GR_JUMP_TRACE;
-    if( !parameters.empty() ) {
+    if( !mParameters.empty() ) {
       HttpRequestParametersMap::const_iterator it;
-      if( ( it = parameters.find( name ) ) != parameters.end() ) {
+      if( ( it = mParameters.find( name ) ) != mParameters.end() ) {
         value = it->second;
         return true;
       }
@@ -307,7 +307,7 @@ public:
   {
     GR_JUMP_TRACE;
     std::vector<std::string> res;
-    for( const auto &parameter : parameters ) {
+    for( const auto &parameter : mParameters ) {
       GR_JUMP_TRACE;
       res.push_back( parameter.first );
     }
@@ -473,14 +473,14 @@ public:
       MPFD::Parser *          parser  = nullptr )
   {
     GR_JUMP_TRACE;
-    this->httpMethod             = type;
-    this->url                    = url;
-    this->origin                 = origin;
-    this->httpAuthUsername       = username;
-    this->clientSockData         = client;
-    this->mimeType               = mimeType;
-    this->payload                = payload;
-    this->multipartContentParser = parser;
+    mHttpMethod             = type;
+    mUrl                    = url;
+    mOrigin                 = origin;
+    mHttpAuthUsername       = username;
+    mClientSockData         = client;
+    mMimeType               = mimeType;
+    mPayload                = payload;
+    mMultipartContentParser = parser;
 
     setParams( params );
 
@@ -499,7 +499,7 @@ public:
   inline bool isMultipartContent() const
   {
     GR_JUMP_TRACE;
-    return multipartContentParser != nullptr;
+    return mMultipartContentParser != nullptr;
   };
 
   /**********************************************************************/
@@ -510,7 +510,7 @@ public:
   inline MPFD::Parser *getMPFDparser()
   {
     GR_JUMP_TRACE;
-    return multipartContentParser;
+    return mMultipartContentParser;
   };
 
   /**********************************************************************/
@@ -521,7 +521,7 @@ public:
   inline const char *getMimeType() const
   {
     GR_JUMP_TRACE;
-    return mimeType;
+    return mMimeType;
   };
 
   /**********************************************************************/
@@ -532,7 +532,7 @@ public:
   inline std::vector<uint8_t> &getPayload()
   {
     GR_JUMP_TRACE;
-    return *payload;
+    return *mPayload;
   };
 
   /**********************************************************************/
@@ -543,7 +543,7 @@ public:
   inline const char *getUrl() const
   {
     GR_JUMP_TRACE;
-    return url;
+    return mUrl;
   };
 
   /**********************************************************************/
@@ -554,7 +554,7 @@ public:
   inline void setUrl( const char *newUrl )
   {
     GR_JUMP_TRACE;
-    url = newUrl;
+    mUrl = newUrl;
   };
 
   // GLSR: torna pública a configuração de parâmetros permitindo realizar
@@ -582,7 +582,7 @@ public:
   inline HttpRequestMethod getRequestType() const
   {
     GR_JUMP_TRACE;
-    return httpMethod;
+    return mHttpMethod;
   };
 
   /**********************************************************************/
@@ -593,7 +593,7 @@ public:
   inline void setRequestType( HttpRequestMethod newMethod )
   {
     GR_JUMP_TRACE;
-    httpMethod = newMethod;
+    mHttpMethod = newMethod;
   };
 
   /**********************************************************************/
@@ -604,7 +604,7 @@ public:
   inline const char *getRequestOrigin() const
   {
     GR_JUMP_TRACE;
-    return origin;
+    return mOrigin;
   };
 
   /**********************************************************************/
@@ -615,7 +615,7 @@ public:
   inline IpAddress &getPeerIpAddress()
   {
     GR_JUMP_TRACE;
-    return clientSockData->ip;
+    return mClientSockData->ip;
   };
 
   /**********************************************************************/
@@ -626,7 +626,7 @@ public:
   inline std::string &getHttpAuthUsername()
   {
     GR_JUMP_TRACE;
-    return httpAuthUsername;
+    return mHttpAuthUsername;
   };
 
   /**********************************************************************/
@@ -637,7 +637,7 @@ public:
   inline std::string &getX509PeerDN()
   {
     GR_JUMP_TRACE;
-    return *( clientSockData->peerDN );
+    return *( mClientSockData->peerDN );
   };
 
   /**********************************************************************/
@@ -648,7 +648,7 @@ public:
   inline bool isX509auth()
   {
     GR_JUMP_TRACE;
-    return clientSockData->peerDN != nullptr;
+    return mClientSockData->peerDN != nullptr;
   }
 
   /**********************************************************************/
@@ -659,18 +659,18 @@ public:
   inline CompressionMode getCompressionMode()
   {
     GR_JUMP_TRACE;
-    return clientSockData->compression;
+    return mClientSockData->compression;
   };
 
   /**********************************************************************/
   /**
    * get the http request client socket data
-   * @return the clientSockData
+   * @return the mClientSockData
    */
   ClientSockData *getClientSockData()
   {
     GR_JUMP_TRACE;
-    return clientSockData;
+    return mClientSockData;
   }
 };
 

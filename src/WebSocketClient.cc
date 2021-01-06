@@ -22,7 +22,8 @@
 
 /***********************************************************************/
 
-WebSocketClient::WebSocketClient( WebSocket *ws, HttpRequest *req ) : websocket( ws ), request( req ), closing( false )
+WebSocketClient::WebSocketClient( WebSocket *ws, HttpRequest *req )
+    : mWebsocket( ws ), mRequest( req ), mClosing( false )
 {
   GR_JUMP_TRACE;
   snd_maxLatency = ws->getClientSendingMaxLatency();
@@ -30,7 +31,7 @@ WebSocketClient::WebSocketClient( WebSocket *ws, HttpRequest *req ) : websocket(
   pthread_cond_init( &sendingNotification, nullptr );
   gzipcontext.dictInfLength = 0;
   nvj_init_stream( &( gzipcontext.strm_deflate ), true );
-  noSessionExpiration( request );
+  noSessionExpiration( mRequest );
   startWebSocketThreads();
 }
 
@@ -42,11 +43,11 @@ void WebSocketClient::sendingThread()
   pthread_mutex_lock( &sendingQueueMutex );
 
   for( ;; ) {
-    while( sendingQueue.empty() && !closing ) {
+    while( sendingQueue.empty() && !mClosing ) {
       pthread_cond_wait( &sendingNotification, &sendingQueueMutex );
     }
 
-    if( closing ) {
+    if( mClosing ) {
       break;
     }
 
@@ -86,17 +87,17 @@ void WebSocketClient::receivingThread()
   unsigned char *msgContent = nullptr;
   enum MsgDecodSteps { FIRSTBYTE, LENGTH, MASK, CONTENT };
 
-  ClientSockData *client = request->getClientSockData();
+  ClientSockData *client = mRequest->getClientSockData();
 
-  if( websocket->getWebsocketTimeoutInMilliSecond()
+  if( mWebsocket->getWebsocketTimeoutInMilliSecond()
       && !setSocketSndRcvTimeout(
-             client->socketId, 0, websocket->getWebsocketTimeoutInMilliSecond() ) ) { // Reduce socket timeout
+             client->socketId, 0, mWebsocket->getWebsocketTimeoutInMilliSecond() ) ) { // Reduce socket timeout
     NVJ_LOG->appendUniq( NVJ_ERROR, "WebSocketClient : setSocketSndRcvTimeout error" );
     closeRecv();
     return;
   }
 
-  if( !websocket->isUsingNaggleAlgo() ) {
+  if( !mWebsocket->isUsingNaggleAlgo() ) {
     if( !setSocketNagleAlgo( client->socketId, false ) ) // Disable Naggle Algorithm
     {
       NVJ_LOG->appendUniq( NVJ_ERROR, "WebSocketClient : setSocketNagleAlgo error" );
@@ -111,7 +112,7 @@ void WebSocketClient::receivingThread()
   MsgDecodSteps step       = FIRSTBYTE;
   memset( msgKeys, 0, 4 * sizeof( unsigned char ) );
 
-  for( ; !closing; ) {
+  for( ; !mClosing; ) {
     int    n      = 0;
     size_t it     = 0;
     size_t length = readLength;
@@ -126,7 +127,7 @@ void WebSocketClient::receivingThread()
         n = BIO_read( client->bio, bufferRecv + it, length - it );
 
         if( SSL_get_error( client->ssl, n ) == SSL_ERROR_ZERO_RETURN ) {
-          closing = true;
+          mClosing = true;
         }
         if( ( n == 0 ) || ( n == -1 ) ) {
           continue;
@@ -137,16 +138,16 @@ void WebSocketClient::receivingThread()
 
         if( n <= 0 ) {
           if( errno == ENOTCONN || errno == EBADF || errno == ECONNRESET ) {
-            closing = true;
+            mClosing = true;
           }
           continue;
         }
       }
 
       it += n;
-    } while( it != length && !closing );
+    } while( it != length && !mClosing );
 
-    if( closing ) {
+    if( mClosing ) {
       continue;
     }
 
@@ -225,9 +226,9 @@ void WebSocketClient::receivingThread()
       break;
 
     case CONTENT:
-      char buf[300];
+      char buf3[300];
       snprintf(
-          buf,
+          buf3,
           300,
           "WebSocket: new message received (len=%llu fin=%d "
           "rsv=%d opcode=%d mask=%d)",
@@ -236,7 +237,7 @@ void WebSocketClient::receivingThread()
           rsv,
           opcode,
           msgMask );
-      spdlog::debug( buf );
+      spdlog::debug( buf3 );
       if( msgContent != nullptr ) {
         for( size_t i = 0; i < length; i++ ) {
           if( msgMask ) {
@@ -271,39 +272,39 @@ void WebSocketClient::receivingThread()
         switch( opcode ) {
         case 0x1:
           if( msgLength ) {
-            websocket->onTextMessage( this, std::string( (char *)msgContent, msgLength ), fin );
+            mWebsocket->onTextMessage( this, std::string( (char *)msgContent, msgLength ), fin );
           }
           else {
-            websocket->onTextMessage( this, "", fin );
+            mWebsocket->onTextMessage( this, "", fin );
           }
           break;
         case 0x2:
-          websocket->onBinaryMessage( this, msgContent, msgLength, fin );
+          mWebsocket->onBinaryMessage( this, msgContent, msgLength, fin );
           break;
         case 0x8:
-          if( websocket->onCloseCtrlFrame( this, msgContent, msgLength ) ) {
+          if( mWebsocket->onCloseCtrlFrame( this, msgContent, msgLength ) ) {
             sendCloseCtrlFrame( msgContent, msgLength );
             closeRecv();
             return;
           }
           break;
         case 0x9:
-          if( websocket->onPingCtrlFrame( this, msgContent, msgLength ) ) {
+          if( mWebsocket->onPingCtrlFrame( this, msgContent, msgLength ) ) {
             sendPongCtrlFrame( msgContent, msgLength );
           }
           break;
         case 0xa:
-          websocket->onPongCtrlFrame( this, msgContent, msgLength );
+          mWebsocket->onPongCtrlFrame( this, msgContent, msgLength );
           break;
         default:
-          char buf[300];
+          char buf2[300];
           snprintf(
-              buf,
+              buf2,
               300,
               "WebSocket: message received with unknown opcode "
               "(%d) has been ignored",
               opcode );
-          NVJ_LOG->append( NVJ_INFO, buf );
+          NVJ_LOG->append( NVJ_INFO, buf2 );
           break;
         }
 
@@ -332,44 +333,44 @@ void WebSocketClient::receivingThread()
 void WebSocketClient::closeWS()
 {
   GR_JUMP_TRACE;
-  closing = true;
-  websocket->removeClient( this, true );
-  websocket->onClosing( this );
+  mClosing = true;
+  mWebsocket->removeClient( this, true );
+  mWebsocket->onClosing( this );
 
   pthread_cond_broadcast( &sendingNotification );
-  wait_for_thread( sendingThreadId );
-  WebServer::freeClientSockData( request->getClientSockData() );
-  wait_for_thread( receivingThreadId );
-  restoreSessionExpiration( request );
-  delete request;
+  wait_for_thread( mSendingThreadId );
+  WebServer::freeClientSockData( mRequest->getClientSockData() );
+  wait_for_thread( mReceivingThreadId );
+  restoreSessionExpiration( mRequest );
+  delete mRequest;
   delete this;
 }
 
 void WebSocketClient::closeSend()
 {
   GR_JUMP_TRACE;
-  closing = true;
-  websocket->removeClient( this, false );
-  websocket->onClosing( this );
+  mClosing = true;
+  mWebsocket->removeClient( this, false );
+  mWebsocket->onClosing( this );
 
-  WebServer::freeClientSockData( request->getClientSockData() );
-  restoreSessionExpiration( request );
-  delete request;
+  WebServer::freeClientSockData( mRequest->getClientSockData() );
+  restoreSessionExpiration( mRequest );
+  delete mRequest;
   delete this;
 }
 
 void WebSocketClient::closeRecv()
 {
   GR_JUMP_TRACE;
-  closing = true;
-  websocket->removeClient( this, false );
-  websocket->onClosing( this );
+  mClosing = true;
+  mWebsocket->removeClient( this, false );
+  mWebsocket->onClosing( this );
 
   pthread_cond_broadcast( &sendingNotification );
-  wait_for_thread( sendingThreadId );
-  WebServer::freeClientSockData( request->getClientSockData() );
-  restoreSessionExpiration( request );
-  delete request;
+  wait_for_thread( mSendingThreadId );
+  WebServer::freeClientSockData( mRequest->getClientSockData() );
+  restoreSessionExpiration( mRequest );
+  delete mRequest;
   delete this;
 }
 
@@ -398,7 +399,7 @@ void WebSocketClient::restoreSessionExpiration( HttpRequest *request )
 bool WebSocketClient::sendMessage( const MessageContent *msgContent )
 {
   GR_JUMP_TRACE;
-  ClientSockData *client = request->getClientSockData();
+  ClientSockData *client = mRequest->getClientSockData();
 
   unsigned char  headerBuffer[10]; // 10 is the max header size
   size_t         headerLen = 2;    // default header size
@@ -459,7 +460,7 @@ void WebSocketClient::addSendingQueue( MessageContent *msgContent )
 {
   GR_JUMP_TRACE;
   pthread_mutex_lock( &sendingQueueMutex );
-  if( !closing ) {
+  if( !mClosing ) {
     sendingQueue.push( msgContent );
   }
   pthread_mutex_unlock( &sendingQueueMutex );
