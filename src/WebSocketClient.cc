@@ -92,7 +92,7 @@ void WebSocketClient::receivingThread()
   if( mWebsocket->getWebsocketTimeoutInMilliSecond()
       && !setSocketSndRcvTimeout(
              client->socketId, 0, mWebsocket->getWebsocketTimeoutInMilliSecond() ) ) { // Reduce socket timeout
-    NVJ_LOG->appendUniq( NVJ_ERROR, "WebSocketClient : setSocketSndRcvTimeout error" );
+    spdlog::error( "WebSocketClient : setSocketSndRcvTimeout error" );
     closeRecv();
     return;
   }
@@ -100,7 +100,7 @@ void WebSocketClient::receivingThread()
   if( !mWebsocket->isUsingNaggleAlgo() ) {
     if( !setSocketNagleAlgo( client->socketId, false ) ) // Disable Naggle Algorithm
     {
-      NVJ_LOG->appendUniq( NVJ_ERROR, "WebSocketClient : setSocketNagleAlgo error" );
+      spdlog::error( "WebSocketClient : setSocketNagleAlgo error" );
       closeRecv();
       return;
     }
@@ -172,7 +172,7 @@ void WebSocketClient::receivingThread()
 
         msgLength = bufferRecv[0] & 0x7f;
         if( !msgLength ) {
-          NVJ_LOG->append( NVJ_WARNING, "Websocket: Message length is null. Closing socket." );
+          spdlog::warn( "Websocket: Message length is null. Closing socket." );
           msgLength  = 0;
           msgContent = nullptr;
           step       = CONTENT;
@@ -205,7 +205,7 @@ void WebSocketClient::receivingThread()
             500,
             " Websocket: Message content allocation failed (length: %llu)",
             static_cast<unsigned long long>( msgLength ) );
-        NVJ_LOG->append( NVJ_WARNING, logBuffer );
+        spdlog::warn( logBuffer );
         msgContent = nullptr;
       }
       msgContentIt = 0;
@@ -264,7 +264,7 @@ void WebSocketClient::receivingThread()
             msgContent[msgLength] = '\0';
           }
           catch( std::exception &e ) {
-            NVJ_LOG->append( NVJ_ERROR, std::string( " Websocket: nvj_gzip raised an exception: " ) + e.what() );
+            spdlog::error( "Websocket: nvj_gzip raised an exception: {}", e.what() );
             msgLength = 0;
           }
         }
@@ -297,14 +297,7 @@ void WebSocketClient::receivingThread()
           mWebsocket->onPongCtrlFrame( this, msgContent, msgLength );
           break;
         default:
-          char buf2[300];
-          snprintf(
-              buf2,
-              300,
-              "WebSocket: message received with unknown opcode "
-              "(%d) has been ignored",
-              opcode );
-          NVJ_LOG->append( NVJ_INFO, buf2 );
+          spdlog::info( "WebSocket: message received with unknown opcode ({}) has been ignored", opcode );
           break;
         }
 
@@ -418,7 +411,7 @@ bool WebSocketClient::sendMessage( const MessageContent *msgContent )
       msgLen = nvj_gzip_websocket_v2( &msg, msgContent->message, msgContent->length, &( gzipcontext.strm_deflate ) );
     }
     catch( ... ) {
-      NVJ_LOG->append( NVJ_ERROR, " Websocket: nvj_gzip raised an exception" );
+      spdlog::error( "Websocket: nvj_gzip raised an exception" );
       return false;
     }
   }

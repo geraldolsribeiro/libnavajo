@@ -23,9 +23,6 @@
 #include <string>
 #include <spdlog/spdlog.h>
 
-#define NVJ_LOG LogRecorder::getInstance()
-#define NVJ_printf LogRecorder::getInstance()->printf
-
 /**
  * LogRecorder - generic class to handle log trace
  */

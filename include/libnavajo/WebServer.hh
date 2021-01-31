@@ -391,7 +391,7 @@ public:
    */
   void startService()
   {
-    NVJ_LOG->append( NVJ_INFO, "WebServer: Service is starting !" );
+    spdlog::info( "WebServer: Service is starting !" );
     create_thread( &threadWebServer, WebServer::startThread, this );
   };
 
@@ -400,7 +400,7 @@ public:
    */
   void stopService()
   {
-    NVJ_LOG->append( NVJ_INFO, "WebServer: Service is stopping !" );
+    spdlog::info( "WebServer: Service is stopping !" );
     exit();
     threadWebServer = 0;
   };

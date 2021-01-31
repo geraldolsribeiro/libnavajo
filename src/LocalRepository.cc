@@ -79,10 +79,7 @@ bool LocalRepository::loadFilename_dir( const std::string &alias, const std::str
     std::string filepath = fullPath + '/' + entry->d_name;
 
     if( stat( filepath.c_str(), &s ) == -1 ) {
-      NVJ_LOG->append(
-          NVJ_ERROR,
-          std::string( "LocalRepository - stat error reading file '" ) + filepath
-              + "': " + std::string( strerror( errno ) ) );
+      spdlog::error( "LocalRepository - stat error reading file '{}': {}", filepath, strerror( errno ) );
       continue;
     }
 
@@ -144,9 +141,7 @@ bool LocalRepository::getFile( HttpRequest *request, HttpResponse *response )
   FILE *pFile = fopen( filename.c_str(), "rb" );
   if( pFile == nullptr ) {
     GR_JUMP_TRACE;
-    char logBuffer[150];
-    snprintf( logBuffer, 150, "Webserver : Error opening file '%s'", filename.c_str() );
-    NVJ_LOG->append( NVJ_ERROR, logBuffer );
+    spdlog::error( "Webserver : Error opening file '{}'", filename );
     return false;
   }
 
@@ -163,9 +158,7 @@ bool LocalRepository::getFile( HttpRequest *request, HttpResponse *response )
   size_t nb = fread( webpage, 1, webpageLen, pFile );
   if( nb != webpageLen ) {
     GR_JUMP_TRACE;
-    char logBuffer[150];
-    snprintf( logBuffer, 150, "Webserver : Error accessing file '%s'", filename.c_str() );
-    NVJ_LOG->append( NVJ_ERROR, logBuffer );
+    spdlog::error( "Webserver : Error accessing file '{}'", filename );
     // free( webpage );
     // fclose( pFile );
     return false;

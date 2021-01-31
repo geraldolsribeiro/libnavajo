@@ -153,7 +153,6 @@ int main()
   signal( SIGTERM, exitFunction );
   signal( SIGINT, exitFunction );
 
-  NVJ_LOG->addLogOutput( new LogStdOutput );
   webServer = new WebServer;
   // webServer->setUseSSL(true, "../myCert.pem");
   LocalRepository myLocalRepo( "", "./html" );

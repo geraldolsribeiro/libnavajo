@@ -203,13 +203,13 @@ bool WebServer::isUserAllowed( const std::string &pwdb64, std::string &login )
   }
 
   if( authOK ) {
-    NVJ_LOG->append( NVJ_INFO, "WebServer: Authentification passed for user '" + login + "'" );
+    spdlog::info( "WebServer: Authentification passed for user '{}'", login );
     if( i == usersAuthHistory.end() ) {
       usersAuthHistory[pwdb64] = t;
     }
   }
   else {
-    spdlog::debug( "WebServer: Authentification failed for user '" + login + "'" );
+    spdlog::debug( "WebServer: Authentification failed for user '{}'", login );
   }
 
   pthread_mutex_unlock( &usersAuthHistory_mutex );
@@ -313,7 +313,7 @@ bool WebServer::isTokenAllowed( const std::string &tokb64, const std::string &re
 
 end:
   pthread_mutex_unlock( &tokensAuthHistory_mutex );
-  NVJ_LOG->append( logAuthLvl, logAuth );
+  spdlog::info( logAuth );
 
   return authOK;
 }
@@ -991,9 +991,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
       }
       else {
         GR_JUMP_TRACE;
-        char bufLinestr[300];
-        snprintf( bufLinestr, 300, "Webserver: Websocket not found %s", urlBuffer );
-        NVJ_LOG->append( NVJ_WARNING, bufLinestr );
+        spdlog::warn( "Webserver: Websocket not found '{}'", urlBuffer );
 
         std::string msg = getNotFoundErrorMsg();
         httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
@@ -1100,7 +1098,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
       // Need to uncompress
       try {
         if( (int)( webpageLen = nvj_gunzip( &webpage, gzipWebPage, sizeZip ) ) < 0 ) {
-          NVJ_LOG->append( NVJ_ERROR, "Webserver: gunzip decompression failed !" );
+          spdlog::error( "Webserver: gunzip decompression failed !" );
           std::string msg = getInternalServerErrorMsg();
           httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
           ( *repo )->freeFile( gzipWebPage );
@@ -1108,7 +1106,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
         }
       }
       catch( ... ) {
-        NVJ_LOG->append( NVJ_ERROR, "Webserver: nvj_gunzip raised an exception" );
+        spdlog::error( "Webserver: nvj_gunzip raised an exception" );
         std::string msg = getInternalServerErrorMsg();
         httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
         ( *repo )->freeFile( gzipWebPage );
@@ -1123,7 +1121,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
           && ( strncmp( mimetype, "application", 11 ) == 0 || strncmp( mimetype, "text", 4 ) == 0 ) ) {
         try {
           if( (int)( sizeZip = nvj_gzip( &gzipWebPage, webpage, webpageLen ) ) < 0 ) {
-            NVJ_LOG->append( NVJ_ERROR, "Webserver: gunzip compression failed !" );
+            spdlog::error( "Webserver: gunzip compression failed !" );
             std::string msg = getInternalServerErrorMsg();
             httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
             ( *repo )->freeFile( webpage );
@@ -1135,7 +1133,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
           }
         }
         catch( ... ) {
-          NVJ_LOG->append( NVJ_ERROR, "Webserver: nvj_gzip raised an exception" );
+          spdlog::error( "Webserver: nvj_gzip raised an exception" );
           std::string msg = getInternalServerErrorMsg();
           httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
           ( *repo )->freeFile( webpage );
@@ -1153,10 +1151,8 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
           = getHttpHeader( response.getHttpReturnCodeStr().c_str(), sizeZip, keepAlive, nullptr, true, &response );
       if( !httpSend( clientSockData, (const void *)header.c_str(), header.length() )
           || !httpSend( clientSockData, (const void *)gzipWebPage, sizeZip ) ) {
-        NVJ_LOG->append(
-            NVJ_ERROR,
-            std::string( "Webserver: httpSend failed sending the zipped page: " ) + urlBuffer + std::string( "- err: " )
-                + strerror( errno ) );
+        spdlog::error(
+            "Webserver: httpSend failed sending the zipped page: {}- err: {}", urlBuffer, strerror( errno ) );
         closing = true;
       }
     }
@@ -1165,10 +1161,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
           = getHttpHeader( response.getHttpReturnCodeStr().c_str(), webpageLen, keepAlive, nullptr, false, &response );
       if( !httpSend( clientSockData, (const void *)header.c_str(), header.length() )
           || !httpSend( clientSockData, (const void *)webpage, webpageLen ) ) {
-        NVJ_LOG->append(
-            NVJ_ERROR,
-            std::string( "Webserver: httpSend failed sending the page: " ) + urlBuffer + std::string( "- err: " )
-                + strerror( errno ) );
+        spdlog::error( "Webserver: httpSend failed sending the page: {}- err: {}", urlBuffer, strerror( errno ) );
         closing = true;
       }
     }
@@ -1281,7 +1274,7 @@ bool WebServer::httpSend( ClientSockData *client, const void *buf, size_t len )
 void WebServer::fatalError( const char *s )
 {
   GR_JUMP_TRACE;
-  NVJ_LOG->append( NVJ_FATAL, std::string( s ) + ": " + std::string( strerror( errno ) ) );
+  spdlog::error( "{}: {}", s, strerror( errno ) );
   ::exit( 1 );
 }
 
@@ -1685,7 +1678,7 @@ u_short WebServer::init()
 
     if( device.length() ) {
 #ifndef LINUX
-      NVJ_LOG->append( NVJ_WARNING, "WebServer: HttpdDevice parameter will be ignored on your system" );
+      spdlog::warn( "WebServer: HttpdDevice parameter will be ignored on your system" );
 #else
       setSocketBindToDevice( server_sock[nbServerSock], device.c_str() );
 #endif
@@ -1704,10 +1697,7 @@ u_short WebServer::init()
       // Disable IPv4 mapped addresses.
       setSocketIp6Only( server_sock[nbServerSock] );
 #else
-      NVJ_LOG->append(
-          NVJ_WARNING,
-          "WebServer: Cannot set IPV6_V6ONLY socket "
-          "option.  Closing IPv6 socket." );
+      spdlog::warn( "WebServer: Cannot set IPV6_V6ONLY socket option.  Closing IPv6 socket." );
       close( server_sock[nbServerSock] );
       continue;
 #endif
@@ -1832,14 +1822,14 @@ void WebServer::initialize_ctx( const char *certfile, const char *cafile, const 
 
   /* Load our keys and certificates*/
   if( !( SSL_CTX_use_certificate_chain_file( sslCtx, certfile ) ) ) {
-    NVJ_LOG->append( NVJ_FATAL, "OpenSSL error: Can't read certificate file" );
+    spdlog::error( "OpenSSL error: Can't read certificate file" );
     ::exit( 1 );
   }
 
   certpass = (char *)password;
   SSL_CTX_set_default_passwd_cb( sslCtx, WebServer::password_cb );
   if( !( SSL_CTX_use_PrivateKey_file( sslCtx, certfile, SSL_FILETYPE_PEM ) ) ) {
-    NVJ_LOG->append( NVJ_FATAL, "OpenSSL error: Can't read key file" );
+    spdlog::error( "OpenSSL error: Can't read key file" );
     ::exit( 1 );
   }
 
@@ -1848,7 +1838,7 @@ void WebServer::initialize_ctx( const char *certfile, const char *cafile, const 
 
   if( mIsAuthPeerSSL ) {
     if( !( SSL_CTX_load_verify_locations( sslCtx, cafile, nullptr ) ) ) {
-      NVJ_LOG->append( NVJ_FATAL, "OpenSSL error: Can't read CA list" );
+      spdlog::error( "OpenSSL error: Can't read CA list" );
       ::exit( 1 );
     }
 
@@ -2093,22 +2083,16 @@ void WebServer::threadProcessing()
 
       updatePeerIpHistory( webClientAddr );
       if( client_sock == -1 ) {
-        NVJ_LOG->appendUniq(
-            NVJ_ERROR,
-            "WebServer : An error occurred when "
-            "attempting to access the socket "
-            "(accept == -1)" );
+        spdlog::error( "WebServer : An error occurred when attempting to access the socket (accept == -1)" );
       }
       else {
         if( socketTimeoutInSecond ) {
           if( !setSocketSndRcvTimeout( client_sock, socketTimeoutInSecond, 0 ) ) {
-            NVJ_LOG->appendUniq(
-                NVJ_ERROR, std::string( "WebServer : setSocketSndRcvTimeout error - " ) + strerror( errno ) );
+            spdlog::error( "WebServer : setSocketSndRcvTimeout error - {}", strerror( errno ) );
           }
         }
         if( !setSocketNoSigpipe( client_sock ) ) {
-          NVJ_LOG->appendUniq(
-              NVJ_ERROR, std::string( "WebServer : setSocketNoSigpipe error - " ) + strerror( errno ) );
+          spdlog::error( "WebServer : setSocketNoSigpipe error - {}", strerror( errno ) );
         }
 
         auto *client        = (ClientSockData *)malloc( sizeof( ClientSockData ) );

@@ -70,9 +70,6 @@ int main()
   signal( SIGTERM, exitFunction );
   signal( SIGINT, exitFunction );
 
-  NVJ_LOG->addLogOutput( new LogStdOutput );
-  // NVJ_LOG->addLogOutput(new LogFile("/var/log/navajo.log"));
-
   webServer = new WebServer;
 
   webServer->setServerPort( 8080 );

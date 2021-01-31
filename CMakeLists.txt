@@ -39,7 +39,7 @@ add_definitions(-DGR_USE_JUMP_TRACE=0)
 set(CMAKE_BUILD_TYPE Debug)
 
 ###############          openssl include/lib dir        #####################
-find_package(OpenSSL REQUIRED) 
+find_package(OpenSSL REQUIRED)
 include_directories (${OPENSSL_INCLUDE_DIR})
 
 ###############          zlib include/lib dir        #####################
@@ -99,6 +99,7 @@ set_target_properties (navajo PROPERTIES VERSION ${LIBNAVAJO_VERSION} SOVERSION 
 set_target_properties(navajoStatic PROPERTIES OUTPUT_NAME navajo)
 
 include_directories (${PROJECT_SOURCE_DIR}/include)
+include_directories (/opt/intmain/dev/linux/usr/include)
 
 target_link_libraries(navajo ${OPENSSL_LIBRARIES})
 target_link_libraries(navajo ${ZLIB_LIBRARIES})

@@ -93,22 +93,21 @@ class MyDynamicRepository : public DynamicRepository {
       std::map<std::string, MPFD::Field *>::iterator it;
       for( it = fields.begin(); it != fields.end(); ++it ) {
         if( fields[it->first]->GetType() == MPFD::Field::TextType ) {
-          NVJ_LOG->append(
-              NVJ_INFO,
-              "Got text field: [" + it->first + "], value: [" + fields[it->first]->GetTextTypeContent() + "]" );
+          spdlog::info( "Got text field: [{}], value: [{}]", it->first, fields[it->first]->GetTextTypeContent() );
         }
         else {
-          NVJ_LOG->append(
-              NVJ_INFO,
-              "Got file field: [" + it->first + "] Filename:[" + fields[it->first]->GetFileName() + "] TempFilename:["
-                  + fields[it->first]->GetTempFileName() + "]\n" );
+          spdlog::info(
+              "Got file field: [{}] Filename:[{}] TempFilename:[{}]",
+              it->first,
+              fields[it->first]->GetFileName(),
+              fields[it->first]->GetTempFileName() );
 
           // Copy files to upload directory
           std::ifstream src( fields[it->first]->GetTempFileName().c_str(), std::ios::binary );
           std::string   dstFilename = std::string( UPLOAD_DIR ) + '/' + fields[it->first]->GetFileName();
           std::ofstream dst( dstFilename.c_str(), std::ios::binary );
           if( !src || !dst ) {
-            NVJ_LOG->append( NVJ_ERROR, "Copy error: check read/write permissions" );
+            spdlog::error( "Copy error: check read/write permissions" );
           }
           else {
             dst << src.rdbuf();
@@ -184,8 +183,6 @@ int main()
 {
   signal( SIGTERM, exitFunction );
   signal( SIGINT, exitFunction );
-
-  NVJ_LOG->addLogOutput( new LogStdOutput );
 
   webServer = new WebServer;
 

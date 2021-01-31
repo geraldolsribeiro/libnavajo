@@ -62,7 +62,7 @@ class MyDynamicRepository : public DynamicRepository {
     bool getPage( HttpRequest *request, HttpResponse *response ) override
     {
 #ifdef DEBUG_TRACES
-      NVJ_LOG->append( NVJ_DEBUG, "Connect" );
+      spdlog::debug( "Connect" );
 #endif
       std::string login, password;
       // User libnavajo/libnavajo is allowed !
@@ -76,7 +76,7 @@ class MyDynamicRepository : public DynamicRepository {
         *connect      = false;
         request->setSessionAttribute( "wschat", (void *)connect );
 #ifdef DEBUG_TRACES
-        NVJ_LOG->append( NVJ_DEBUG, "authOK" );
+        spdlog::debug( "authOK" );
 #endif
         return fromString( "authOK", response );
       }
@@ -139,7 +139,9 @@ class MyWebSocket : public WebSocket {
       client->sendCloseCtrlFrame( "Not allowed message format" );
     }
   }
-  void onBinaryMessage( WebSocketClient *client, const unsigned char *message, size_t len, const bool fin ) override{}
+  void onBinaryMessage( WebSocketClient *client, const unsigned char *message, size_t len, const bool fin ) override
+  {
+  }
 } myWebSocket;
 
 /***********************************************************************/
@@ -150,9 +152,6 @@ int main()
   signal( SIGTERM, exitFunction );
   signal( SIGINT, exitFunction );
 
-  NVJ_LOG->addLogOutput( new LogStdOutput );
-  // NVJ_LOG->addLogOutput(new LogFile("/var/log/navajo.log"));
-  NVJ_LOG->setDebugMode();
   webServer = new WebServer;
 
   webServer->setServerPort( 8080 );
