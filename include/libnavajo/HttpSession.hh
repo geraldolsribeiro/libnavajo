@@ -14,12 +14,12 @@
 #ifndef HTTPSESSION_HH_
 #define HTTPSESSION_HH_
 
+#include <cstdlib>
+#include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <cstdlib>
-#include <iostream>
 
 #include <spdlog/spdlog.h>
 

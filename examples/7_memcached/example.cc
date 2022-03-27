@@ -65,8 +65,8 @@ int main()
   webServer->addRepository( &myRepo );
 
   MemcachedRepository memcachedRepo( "my-prefix" );
-  //memcachedRepo.set( "/xyz", "<body>XYZ</body>" );
-  //memcachedRepo.set( "/abc", "<body>ABC</body>" );
+  // memcachedRepo.set( "/xyz", "<body>XYZ</body>" );
+  // memcachedRepo.set( "/abc", "<body>ABC</body>" );
   webServer->addRepository( &memcachedRepo );
 
   webServer->startService();

@@ -91,7 +91,7 @@ void WebSocketClient::receivingThread()
 
   if( mWebsocket->getWebsocketTimeoutInMilliSecond()
       && !setSocketSndRcvTimeout(
-             client->socketId, 0, mWebsocket->getWebsocketTimeoutInMilliSecond() ) ) { // Reduce socket timeout
+          client->socketId, 0, mWebsocket->getWebsocketTimeoutInMilliSecond() ) ) { // Reduce socket timeout
     spdlog::error( "WebSocketClient : setSocketSndRcvTimeout error" );
     closeRecv();
     return;

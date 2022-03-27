@@ -149,7 +149,7 @@ inline void *thread_timeout_scheduler( void *arg )
   cancelArg *ca             = (cancelArg *)arg;
   pthread_t  thread_to_kill = *( ca->p );
 
-  timespec t1 = {ca->s, ca->ns};
+  timespec t1 = { ca->s, ca->ns };
   timespec t2;
 
   if( nanosleep( &t1, &t2 ) == -1 ) {

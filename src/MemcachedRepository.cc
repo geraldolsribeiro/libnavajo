@@ -77,7 +77,7 @@ bool MemcachedRepository::get( const string &url, string &value )
 {
   vector<char> vec;
   if( mMemCacheClient->get( mPrefix + url, vec ) ) {
-    value = string{vec.begin(), vec.end()};
+    value = string{ vec.begin(), vec.end() };
     return true;
   }
   return false;

@@ -20,8 +20,8 @@
 #include <cstdio>
 #include <list>
 #include <set>
-#include <string>
 #include <spdlog/spdlog.h>
+#include <string>
 
 /**
  * LogRecorder - generic class to handle log trace

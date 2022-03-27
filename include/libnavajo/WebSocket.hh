@@ -92,7 +92,7 @@ public:
    * @param len: the message length
    */
   virtual void onPongCtrlFrame( WebSocketClient * /*client*/, const unsigned char * /*message*/, size_t /*len*/ ){
-      /* should check application data received is the same than in the ping message */};
+      /* should check application data received is the same than in the ping message */ };
 
   /**
    * Callback on new ping message (should came after a ping message)
