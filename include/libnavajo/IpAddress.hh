@@ -321,8 +321,8 @@ public:
   IpAddress addr;
   u_int8_t  mask;
 
-  IpNetwork(){};
-  IpNetwork( const IpAddress &A ) : addr( A )
+  IpNetwork() = default;
+  IpNetwork( const IpAddress &A )
   {
     if( A.ipversion == 4 ) {
       mask = 32;
@@ -330,8 +330,13 @@ public:
     else {
       mask = 128;
     }
+    addr = A;
   };
-  IpNetwork( const IpAddress &a, const u_int8_t &m ) : addr( a ), mask( m ){};
+  IpNetwork( const IpAddress &a, const u_int8_t &m )
+  {
+    addr = a;
+    mask = m;
+  };
 
   // TODO: IpNetwork(const std::string& value)
 

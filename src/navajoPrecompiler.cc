@@ -45,10 +45,13 @@ void dump_buffer( FILE *f, unsigned n, const unsigned char *buf )
 char *str_replace_first( char *buffer, const char *s, const char *by )
 {
   GR_JUMP_TRACE;
-  char *p = strstr( buffer, s ), *ret = nullptr;
+  char *p   = strstr( buffer, s );
+  char *ret = nullptr;
 
   if( p != nullptr ) {
-    size_t len_p = strlen( p ), len_s = strlen( s ), len_by = strlen( by );
+    size_t len_p  = strlen( p );
+    size_t len_s  = strlen( s );
+    size_t len_by = strlen( by );
 
     if( len_s != len_by ) {
       /* ajuster la taille de la partie 's' pur pouvoir placer by */
