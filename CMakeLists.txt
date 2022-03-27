@@ -70,6 +70,7 @@ file(GLOB sources_lib
   ${PROJECT_SOURCE_DIR}/src/LogFile.cc
   ${PROJECT_SOURCE_DIR}/src/LogSyslog.cc
   ${PROJECT_SOURCE_DIR}/src/LogStdOutput.cc
+  ${PROJECT_SOURCE_DIR}/src/MemcachedRepository.cc
   ${PROJECT_SOURCE_DIR}/src/WebServer.cc
   ${PROJECT_SOURCE_DIR}/src/WebSocketClient.cc
   ${PROJECT_SOURCE_DIR}/src/MPFDParser/Parser.cc
