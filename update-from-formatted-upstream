@@ -30,7 +30,7 @@ git checkout -b local-master-formatted master
 for ext in cc hh h
 do
   echo "Updating *.${ext}..."
-  find . -name "*.${ext}" -exec clang-tidy {} -fix-errors -checks=${CHECKS} -- ${CXXFLAGS} \;
+  # find . -name "*.${ext}" -exec clang-tidy {} -fix-errors -checks=${CHECKS} -- ${CXXFLAGS} \;
   find . -name "*.${ext}" -exec clang-format -i {} \;
 done
 
