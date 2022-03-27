@@ -107,7 +107,7 @@ inline void wait_for_thread( pthread_t thread )
   int rc;       /* Return code (error number)        */
   STRERROR_BUF; /* Buffer for strerror_r()           */
 
-  rc = pthread_join( thread, NULL );
+  rc = pthread_join( thread, nullptr );
   if( rc != 0 ) {
     fprintf( stderr, "pthread_join(): %s\n", STRERROR( rc ) );
   }
@@ -122,12 +122,12 @@ inline void cancelstate_thread( void )
   int rc;       /* Return code (error number)        */
   STRERROR_BUF; /* Buffer for strerror_r()           */
 
-  rc = pthread_setcancelstate( PTHREAD_CANCEL_ENABLE, NULL );
+  rc = pthread_setcancelstate( PTHREAD_CANCEL_ENABLE, nullptr );
   if( rc != 0 ) {
     fprintf( stderr, "pthread_setcancelstate(): %s\n", STRERROR( rc ) );
   }
 
-  rc = pthread_setcanceltype( PTHREAD_CANCEL_DEFERRED, NULL );
+  rc = pthread_setcanceltype( PTHREAD_CANCEL_DEFERRED, nullptr );
   if( rc != 0 ) {
     fprintf( stderr, "pthread_setcanceltype(): %s\n", STRERROR( rc ) );
   }
@@ -153,19 +153,19 @@ inline void *thread_timeout_scheduler( void *arg )
   timespec t2;
 
   if( nanosleep( &t1, &t2 ) == -1 ) {
-    pthread_exit( 0 );
+    pthread_exit( nullptr );
   }
 
   if( t2.tv_nsec > 0 ) {
-    pthread_exit( 0 );
+    pthread_exit( nullptr );
   }
 
   cancel_thread( thread_to_kill );
   wait_for_thread( thread_to_kill );
   printf( "Timeout Exceeded: The thread as been cancelled !!! \n" );
 
-  pthread_exit( 0 );
-  return NULL;
+  pthread_exit( nullptr );
+  return nullptr;
 }
 
 #endif

@@ -68,8 +68,9 @@ nvj_gzip( unsigned char **dst, const unsigned char *src, const size_t sizeSrc, b
     if( strm.avail_out == 0 ) {
       unsigned char *reallocDst = (unsigned char *)realloc( *dst, CHUNK * ( i + 1 ) * sizeof( unsigned char ) );
 
-      if( reallocDst != NULL )
+      if( reallocDst != nullptr ) {
         *dst = reallocDst;
+      }
       else {
         free( reallocDst );
         free( *dst );
@@ -137,8 +138,9 @@ nvj_gunzip( unsigned char **dst, const unsigned char *src, const size_t sizeSrc,
     if( strm.avail_out == 0 ) {
       unsigned char *reallocDst = (unsigned char *)realloc( *dst, CHUNK * ( i + 1 ) * sizeof( unsigned char ) );
 
-      if( reallocDst != NULL )
+      if( reallocDst != nullptr ) {
         *dst = reallocDst;
+      }
       else {
         free( reallocDst );
         free( *dst );
@@ -158,7 +160,7 @@ inline size_t nvj_gzip_websocket_v2(
     unsigned char **     dst,
     const unsigned char *src,
     const size_t         sizeSrc,
-    z_stream *           pstream   = NULL,
+    z_stream *           pstream   = nullptr,
     const unsigned int   sizeChunk = CHUNK )
 {
 
@@ -169,7 +171,7 @@ inline size_t nvj_gzip_websocket_v2(
   int in         = sizeChunk;
   int flush      = Z_NO_FLUSH;
 
-  *dst = NULL;
+  *dst = nullptr;
 
   for( int i = 0; i < iterations; i++ ) {
     if( i == iterations - 1 ) {
@@ -186,7 +188,7 @@ inline size_t nvj_gzip_websocket_v2(
     do {
       unsigned char *reallocDst = (unsigned char *)realloc( *dst, ( sizeDst + sizeChunk ) * sizeof( unsigned char ) );
 
-      if( reallocDst != NULL ) {
+      if( reallocDst != nullptr ) {
         *dst = reallocDst;
       }
       else {
@@ -211,7 +213,7 @@ inline size_t nvj_gzip_websocket_v2(
 
   unsigned char *reallocDst = (unsigned char *)realloc( *dst, sizeDst * sizeof( unsigned char ) );
 
-  if( reallocDst != NULL ) {
+  if( reallocDst != nullptr ) {
     *dst = reallocDst;
   }
   else {
@@ -226,7 +228,7 @@ inline size_t nvj_gzip_websocket_v2(
 
 //********************************************************
 
-inline void nvj_end_stream( z_stream *pstream = NULL )
+inline void nvj_end_stream( z_stream *pstream = nullptr )
 {
   (void)deflateEnd( pstream );
 }
@@ -234,7 +236,7 @@ inline void nvj_end_stream( z_stream *pstream = NULL )
 //********************************************************
 
 inline void nvj_init_stream(
-    z_stream *pstream        = NULL,
+    z_stream *pstream        = nullptr,
     bool      rawDeflateData = false,
     int       level          = Z_BEST_COMPRESSION,
     int       strategy       = Z_DEFAULT_STRATEGY )
@@ -253,8 +255,8 @@ inline size_t nvj_gunzip_websocket_v2(
     const unsigned char *src,
     size_t               sizeSrc,
     bool                 rawDeflateData = false,
-    unsigned char *      dictionary     = NULL,
-    unsigned int *       dictLength     = NULL,
+    unsigned char *      dictionary     = nullptr,
+    unsigned int *       dictLength     = nullptr,
     const unsigned int   sizeChunk      = CHUNK )
 {
   z_stream strm;
@@ -263,7 +265,7 @@ inline size_t nvj_gunzip_websocket_v2(
   int      iterations = ( rmndr == 0 ? sizeSrc / sizeChunk : sizeSrc / sizeChunk + 1 );
   int      in         = sizeChunk;
   int      ret;
-  *dst = NULL;
+  *dst = nullptr;
 
   if( src == NULL )
     throw std::runtime_error( std::string( "gunzip : src == NULL !" ) );
@@ -298,8 +300,9 @@ inline size_t nvj_gunzip_websocket_v2(
 
       unsigned char *reallocDst = (unsigned char *)realloc( *dst, ( sizeDst + sizeChunk ) * sizeof( unsigned char ) );
 
-      if( reallocDst != NULL )
+      if( reallocDst != nullptr ) {
         *dst = reallocDst;
+      }
       else {
         free( reallocDst );
         free( *dst );
@@ -330,7 +333,7 @@ inline size_t nvj_gunzip_websocket_v2(
 
   unsigned char *reallocDst = (unsigned char *)realloc( *dst, ( sizeDst ) * sizeof( unsigned char ) );
 
-  if( reallocDst != NULL ) {
+  if( reallocDst != nullptr ) {
     *dst = reallocDst;
   }
   else {

@@ -20,7 +20,7 @@ do
   echo "Updating *.${ext}..."
   find . -name "*.${ext}" -exec sed -i "s/mutipart/multipart/g" {} \;
   find . -name "*.${ext}" -exec sed -i "s/Mutipart/Multipart/g" {} \;
-  # find . -name "*.${ext}" -exec clang-tidy {} -fix-errors -checks="${CHECKS}" -- ${CXXFLAGS} \;
+  find . -name "*.${ext}" -exec clang-tidy {} -fix-errors -checks="${CHECKS}" -- ${CXXFLAGS} \;
   find . -name "*.${ext}" -exec clang-format -i {} \;
 done
 
