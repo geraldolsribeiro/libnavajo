@@ -7,7 +7,7 @@
 
 cmake_minimum_required(VERSION 3.1)
 set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 ###############              Project name          #####################
 project(libnavajo)
@@ -21,7 +21,7 @@ set(LIBNAVAJO_BUILD_DATE `/bin/date +%s`)
 ###############            Minimal flags           #####################
 IF(${UNIX})
   # -fsanitize=address,undefined
-  set (CMAKE_CXX_FLAGS " -Wall -std=c++17 -O2 -DLINUX -Wextra -Wshadow -Wno-unused -Wpedantic -fexceptions -fPIC -D_REENTRANT -DLIBNAVAJO_SOFTWARE_VERSION=\"\\\"${LIBNAVAJO_VERSION}\\\"\" -DDEBUG_TRACES -DSPDLOG_FMT_EXTERNAL=1 -DFMT_HEADER_ONLY=1")
+  set (CMAKE_CXX_FLAGS " -Wall -O2 -DLINUX -Wextra -Wshadow -Wno-unused -Wpedantic -fexceptions -fPIC -D_REENTRANT -DLIBNAVAJO_SOFTWARE_VERSION=\"\\\"${LIBNAVAJO_VERSION}\\\"\" -DDEBUG_TRACES -DSPDLOG_FMT_EXTERNAL=1 -DFMT_HEADER_ONLY=1")
 ENDIF(${UNIX})
 
 IF(${APPLE})

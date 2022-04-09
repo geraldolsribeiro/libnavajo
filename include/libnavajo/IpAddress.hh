@@ -65,27 +65,29 @@ public:
 
   IP       ip;
   u_int8_t ipversion;
+  constexpr IpAddress(const IpAddress&) = default;
+  virtual ~IpAddress() = default;
 
-  inline void init()
+ void init()
   {
     ipversion = 0;
     memset( ip.v6.s6_addr, 0, INET6_ADDRLEN );
-  };
+  }
 
   IpAddress()
   {
     init();
-  };
+  }
 
   IpAddress( const in_addr_t &addrIPv4 ) : ipversion( 4 )
   {
     ip.v4 = addrIPv4;
-  };
+  }
 
   IpAddress( const in6_addr &addrIPv6 ) : ipversion( 6 )
   {
     memcpy( (void *)&( ip.v6 ), (void *)( &addrIPv6 ), INET6_ADDRLEN );
-  };
+  }
 
   IpAddress( const std::string &value )
   {
@@ -109,35 +111,43 @@ public:
     }
   }
 
-  inline bool isNull() const
+ bool isNull() const
   {
     return ipversion == 0;
-  };
+  }
 
-  inline IpAddress &operator=( const in_addr_t &addrIPv4 )
+ IpAddress &operator=( const in_addr_t &addrIPv4 )
   {
-    this->ipversion = 4;
-    this->ip.v4     = addrIPv4;
+    ipversion = 4;
+    ip.v4     = addrIPv4;
     return *this;
-  };
-  inline IpAddress &operator=( const in6_addr &addrIPv6 )
+  }
+
+ IpAddress &operator=( const in6_addr &addrIPv6 )
   {
-    this->ipversion = 6;
+    ipversion = 6;
     memcpy( (void *)&( ip.v6 ), (void *)( &addrIPv6 ), INET6_ADDRLEN );
     return *this;
-  };
-  inline IpAddress &operator=( const IpAddress &i )
+  }
+
+  IpAddress &operator=( const IpAddress &i )
   {
     if( i.ipversion == 4 ) {
       *this = i.ip.v4;
+      // ipversion = 4;
+      // ip.v4     = addrIPv4;
+      return *this;
     }
     else {
       *this = i.ip.v6;
+      // ipversion = 6;
+      // memcpy( (void *)&( ip.v6 ), (void *)( &addrIPv6 ), INET6_ADDRLEN );
+      return *this;
     }
     return *this;
-  };
+  }
 
-  inline bool operator==( IpAddress const &ipA ) const
+ bool operator==( IpAddress const &ipA ) const
   {
     if( ipA.ipversion != this->ipversion ) {
       return false;
@@ -157,7 +167,7 @@ public:
       ;
     }
     return i < 0;
-  };
+  }
 
   bool operator<( const IpAddress &A ) const
   {
@@ -183,14 +193,14 @@ public:
     else {
       return ip.v6.s6_addr[i] < A.ip.v6.s6_addr[i];
     }
-  };
+  }
 
-  inline bool isUndef() const
+ bool isUndef() const
   {
     return ipversion == 0;
-  };
+  }
 
-  inline std::string str() const
+ std::string str() const
   {
     std::string res = "";
     if( ipversion == 4 ) {
@@ -209,11 +219,11 @@ public:
     }
 
     return res;
-  };
+  }
 
   static pthread_mutex_t resolvIP_mutex;
 
-  inline bool snresolve( char *hname, const size_t maxlength ) const
+ bool snresolve( char *hname, const size_t maxlength ) const
   {
     int                 error = 0;
     struct sockaddr_in  sin;
@@ -237,9 +247,9 @@ public:
     pthread_mutex_unlock( &resolvIP_mutex );
 
     return ( !error );
-  };
+  }
 
-  inline static IpAddress *fromHostname( const std::string &hostname, bool preferIpv4 = true )
+ static IpAddress *fromHostname( const std::string &hostname, bool preferIpv4 = true )
   {
     int              status;
     struct addrinfo  hints, *p;
@@ -296,7 +306,7 @@ public:
     return nullptr;
   }
 
-  inline static IpAddress *fromString( const std::string &value )
+ static IpAddress *fromString( const std::string &value )
   {
     IpAddress *newIp = new IpAddress( value );
 
@@ -322,25 +332,26 @@ public:
   u_int8_t  mask;
 
   IpNetwork() = default;
-  IpNetwork( const IpAddress &A )
+  IpNetwork( const IpAddress &a )
   {
-    if( A.ipversion == 4 ) {
+    if( a.ipversion == 4 ) {
       mask = 32;
     }
     else {
       mask = 128;
     }
-    addr = A;
-  };
+    addr = a;
+  }
+
   IpNetwork( const IpAddress &a, const u_int8_t &m )
   {
     addr = a;
     mask = m;
-  };
+  }
 
   // TODO: IpNetwork(const std::string& value)
 
-  inline bool operator<( const IpNetwork &A ) const
+ bool operator<( const IpNetwork &A ) const
   {
     if( A.addr.ipversion != addr.ipversion ) {
       return addr.ipversion < A.addr.ipversion;
@@ -389,16 +400,16 @@ public:
     }
 
     return false;
-  };
+  }
 
-  inline std::string strCIDR() const
+ std::string strCIDR() const
   {
     std::string       netCIDR = addr.str() + "/";
     std::stringstream masklengthSs;
     masklengthSs << (int)mask;
     netCIDR += masklengthSs.str();
     return netCIDR;
-  };
+  }
 
   /**
    * Is this IP address belonging to this network?
@@ -407,7 +418,7 @@ public:
    * @return true if it belongs to local network, false otherwise
    */
 
-  inline bool isInside( const IpAddress &ip ) const
+ bool isInside( const IpAddress &ip ) const
   {
     bool res = false;
 
@@ -441,9 +452,9 @@ public:
     }
 
     return res;
-  };
+  }
 
-  inline static IpNetwork *fromString( const std::string &value )
+ static IpNetwork *fromString( const std::string &value )
   {
     IpNetwork * ipNet = nullptr;
     std::string ipstr;

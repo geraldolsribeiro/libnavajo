@@ -200,7 +200,7 @@ class HttpRequest {
     }
 
     initSessionId();
-  };
+  }
 
 public:
   /**********************************************************************/
@@ -416,7 +416,7 @@ public:
     GR_JUMP_TRACE;
     if( mSessionId.empty() ) {
       return std::vector<std::string>();
-    };
+    }
     return HttpSession::getAttributeNames( mSessionId );
   }
 
@@ -440,7 +440,7 @@ public:
   {
     GR_JUMP_TRACE;
     mSessionId = "";
-  };
+  }
 
   /**
    * get mSessionId value
@@ -450,7 +450,7 @@ public:
   {
     GR_JUMP_TRACE;
     return mSessionId;
-  };
+  }
 
   /**********************************************************************/
   /**
@@ -489,7 +489,7 @@ public:
       decodCookies( cookies );
     }
     getSession();
-  };
+  }
 
   /**********************************************************************/
   /**
@@ -500,7 +500,7 @@ public:
   {
     GR_JUMP_TRACE;
     return mMultipartContentParser != nullptr;
-  };
+  }
 
   /**********************************************************************/
   /**
@@ -511,7 +511,7 @@ public:
   {
     GR_JUMP_TRACE;
     return mMultipartContentParser;
-  };
+  }
 
   /**********************************************************************/
   /**
@@ -522,7 +522,7 @@ public:
   {
     GR_JUMP_TRACE;
     return mMimeType;
-  };
+  }
 
   /**********************************************************************/
   /**
@@ -533,7 +533,7 @@ public:
   {
     GR_JUMP_TRACE;
     return *mPayload;
-  };
+  }
 
   /**********************************************************************/
   /**
@@ -544,7 +544,7 @@ public:
   {
     GR_JUMP_TRACE;
     return mUrl;
-  };
+  }
 
   /**********************************************************************/
   /**
@@ -555,7 +555,7 @@ public:
   {
     GR_JUMP_TRACE;
     mUrl = newUrl;
-  };
+  }
 
   // GLSR: torna pública a configuração de parâmetros permitindo realizar
   // forwardTo com novos parâmetros
@@ -583,7 +583,7 @@ public:
   {
     GR_JUMP_TRACE;
     return mHttpMethod;
-  };
+  }
 
   /**********************************************************************/
   /**
@@ -594,7 +594,7 @@ public:
   {
     GR_JUMP_TRACE;
     mHttpMethod = newMethod;
-  };
+  }
 
   /**********************************************************************/
   /**
@@ -605,7 +605,7 @@ public:
   {
     GR_JUMP_TRACE;
     return mOrigin;
-  };
+  }
 
   /**********************************************************************/
   /**
@@ -616,7 +616,7 @@ public:
   {
     GR_JUMP_TRACE;
     return mClientSockData->ip;
-  };
+  }
 
   /**********************************************************************/
   /**
@@ -627,7 +627,7 @@ public:
   {
     GR_JUMP_TRACE;
     return mHttpAuthUsername;
-  };
+  }
 
   /**********************************************************************/
   /**
@@ -638,7 +638,7 @@ public:
   {
     GR_JUMP_TRACE;
     return *( mClientSockData->peerDN );
-  };
+  }
 
   /**********************************************************************/
   /**
@@ -660,7 +660,7 @@ public:
   {
     GR_JUMP_TRACE;
     return mClientSockData->compression;
-  };
+  }
 
   /**********************************************************************/
   /**
@@ -673,7 +673,6 @@ public:
     return mClientSockData;
   }
 };
-
 //****************************************************************************
 
 #endif
