@@ -2,8 +2,8 @@
 // Copyright (C) 2004-2020 Geraldo Ribeiro <geraldo@intmain.io>
 // ----------------------------------------------------------------------
 
-#ifndef __GR_COMMON_DEBUG_HPP__
-#define __GR_COMMON_DEBUG_HPP__
+#ifndef GR_COMMON_DEBUG_HPP
+#define GR_COMMON_DEBUG_HPP
 
 #include <cstring> // strerror( errno )
 #include <exception>
@@ -53,7 +53,7 @@
 //#define THROWMSG(x) throw __FILE__  " "  x ;
 
 #ifdef __WIN32
-// O mingw não possui to_string definida
+// O mingw nÃ£o possui to_string definida
 #define GR_TO_STRING( x ) #x
 #else
 #define GR_TO_STRING( x ) std::to_string( x )
@@ -68,7 +68,7 @@
     err.append( __FILE__ );                                                                                            \
     err.append( "\nLinha: " );                                                                                         \
     err.append( GR_TO_STRING( __LINE__ ) );                                                                            \
-    err.append( "\nFunção: " );                                                                                        \
+    err.append( "\nFun??o: " );                                                                                        \
     err.append( __PRETTY_FUNCTION__ );                                                                                 \
     throw std::runtime_error( err.c_str() );                                                                           \
   }
@@ -86,7 +86,7 @@
 #define GR_THROW( e ) GR_THROW_MSG( e, #e )
 
 
-// Gerador de exceção
+// Gerador de exceÃ§Ã£o
 #define GR_EXCEPTION( NAME )                                                                                           \
   class NAME : public std::invalid_argument {                                                                          \
   public:                                                                                                              \

@@ -75,7 +75,6 @@ void MPFD::Parser::SetContentType( const std::string type )
 void MPFD::Parser::AcceptSomeData( const char *data, const long length )
 {
   GR_JUMP_TRACE;
-  spdlog::debug( "MPFD::Parser::AcceptSomeData length: {}", length );
   if( Boundary.length() > 0 ) {
     // Append data to existing accumulator
     if( DataCollector == nullptr ) {
@@ -103,7 +102,6 @@ void MPFD::Parser::AcceptSomeData( const char *data, const long length )
 void MPFD::Parser::_ProcessData()
 {
   GR_JUMP_TRACE;
-  spdlog::debug( "MPFD::Parser::_ProcessData" );
   // If some data left after truncate, process it right now.
   // Do not wait for AcceptSomeData called again
   bool NeedToRepeat;
@@ -138,7 +136,6 @@ void MPFD::Parser::_ProcessData()
 bool MPFD::Parser::ProcessContentOfTheField()
 {
   GR_JUMP_TRACE;
-  spdlog::debug( "MPFD::Parser::ProcessContentOfTheField" );
   long BoundaryPosition = BoundaryPositionInDataCollector();
   long DataLengthToSendToField;
   if( BoundaryPosition >= 0 ) {
@@ -165,7 +162,7 @@ bool MPFD::Parser::ProcessContentOfTheField()
       currentFieldContent += Fields[ProcessingFieldName]->GetTextTypeContent();
       Fields[processingFieldNameArr]->AcceptSomeData(
           const_cast<char *>( currentFieldContent.c_str() ), currentFieldContent.size() );
-      spdlog::debug( "ProcessContentOfTheField {} -> {}", ProcessingFieldName, currentFieldContent );
+      //spdlog::debug( "ProcessContentOfTheField {} -> {}", ProcessingFieldName, currentFieldContent );
     }
   }
 
@@ -181,7 +178,6 @@ bool MPFD::Parser::ProcessContentOfTheField()
 bool MPFD::Parser::WaitForHeadersEndAndParseThem()
 {
   GR_JUMP_TRACE;
-  spdlog::debug( "WaitForHeadersEndAndParseThem DataCollectorLength: {}", DataCollectorLength );
 
   for( int i = 0; i < DataCollectorLength - 3; i++ ) {
     if( ( DataCollector[i] == 13 ) && ( DataCollector[i + 1] == 10 ) && ( DataCollector[i + 2] == 13 )
@@ -251,7 +247,7 @@ void MPFD::Parser::_ParseHeaders( std::string headers )
       // GLSR Campos duplicados
       if( Fields.count( ProcessingFieldName ) and Fields.count( ProcessingFieldName + "[]" ) ) {
         Fields[ProcessingFieldName + "[]"] = new Field();
-        spdlog::debug( "_ParseHeaders {}", ProcessingFieldName );
+        // spdlog::debug( "_ParseHeaders {}", ProcessingFieldName );
       }
       Fields[ProcessingFieldName] = new Field();
     }

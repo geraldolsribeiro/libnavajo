@@ -327,7 +327,6 @@ end:
 size_t WebServer::recvLine( int client, char *bufLine, size_t nsize )
 {
   GR_JUMP_TRACE;
-  // spdlog::debug( "recvLine: client {}, nsize {}, {}", client, nsize, bufLine );
 
   size_t bufLineLen = 0;
   char   c;
@@ -1057,10 +1056,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
 
     if( !fileFound ) {
       GR_JUMP_TRACE;
-      // GLSR Verificar se este tamanho é suficiente
-      char bufLinestr[300];
-      snprintf( bufLinestr, 300, "Webserver: page not found %s", urlBuffer );
-      spdlog::debug( bufLinestr );
+      spdlog::warn( "Webserver: page not found: '{}'", urlBuffer );
 
       std::string msg = getNotFoundErrorMsg();
       httpSend( clientSockData, (const void *)msg.c_str(), msg.length() );
@@ -1088,9 +1084,7 @@ bool WebServer::accept_request( ClientSockData *clientSockData, bool /*authSSL*/
       }
     }
 #ifdef DEBUG_TRACES
-    char bufLinestr[300];
-    snprintf( bufLinestr, 300, "Webserver: page found %s", urlBuffer );
-    spdlog::debug( bufLinestr );
+    spdlog::debug( "Webserver: page found: '{}'", urlBuffer );
 #endif
 
     if( ( clientSockData->compression == NONE ) && zippedFile ) {
@@ -1494,7 +1488,7 @@ std::string WebServer::getHttpHeader(
     std::vector<std::string> &cookies = response->getCookies();
     for( const auto &cookie : cookies ) {
       header += "Set-Cookie: " + cookie + "\r\n";
-      spdlog::debug( "Cabeçalho de cookie: {}", cookie );
+      // spdlog::debug( "Cabeçalho de cookie: {}", cookie );
     }
   }
 
@@ -1525,7 +1519,6 @@ std::string WebServer::getHttpHeader(
 
   header += "\r\n";
 
-  spdlog::debug( "WebServer::getHttpHeader: {}", header );
   return header;
 }
 
@@ -1818,7 +1811,6 @@ int WebServer::verify_callback( int preverify_ok, X509_STORE_CTX *ctx )
         X509_verify_cert_error_string( err ),
         depth,
         buf );
-    spdlog::debug( buftmp );
   }
 
   /*
@@ -1829,7 +1821,6 @@ int WebServer::verify_callback( int preverify_ok, X509_STORE_CTX *ctx )
     X509_NAME_oneline( X509_get_issuer_name( err_cert ), buf, 256 );
     char buftmp[300];
     snprintf( buftmp, 300, "X509_verify_cert error: issuer= %s", buf );
-    spdlog::debug( buftmp );
   }
 
   return 1;
@@ -2054,9 +2045,7 @@ void WebServer::threadProcessing()
   initPoolThreads();
   httpdAuth = authLoginPwdList.size();
 
-  char buf[300];
-  snprintf( buf, 300, "WebServer : Listen on port %d", port );
-  spdlog::debug( buf );
+  spdlog::info( "WebServer listen on port {}", port );
 
   struct pollfd *pfd;
   if( ( pfd = (pollfd *)malloc( nbServerSock * sizeof( struct pollfd ) ) ) == nullptr ) {
