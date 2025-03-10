@@ -21,6 +21,8 @@
 
 #include "libnavajo/LogOutput.hh"
 
+#define MAX_SYSLOG_ID_SIZE 30
+
 /**
  * LogSyslog - LogOutput
  */
@@ -33,7 +35,7 @@ public:
   void initialize() override;
 
 private:
-  char ident[30];
+  char ident[MAX_SYSLOG_ID_SIZE];
 };
 
 #endif

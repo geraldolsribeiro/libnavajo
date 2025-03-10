@@ -52,9 +52,11 @@ void WebSocketClient::sendingThread() {
     sendingQueue.pop();
     pthread_mutex_unlock(&sendingQueueMutex);
 
-    struct timeb t;
-    ftime(&t);
-    long long msgLatency = (long long)(t.time - msg->date.time) * 1000 + (long long)(t.millitm - msg->date.millitm);
+    long long msgLatency = (unsigned long long)(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                                    std::chrono::steady_clock::now().time_since_epoch())
+                                                    .count() -
+                                                msg->date_ms);
+
     if (msgLatency > snd_maxLatency || !sendMessage(msg)) {
       free(msg->message);
       free(msg);
@@ -440,8 +442,9 @@ void WebSocketClient::sendTextMessage(const std::string &message, bool fin) {
   message.copy((char *)msgContent->message, message.length());
   msgContent->length = message.length();
   msgContent->fin    = fin;
-  ftime(&msgContent->date);
-
+  msgContent->date_ms =
+      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
+          .count();
   addSendingQueue(msgContent);
 }
 
@@ -455,8 +458,9 @@ void WebSocketClient::sendBinaryMessage(const unsigned char *message, size_t len
   memcpy(msgContent->message, message, length);
   msgContent->length = length;
   msgContent->fin    = fin;
-  ftime(&msgContent->date);
-
+  msgContent->date_ms =
+      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
+          .count();
   addSendingQueue(msgContent);
 }
 
@@ -470,8 +474,9 @@ void WebSocketClient::sendPingCtrlFrame(const unsigned char *message, size_t len
   memcpy(msgContent->message, message, length);
   msgContent->length = length;
   msgContent->fin    = true;
-  ftime(&msgContent->date);
-
+  msgContent->date_ms =
+      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
+          .count();
   addSendingQueue(msgContent);
 }
 
@@ -490,7 +495,9 @@ void WebSocketClient::sendPongCtrlFrame(const unsigned char *message, size_t len
   memcpy(msgContent->message, message, length);
   msgContent->length = length;
   msgContent->fin    = false;
-  ftime(&msgContent->date);
+  msgContent->date_ms =
+      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
+          .count();
 
   addSendingQueue(msgContent);
 }
@@ -510,7 +517,9 @@ void WebSocketClient::sendCloseCtrlFrame(const unsigned char *message, size_t le
   memcpy(msgContent->message, message, length);
   msgContent->length = length;
   msgContent->fin    = true;
-  ftime(&msgContent->date);
+  msgContent->date_ms =
+      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
+          .count();
 
   addSendingQueue(msgContent);
 }

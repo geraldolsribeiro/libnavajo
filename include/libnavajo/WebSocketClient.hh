@@ -17,8 +17,8 @@
 #include "libnavajo/HttpRequest.hh"
 #include "libnavajo/nvjGzip.h"
 #include "libnavajo/nvjThread.h"
+#include <chrono>
 #include <queue>
-#include <sys/timeb.h>
 
 class WebSocket;
 class WebSocketClient {
@@ -27,7 +27,7 @@ class WebSocketClient {
     unsigned char *message;
     size_t         length;
     bool           fin;
-    timeb          date;
+    unsigned long long date_ms;
   } MessageContent;
 
   typedef struct {

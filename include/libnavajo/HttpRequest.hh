@@ -53,6 +53,8 @@ typedef struct {
   //  pthread_mutex_t client_mutex;
 } ClientSockData;
 
+typedef std::map<std::string, std::string> HttpRequestHeadersMap;
+
 class HttpRequest {
   typedef std::map<std::string, std::string> HttpRequestParametersMap;
   typedef std::map<std::string, std::string> HttpRequestCookiesMap;
@@ -64,6 +66,7 @@ class HttpRequest {
   HttpRequestMethod        mHttpMethod;
   HttpRequestCookiesMap    mCookies;
   HttpRequestParametersMap mParameters;
+  HttpRequestHeadersMap    mExtraHeaders;
   std::string              mSessionId;
   MPFD::Parser            *mMultipartContentParser;
   const char              *mMimeType;
@@ -238,6 +241,24 @@ public:
       res.push_back(cookie.first);
     }
     return res;
+  }
+
+  /**********************************************************************/
+  /**
+   * get header value
+   * @param name: the header name
+   * @param value: the header value
+   * @return true is the header exists
+   */
+  inline bool getExtraHeader(const std::string &name, std::string &value) const {
+    if (!mExtraHeaders.empty()) {
+      HttpRequestHeadersMap::const_iterator it;
+      if ((it = mExtraHeaders.find(name)) != mExtraHeaders.end()) {
+        value = it->second;
+        return true;
+      }
+    }
+    return false;
   }
 
   /**********************************************************************/
@@ -435,8 +456,8 @@ public:
    * @cookies params: raw http cookies string
    */
   HttpRequest(const HttpRequestMethod type, const char *url, const char *params, const char *cookies,
-              const char *origin, const std::string &username, ClientSockData *client, const char *mimeType,
-              std::vector<uint8_t> *payload = nullptr, MPFD::Parser *parser = nullptr) {
+              HttpRequestHeadersMap &hMap, const char *origin, const std::string &username, ClientSockData *client, const char *mimeType,
+std::vector<uint8_t> *payload = nullptr, MPFD::Parser *parser = nullptr) {
     GR_JUMP_TRACE;
     mHttpMethod             = type;
     mUrl                    = url;
@@ -446,6 +467,7 @@ public:
     mMimeType               = mimeType;
     mPayload                = payload;
     mMultipartContentParser = parser;
+    mExtraHeaders           = hMap;
 
     setParams(params);
 

@@ -9,7 +9,7 @@
 
 Summary:	C++ framework for Web and RESTfull API development, including a complete, fast and multithreaded HTTP(S) server
 Name:		libnavajo
-Version:	1.6.0
+Version:	1.7.1
 Release:	1
 License:	LGPLv3
 Group:		System/Libraries

@@ -31,7 +31,7 @@ Maintainer: Thierry DESCOMBES <thierry.descombes@gmail.com>
 Architecture: `echo $ARCH_NAME`
 Depends: openssl, zlib1g-dev
 Version: 1.6
-Description: C++ framework for Web and RESTfull API development, including a complete, fast and multithreaded HTTP(S) server
+Description: an implementation of a complete HTTP(S) server, complete, fast and lightweight.
 EOF_CONTROL
 
 cat > $DPKG_BUILD_ROOT/DEBIAN/rules << EOF_RULES

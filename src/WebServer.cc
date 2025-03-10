@@ -20,13 +20,19 @@
 #include <pthread.h>
 
 #include <algorithm>
+#include <cctype>
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 #include <iostream>
-#include <libnavajo/HttpRequest.hh>
+#include <locale>
 #include <sstream>
 #include <sys/types.h>
+#include <openssl/evp.h>
+#include <openssl/sha.h>
+
+#include <libnavajo/HttpRequest.hh>
 
 #include "libnavajo/GrDebug.hpp"
 #include "libnavajo/WebServer.hh"
@@ -68,24 +74,24 @@ time_t                           HttpSession::sessionLifeTime          = 20 * 60
 
 // clang-format off
 WebServer::WebServer() :
-  sslCtx( nullptr ),
-  s_server_session_id_context( 1 ),
-  tokDecodeCallback( nullptr ),
-  authBearTokDecExpirationCb( nullptr ),
-  authBearTokDecScopesCb( nullptr ),
-  authBearerEnabled( false ),
-  httpdAuth( false ),
-  exiting( false ),
-  exitedThread( 0 ),
-  nbServerSock( 0 ),
-  disableIpV4( false ),
-  disableIpV6( false ),
-  socketTimeoutInSecond( DEFAULT_HTTP_SERVER_SOCKET_TIMEOUT ),
-  tcpPort( DEFAULT_HTTP_PORT ),
-  threadsPoolSize( 64 ),
-  multipartMaxCollectedDataLength( 20 * 1024 ),
-  mIsSSLEnabled( false ),
-  mIsAuthPeerSSL( false )
+  sslCtx(nullptr),
+  s_server_session_id_context(1),
+  tokDecodeCallback(nullptr),
+  authBearTokDecExpirationCb(nullptr),
+  authBearTokDecScopesCb(nullptr),
+  authBearerEnabled(false),
+  httpdAuth(false),
+  exiting(false),
+  exitedThread(0),
+  nbServerSock(0),
+  disableIpV4(false),
+  disableIpV6(false),
+  socketTimeoutInSecond(DEFAULT_HTTP_SERVER_SOCKET_TIMEOUT),
+  tcpPort(DEFAULT_HTTP_PORT),
+  threadsPoolSize(64),
+  multipartMaxCollectedDataLength(20 * 1024),
+  mIsSSLEnabled(false),
+  mIsAuthPeerSSL(false)
 {
   GR_JUMP_TRACE;
 
@@ -332,6 +338,44 @@ size_t WebServer::recvLine(int client, char *bufLine, size_t nsize) {
   return bufLineLen;
 }
 
+/**********************************************************************/
+/**
+ * trim from start, thanks to https://stackoverflow.com/a/217605
+ */
+static inline std::string &ltrim(std::string &s) {
+  s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+  return s;
+}
+
+/**********************************************************************/
+/**
+ * trim from end, thanks to https://stackoverflow.com/a/217605
+ */
+static inline std::string &rtrim(std::string &s) {
+  s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+  return s;
+}
+
+/**********************************************************************/
+/**
+ * trim from both ends, thanks to https://stackoverflow.com/a/217605
+ */
+static inline std::string &trim(std::string &s) { return ltrim(rtrim(s)); }
+
+/**********************************************************************/
+/**
+ * fill extra http headers Map
+ * @param c: raw string containing a header line made of "Header: Value"
+ */
+static void addExtraHeader(const char *l, HttpRequestHeadersMap &m) {
+  std::stringstream ss(l);
+  std::string       header;
+  std::string       val;
+  if (std::getline(ss, header, ':') && std::getline(ss, val, ':')) {
+    m[header] = trim(val);
+  }
+};
+
 /***********************************************************************
  * accept_request:  Process a request
  * @param c - the socket connected to the client
@@ -355,6 +399,7 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
   char         *requestParams          = nullptr;
   char         *requestCookies         = nullptr;
   char         *requestOrigin          = nullptr;
+  HttpRequestHeadersMap requestExtraHeaders;
   char         *webSocketClientKey     = nullptr;
   bool          websocket              = false;
   int           webSocketVersion       = -1;
@@ -605,6 +650,7 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
           continue;
         }
 
+        addExtraHeader(bufLine + j, requestExtraHeaders);
         isQueryStr = false;
         if (strncmp(bufLine + j, "GET", 3) == 0) {
           GR_JUMP_TRACE;
@@ -901,7 +947,7 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
         }
 
         GR_JUMP_TRACE;
-        auto *request = new HttpRequest(requestMethod, urlBuffer, requestParams, requestCookies, requestOrigin,
+        auto *request = new HttpRequest(requestMethod, urlBuffer, requestParams, requestCookies, requestExtraHeaders, requestOrigin,
                                         username, clientSockData, mimeType, &payload, multipartContentParser);
 
         GR_JUMP_TRACE;
@@ -951,7 +997,7 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
     bool           zippedFile  = false;
 
     GR_JUMP_TRACE;
-    HttpRequest request(requestMethod, urlBuffer, requestParams, requestCookies, requestOrigin, username,
+    HttpRequest request(requestMethod, urlBuffer, requestParams, requestCookies, requestExtraHeaders, requestOrigin, username,
                         clientSockData, mimeType, &payload, multipartContentParser);
 
     GR_JUMP_TRACE;
