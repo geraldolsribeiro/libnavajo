@@ -37,9 +37,8 @@ public:
    * getInstance - return/create a static logRecorder object
    * \return theLogRecorder - static log recorder
    */
-  inline static LogRecorder *getInstance()
-  {
-    if( theLogRecorder == nullptr ) {
+  inline static LogRecorder *getInstance() {
+    if (theLogRecorder == nullptr) {
       theLogRecorder = new LogRecorder;
     }
     return theLogRecorder;
@@ -49,53 +48,45 @@ public:
    * freeInstance - free the static logRecorder object
    */
 
-  static void freeInstance()
-  {
-    if( theLogRecorder != nullptr ) {
+  static void freeInstance() {
+    if (theLogRecorder != nullptr) {
       delete theLogRecorder;
     }
 
     theLogRecorder = nullptr;
   }
-  void setDebugMode( bool d = true )
-  {
+  void setDebugMode(bool d = true) {
     debugMode = d;
-    if( debugMode ) {
-      spdlog::set_level( spdlog::level::debug );
-    }
-    else {
-      spdlog::set_level( spdlog::level::info );
+    if (debugMode) {
+      spdlog::set_level(spdlog::level::debug);
+    } else {
+      spdlog::set_level(spdlog::level::info);
     }
   };
-  void addLogOutput( LogOutput * );
+  void addLogOutput(LogOutput *);
   void removeLogOutputs();
 
-  void        append( const NvjLogSeverity &l, const std::string &msg, const std::string &details = "" );
-  inline void appendUniq( const NvjLogSeverity &l, const std::string &msg, const std::string &details = "" )
-  {
+  void        append(const NvjLogSeverity &l, const std::string &msg, const std::string &details = "");
+  inline void appendUniq(const NvjLogSeverity &l, const std::string &msg, const std::string &details = "") {
     std::set<std::string>::iterator it;
-    it = uniqLog.find( msg + details );
-    if( it == uniqLog.end() ) {
-      uniqLog.insert( msg + details );
-      append( l, msg, details );
+    it = uniqLog.find(msg + details);
+    if (it == uniqLog.end()) {
+      uniqLog.insert(msg + details);
+      append(l, msg, details);
     }
   };
 
-  inline void printf( const NvjLogSeverity severity, const char *fmt, ... )
-  {
+  inline void printf(const NvjLogSeverity severity, const char *fmt, ...) {
     char    buff[512];
     va_list argptr;
-    va_start( argptr, fmt );
-    vsnprintf( buff, 512, fmt, argptr );
-    va_end( argptr );
+    va_start(argptr, fmt);
+    vsnprintf(buff, 512, fmt, argptr);
+    va_end(argptr);
 
-    append( severity, buff );
+    append(severity, buff);
   }
 
-  inline void initUniq()
-  {
-    uniqLog.clear();
-  };
+  inline void initUniq() { uniqLog.clear(); };
 
 protected:
   LogRecorder();

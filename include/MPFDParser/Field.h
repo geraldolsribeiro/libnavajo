@@ -3,7 +3,6 @@
 //
 // Contacts and other info are on the WEB page:  grigory.info/MPFDParser
 
-
 #ifndef _FIELD_H
 #define _FIELD_H
 
@@ -23,30 +22,28 @@ public:
   Field();
   virtual ~Field();
 
-  void SetType( int type );
+  void SetType(int type);
   int  GetType();
 
-  void AcceptSomeData( char *data, long length );
-
+  void AcceptSomeData(char *data, long length);
 
   // File functions
-  void SetUploadedFilesStorage( int where );
-  void SetTempDir( std::string dir );
+  void SetUploadedFilesStorage(int where);
+  void SetTempDir(std::string dir);
 
-  void        SetFileName( std::string name );
+  void        SetFileName(std::string name);
   std::string GetFileName();
 
-  void        SetFileContentType( std::string type );
+  void        SetFileContentType(std::string type);
   std::string GetFileMimeType();
 
-  char *        GetFileContent();
+  char         *GetFileContent();
   unsigned long GetFileContentSize();
 
   std::string GetTempFileName();
 
   // Text field operations
   std::string GetTextTypeContent();
-
 
 private:
   unsigned long FieldContentLength;
@@ -57,7 +54,7 @@ private:
   std::string FileContentType, FileName;
 
   int           type;
-  char *        FieldContent;
+  char         *FieldContent;
   std::ofstream file;
 };
 } // namespace MPFD

@@ -31,12 +31,12 @@ class LocalRepository : public WebRepository {
   std::string aliasName;
   std::string fullPathToLocalDir;
 
-  bool loadFilename_dir( const std::string &alias, const std::string &path, const std::string &subpath = "" );
-  bool fileExist( const std::string &url );
+  bool loadFilename_dir(const std::string &alias, const std::string &path, const std::string &subpath = "");
+  bool fileExist(const std::string &url);
 
 public:
-  LocalRepository( const std::string &alias, const std::string &dirPath );
-  virtual ~LocalRepository(){};
+  LocalRepository(const std::string &alias, const std::string &dirPath);
+  virtual ~LocalRepository() {};
 
   /**
    * Try to resolve an http request by requesting the LocalRepository. Inherited
@@ -46,7 +46,7 @@ public:
    * @param response: a pointer to the new generated response
    * \return true if the repository contains the requested resource
    */
-  bool getFile( HttpRequest *request, HttpResponse *response ) override;
+  bool getFile(HttpRequest *request, HttpResponse *response) override;
 
   /**
    * Free resources after use. Inherited from class WebRepository
@@ -54,10 +54,9 @@ public:
    * @param webpage: a pointer to the generated page
    */
   // GLSR FIXME override
-  void freeFile( unsigned char *webpage ) override
-  {
+  void freeFile(unsigned char *webpage) override {
     GR_JUMP_TRACE;
-    ::free( webpage );
+    ::free(webpage);
   };
 
   /**
@@ -69,8 +68,7 @@ public:
   /**
    * Return the list of available resources (list of url)
    */
-  inline std::set<std::string> *getFilenames()
-  {
+  inline std::set<std::string> *getFilenames() {
     GR_JUMP_TRACE;
     return &filenamesSet;
   }

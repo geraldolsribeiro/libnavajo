@@ -17,13 +17,13 @@
 #include "libnavajo/GrDebug.hpp"
 #include "libnavajo/LogStdOutput.hh"
 
-#define RED "\x1B[31m"
-#define GRN "\x1B[32m"
-#define YEL "\x1B[33m"
-#define BLU "\x1B[34m"
-#define MAG "\x1B[35m"
-#define CYN "\x1B[36m"
-#define WHT "\x1B[37m"
+#define RED   "\x1B[31m"
+#define GRN   "\x1B[32m"
+#define YEL   "\x1B[33m"
+#define BLU   "\x1B[34m"
+#define MAG   "\x1B[35m"
+#define CYN   "\x1B[36m"
+#define WHT   "\x1B[37m"
 #define RESET "\x1B[0m"
 
 /***********************************************************************/
@@ -32,32 +32,31 @@
  * \param l - LogSeverity
  * \param m - message
  */
-void LogStdOutput::append( const NvjLogSeverity &l, const std::string &message, const std::string & /*details*/ )
-{
+void LogStdOutput::append(const NvjLogSeverity &l, const std::string &message, const std::string & /*details*/) {
   GR_JUMP_TRACE;
 
-  switch( l ) {
+  switch (l) {
   case NVJ_DEBUG:
-    fprintf( stdout, CYN "%s\n" RESET, message.c_str() );
-    fflush( nullptr );
+    fprintf(stdout, CYN "%s\n" RESET, message.c_str());
+    fflush(nullptr);
     break;
   case NVJ_WARNING:
-    fprintf( stdout, YEL "%s\n" RESET, message.c_str() );
-    fflush( nullptr );
+    fprintf(stdout, YEL "%s\n" RESET, message.c_str());
+    fflush(nullptr);
     break;
   case NVJ_ALERT:
-    fprintf( stdout, MAG "%s\n" RESET, message.c_str() );
-    fflush( nullptr );
+    fprintf(stdout, MAG "%s\n" RESET, message.c_str());
+    fflush(nullptr);
     break;
   case NVJ_INFO:
-    fprintf( stdout, GRN "%s\n" RESET, message.c_str() );
-    fflush( nullptr );
+    fprintf(stdout, GRN "%s\n" RESET, message.c_str());
+    fflush(nullptr);
     break;
   case NVJ_ERROR:
-    fprintf( stderr, RED "%s\n" RESET, message.c_str() );
+    fprintf(stderr, RED "%s\n" RESET, message.c_str());
     break;
   case NVJ_FATAL:
-    fprintf( stderr, RED "%s\n" RESET, message.c_str() );
+    fprintf(stderr, RED "%s\n" RESET, message.c_str());
     break;
   }
 }
@@ -67,29 +66,20 @@ void LogStdOutput::append( const NvjLogSeverity &l, const std::string &message, 
  *  initialize the logoutput
  */
 
-void LogStdOutput::initialize()
-{
-  GR_JUMP_TRACE;
-}
+void LogStdOutput::initialize() { GR_JUMP_TRACE; }
 
 /***********************************************************************/
 /**
  * LogStdOutput - constructor
  */
 
-LogStdOutput::LogStdOutput()
-{
-  GR_JUMP_TRACE;
-}
+LogStdOutput::LogStdOutput() { GR_JUMP_TRACE; }
 
 /***********************************************************************/
 /**
  * ~LogRecorder - destructor
  */
 
-LogStdOutput::~LogStdOutput()
-{
-  GR_JUMP_TRACE;
-}
+LogStdOutput::~LogStdOutput() { GR_JUMP_TRACE; }
 
 /***********************************************************************/

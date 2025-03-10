@@ -3,7 +3,6 @@
 //
 // Contacts and other info are on the WEB page:  grigory.info/MPFDParser
 
-
 #ifndef _PARSER_H
 #define _PARSER_H
 
@@ -21,21 +20,19 @@ class Parser {
 public:
   static const int StoreUploadedFilesInFilesystem = 1, StoreUploadedFilesInMemory = 2;
 
-
   Parser();
   ~Parser();
 
-  void SetContentType( const std::string type );
+  void SetContentType(const std::string type);
 
-  void AcceptSomeData( const char *data, const long length );
+  void AcceptSomeData(const char *data, const long length);
 
-
-  void SetMaxCollectedDataLength( long max );
-  void SetTempDirForFileUpload( std::string dir );
-  void SetUploadedFilesStorage( int where );
+  void SetMaxCollectedDataLength(long max);
+  void SetTempDirForFileUpload(std::string dir);
+  void SetUploadedFilesStorage(int where);
 
   std::map<std::string, Field *> GetFieldsMap();
-  Field *                        GetField( std::string Name );
+  Field                         *GetField(std::string Name);
 
 private:
   int WhereToStoreUploadedFiles;
@@ -54,13 +51,13 @@ private:
   std::string ProcessingFieldName;
   bool        _HeadersOfTheFieldAreProcessed;
   long        ContentLength;
-  char *      DataCollector;
+  char       *DataCollector;
   long        DataCollectorLength, MaxDataCollectorLength;
   bool        FindStartingBoundaryAndTruncData();
   void        _ProcessData();
-  void        _ParseHeaders( std::string headers );
+  void        _ParseHeaders(std::string headers);
   bool        WaitForHeadersEndAndParseThem();
-  void        TruncateDataCollectorFromTheBeginning( long n );
+  void        TruncateDataCollectorFromTheBeginning(long n);
   long        BoundaryPositionInDataCollector();
   bool        ProcessContentOfTheField();
 };

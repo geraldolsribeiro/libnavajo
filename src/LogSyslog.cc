@@ -17,19 +17,17 @@
 #include "libnavajo/GrDebug.hpp"
 #include "libnavajo/LogSyslog.hh"
 
-
 /***********************************************************************/
 /**
  * append - append a message
  * \param l - LogSeverity
  * \param m - message
  */
-void LogSyslog::append( const NvjLogSeverity &l, const std::string &message, const std::string & /*details*/ )
-{
+void LogSyslog::append(const NvjLogSeverity &l, const std::string &message, const std::string & /*details*/) {
   GR_JUMP_TRACE;
 
   int type;
-  switch( l ) {
+  switch (l) {
   case NVJ_DEBUG:
     type = LOG_DEBUG;
     break;
@@ -50,7 +48,7 @@ void LogSyslog::append( const NvjLogSeverity &l, const std::string &message, con
     type = LOG_INFO;
     break;
   }
-  syslog( type, "%s", message.c_str() );
+  syslog(type, "%s", message.c_str());
 }
 
 /***********************************************************************/
@@ -58,11 +56,10 @@ void LogSyslog::append( const NvjLogSeverity &l, const std::string &message, con
  *  initialize the logoutput
  */
 
-void LogSyslog::initialize()
-{
+void LogSyslog::initialize() {
   GR_JUMP_TRACE;
-  openlog( ident, LOG_PID, LOG_USER );
-  setWithDateTime( false );
+  openlog(ident, LOG_PID, LOG_USER);
+  setWithDateTime(false);
 }
 
 /***********************************************************************/
@@ -70,10 +67,9 @@ void LogSyslog::initialize()
  * LogSyslog - constructor
  */
 
-LogSyslog::LogSyslog( const char *id )
-{
+LogSyslog::LogSyslog(const char *id) {
   GR_JUMP_TRACE;
-  strncpy( ident, id, 30 );
+  strncpy(ident, id, 30);
 }
 
 /***********************************************************************/
@@ -81,8 +77,7 @@ LogSyslog::LogSyslog( const char *id )
  * ~LogRecorder - destructor
  */
 
-LogSyslog::~LogSyslog()
-{
+LogSyslog::~LogSyslog() {
   GR_JUMP_TRACE;
   closelog();
 }

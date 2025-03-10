@@ -11,7 +11,6 @@
  */
 //********************************************************
 
-
 #include <ctime>
 #include <iostream>
 
@@ -28,18 +27,17 @@ LogRecorder *LogRecorder::theLogRecorder = nullptr;
  * getDateStr - return a string with the formatted date
  * \return string - formatted date
  */
-std::string LogRecorder::getDateStr()
-{
+std::string LogRecorder::getDateStr() {
   GR_JUMP_TRACE;
   struct tm today;
   char      tmpbuf[128];
   time_t    ltime;
 
-  time( &ltime );
-  gmtime_r( &ltime, &today );
+  time(&ltime);
+  gmtime_r(&ltime, &today);
 
   std::string ret_str;
-  strftime( tmpbuf, 128, "[%Y-%m-%d %H:%M:%S] >  ", &today );
+  strftime(tmpbuf, 128, "[%Y-%m-%d %H:%M:%S] >  ", &today);
   ret_str = tmpbuf;
   return ret_str;
 }
@@ -50,31 +48,29 @@ std::string LogRecorder::getDateStr()
  * \param l - type of entry
  * \param m - message
  */
-void LogRecorder::append( const NvjLogSeverity &l, const std::string &m, const std::string &details )
-{
+void LogRecorder::append(const NvjLogSeverity &l, const std::string &m, const std::string &details) {
   GR_JUMP_TRACE;
-  pthread_mutex_lock( &log_mutex );
+  pthread_mutex_lock(&log_mutex);
 
-  if( l != NVJ_DEBUG || debugMode ) {
-    for( auto &it : logOutputsList_ ) {
+  if (l != NVJ_DEBUG || debugMode) {
+    for (auto &it : logOutputsList_) {
       std::string msg;
 
-      if( it->isWithDateTime() ) {
+      if (it->isWithDateTime()) {
         msg = getDateStr() + m;
-      }
-      else {
+      } else {
         msg = m;
       }
 
-      if( it->isWithEndline() ) {
-        msg += std::string( "\n" );
+      if (it->isWithEndline()) {
+        msg += std::string("\n");
       }
 
-      it->append( l, msg, details );
+      it->append(l, msg, details);
     }
   }
 
-  pthread_mutex_unlock( &log_mutex );
+  pthread_mutex_unlock(&log_mutex);
 }
 
 /***********************************************************************/
@@ -82,21 +78,19 @@ void LogRecorder::append( const NvjLogSeverity &l, const std::string &m, const s
  * addLogOutput - ajout d'une sortie LogOutput où imprimer les logs
  */
 
-void LogRecorder::addLogOutput( LogOutput *output )
-{
+void LogRecorder::addLogOutput(LogOutput *output) {
   GR_JUMP_TRACE;
   output->initialize();
-  logOutputsList_.push_back( output );
+  logOutputsList_.push_back(output);
 }
 
 /***********************************************************************/
 /**
  * removeLogOutputs - supprime toutes les sorties LogOutput
  */
-void LogRecorder::removeLogOutputs()
-{
+void LogRecorder::removeLogOutputs() {
   GR_JUMP_TRACE;
-  for( auto &it : logOutputsList_ ) {
+  for (auto &it : logOutputsList_) {
     delete it;
   }
 
@@ -108,19 +102,17 @@ void LogRecorder::removeLogOutputs()
  * LogRecorder - base constructor
  */
 
-LogRecorder::LogRecorder()
-{
+LogRecorder::LogRecorder() {
   GR_JUMP_TRACE;
   debugMode = false;
-  pthread_mutex_init( &log_mutex, nullptr );
+  pthread_mutex_init(&log_mutex, nullptr);
 }
 
 /***********************************************************************/
 /**
  * ~LogRecorder - destructor
  */
-LogRecorder::~LogRecorder()
-{
+LogRecorder::~LogRecorder() {
   GR_JUMP_TRACE;
   removeLogOutputs();
 }

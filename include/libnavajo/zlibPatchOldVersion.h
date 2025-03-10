@@ -13,7 +13,6 @@
  */
 //********************************************************
 
-
 typedef enum {
   HEAD,     /* i: waiting for magic header */
   FLAGS,    /* i: waiting for method and flags (gzip) */
@@ -80,22 +79,21 @@ struct inflate_state2 {
   *window; /* allocated sliding window, if needed */
 };
 
-
 inline int ZEXPORT;
-inflateGetDictionary( z_streamp strm, Bytef *dictionary, uInt *dictLength )
-{
+inflateGetDictionary(z_streamp strm, Bytef *dictionary, uInt *dictLength) {
   struct inflate_state2 FAR;
   *state;
   /* check state */
-  if( strm == Z_NULL || strm->state == Z_NULL )
+  if (strm == Z_NULL || strm->state == Z_NULL) {
     return Z_STREAM_ERROR;
+  }
   state = (inflate_state2 FAR *)strm->state;
   /* copy dictionary */
-  if( state->whave && dictionary != Z_NULL ) {
-    memcpy( dictionary, state->window + state->wnext, state->whave - state->wnext );
-    memcpy( dictionary + state->whave - state->wnext, state->window, state->wnext );
+  if (state->whave && dictionary != Z_NULL) {
+    memcpy(dictionary, state->window + state->wnext, state->whave - state->wnext);
+    memcpy(dictionary + state->whave - state->wnext, state->window, state->wnext);
   }
-  if( dictLength != Z_NULL )
+  if (dictLength != Z_NULL)
     *dictLength = state->whave;
   return Z_OK;
 }

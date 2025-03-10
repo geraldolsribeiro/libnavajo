@@ -40,68 +40,63 @@ class WebSocketClient {
   std::queue<MessageContent *> sendingQueue;
   pthread_mutex_t              sendingQueueMutex;
   pthread_cond_t               sendingNotification;
-  void                         addSendingQueue( MessageContent *msgContent );
+  void                         addSendingQueue(MessageContent *msgContent);
 
-  WebSocket *   mWebsocket;
-  HttpRequest * mRequest;
+  WebSocket    *mWebsocket;
+  HttpRequest  *mRequest;
   volatile bool mClosing;
   pthread_t     mReceivingThreadId, mSendingThreadId;
 
   void receivingThread();
   void sendingThread();
 
-  bool sendMessage( const MessageContent *msg );
+  bool sendMessage(const MessageContent *msg);
 
-  void updateSessionExpiration( HttpRequest *request );
+  void updateSessionExpiration(HttpRequest *request);
 
-  inline static void *startReceivingThread( void *t )
-  {
-    WebSocketClient *_this = static_cast<WebSocketClient *>( t );
+  inline static void *startReceivingThread(void *t) {
+    WebSocketClient *_this = static_cast<WebSocketClient *>(t);
     _this->receivingThread();
-    pthread_exit( nullptr );
+    pthread_exit(nullptr);
     return nullptr;
   };
 
-  inline static void *startSendingThread( void *t )
-  {
-    WebSocketClient *_this = static_cast<WebSocketClient *>( t );
+  inline static void *startSendingThread(void *t) {
+    WebSocketClient *_this = static_cast<WebSocketClient *>(t);
     _this->sendingThread();
-    pthread_exit( nullptr );
+    pthread_exit(nullptr);
     return nullptr;
   };
 
-  void startWebSocketThreads()
-  {
-    create_thread( &mReceivingThreadId, WebSocketClient::startReceivingThread, static_cast<void *>( this ) );
-    create_thread( &mSendingThreadId, WebSocketClient::startSendingThread, static_cast<void *>( this ) );
+  void startWebSocketThreads() {
+    create_thread(&mReceivingThreadId, WebSocketClient::startReceivingThread, static_cast<void *>(this));
+    create_thread(&mSendingThreadId, WebSocketClient::startSendingThread, static_cast<void *>(this));
   }
 
-  void freeSendingQueue()
-  {
-    while( !sendingQueue.empty() ) {
+  void freeSendingQueue() {
+    while (!sendingQueue.empty()) {
       MessageContent *msg = sendingQueue.front();
-      free( msg->message );
-      free( msg );
+      free(msg->message);
+      free(msg);
       sendingQueue.pop();
     }
   }
 
   unsigned short snd_maxLatency;
 
-  void noSessionExpiration( HttpRequest *request );
-  void restoreSessionExpiration( HttpRequest *request );
+  void noSessionExpiration(HttpRequest *request);
+  void restoreSessionExpiration(HttpRequest *request);
 
 public:
-  WebSocketClient( WebSocket *ws, HttpRequest *req );
+  WebSocketClient(WebSocket *ws, HttpRequest *req);
 
-  ~WebSocketClient()
-  {
-    pthread_mutex_lock( &sendingQueueMutex );
+  ~WebSocketClient() {
+    pthread_mutex_lock(&sendingQueueMutex);
     freeSendingQueue();
-    pthread_mutex_unlock( &sendingQueueMutex );
-    nvj_end_stream( &( gzipcontext.strm_deflate ) );
-    pthread_mutex_destroy( &sendingQueueMutex );
-    pthread_cond_destroy( &sendingNotification );
+    pthread_mutex_unlock(&sendingQueueMutex);
+    nvj_end_stream(&(gzipcontext.strm_deflate));
+    pthread_mutex_destroy(&sendingQueueMutex);
+    pthread_cond_destroy(&sendingNotification);
   }
 
   /**
@@ -109,7 +104,7 @@ public:
    * @param message: the text message
    * @param fin: is-it the final fragment of the message ?
    */
-  void sendTextMessage( const std::string &message, bool fin = true );
+  void sendTextMessage(const std::string &message, bool fin = true);
 
   /**
    * Send Binary Message on the websocket
@@ -117,20 +112,20 @@ public:
    * @param length: the message length
    * @param fin: is-it the final fragment of the message ?
    */
-  void sendBinaryMessage( const unsigned char *message, size_t length, bool fin = true );
+  void sendBinaryMessage(const unsigned char *message, size_t length, bool fin = true);
 
   /**
    * Send Close Message Notification on the websocket
    * @param message: the closure reason message
    * @param length: the message length
    */
-  void sendCloseCtrlFrame( const unsigned char *message, size_t length );
+  void sendCloseCtrlFrame(const unsigned char *message, size_t length);
 
   /**
    * Send Close Message Notification on the websocket
    * @param message: the closure reason message
    */
-  void sendCloseCtrlFrame( const std::string &reasonMsg = "" );
+  void sendCloseCtrlFrame(const std::string &reasonMsg = "");
 
   /**
    * Send Ping Message Notification on the websocket
@@ -138,31 +133,28 @@ public:
    * @param message: the content
    * @param length: the message length
    */
-  void sendPingCtrlFrame( const unsigned char *message, size_t length );
+  void sendPingCtrlFrame(const unsigned char *message, size_t length);
 
   /**
    * Send Ping Message Notification on the websocket
    * @param message: the content
    */
-  void sendPingCtrlFrame( const std::string &message );
+  void sendPingCtrlFrame(const std::string &message);
 
   /**
    * Send Pong Message Notification on the websocket
    * @param message: the content
    * @param length: the message length
    */
-  void sendPongCtrlFrame( const unsigned char *message, size_t length );
+  void sendPongCtrlFrame(const unsigned char *message, size_t length);
 
   /**
    * Send Pong Message Notification on the websocket
    * @param message: the content
    */
-  void sendPongCtrlFrame( const std::string &message );
+  void sendPongCtrlFrame(const std::string &message);
 
-  HttpRequest *getHttpRequest()
-  {
-    return mRequest;
-  };
+  HttpRequest *getHttpRequest() { return mRequest; };
 
   void closeWS();
   void closeSend();

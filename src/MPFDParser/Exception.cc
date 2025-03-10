@@ -7,25 +7,19 @@
 
 #include "MPFDParser/Exception.h"
 
-MPFD::Exception::Exception( std::string error )
-{
+MPFD::Exception::Exception(std::string error) {
   GR_JUMP_TRACE;
   Error = error;
 }
 
-MPFD::Exception::Exception( const MPFD::Exception &orig )
-{
+MPFD::Exception::Exception(const MPFD::Exception &orig) {
   GR_JUMP_TRACE;
   Error = orig.Error;
 }
 
-MPFD::Exception::~Exception()
-{
-  GR_JUMP_TRACE;
-}
+MPFD::Exception::~Exception() { GR_JUMP_TRACE; }
 
-std::string MPFD::Exception::GetError() const
-{
+std::string MPFD::Exception::GetError() const {
   GR_JUMP_TRACE;
   return Error;
 }

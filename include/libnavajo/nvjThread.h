@@ -24,52 +24,45 @@ extern "C" {
 #define STRERROR_BUF char strerror_buf[256]
 
 #ifdef WIN32
-#define STRERROR( en ) strerror_s( strerror_buf, sizeof strerror_buf, en )
+#define STRERROR(en) strerror_s(strerror_buf, sizeof strerror_buf, en)
 
 #else
 
-#define STRERROR( en ) ( strerror_r( en, strerror_buf, sizeof strerror_buf ) == 0 ? strerror_buf : "Unknown error" )
+#define STRERROR(en) (strerror_r(en, strerror_buf, sizeof strerror_buf) == 0 ? strerror_buf : "Unknown error")
 
 #endif
 
-
 /***********************************************************************/
 
-inline void create_thread(
-    pthread_t *thread_p,
-    void *( *thread_rtn )(void *),
-    void * data_p,
-    bool   joinable  = true,
-    size_t stackSize = 512 * 1024 /* Redhat default size is 2*1024*1024 */ )
-{
+inline void create_thread(pthread_t *thread_p, void *(*thread_rtn)(void *), void *data_p, bool joinable = true,
+                          size_t stackSize = 512 * 1024 /* Redhat default size is 2*1024*1024 */) {
   pthread_attr_t thread_attr; /* Thread attributes		 */
   int            rc;          /* Return code (error number)	 */
   STRERROR_BUF;               /* Buffer for strerror_r()  	 */
 
-
-  rc = pthread_attr_init( &thread_attr );
-  if( rc != 0 ) {
-    fprintf( stderr, "pthread_attr_init(): %s\n", STRERROR( rc ) );
+  rc = pthread_attr_init(&thread_attr);
+  if (rc != 0) {
+    fprintf(stderr, "pthread_attr_init(): %s\n", STRERROR(rc));
   }
 
-  rc = pthread_attr_setdetachstate( &thread_attr, joinable ? PTHREAD_CREATE_JOINABLE : PTHREAD_CREATE_DETACHED );
-  if( rc != 0 ) {
-    fprintf( stderr, "pthread_attr_setdetachstate(): %s\n", STRERROR( rc ) );
+  rc = pthread_attr_setdetachstate(&thread_attr, joinable ? PTHREAD_CREATE_JOINABLE : PTHREAD_CREATE_DETACHED);
+  if (rc != 0) {
+    fprintf(stderr, "pthread_attr_setdetachstate(): %s\n", STRERROR(rc));
   }
 
-  rc = pthread_attr_setstacksize( &thread_attr, stackSize );
-  if( rc != 0 ) {
-    fprintf( stderr, "pthread_attr_setstacksize(): %s\n", STRERROR( rc ) );
+  rc = pthread_attr_setstacksize(&thread_attr, stackSize);
+  if (rc != 0) {
+    fprintf(stderr, "pthread_attr_setstacksize(): %s\n", STRERROR(rc));
   }
 
-  rc = pthread_create( thread_p, &thread_attr, thread_rtn, data_p );
-  if( rc != 0 ) {
-    fprintf( stderr, "pthread_create(): %s\n", STRERROR( rc ) );
+  rc = pthread_create(thread_p, &thread_attr, thread_rtn, data_p);
+  if (rc != 0) {
+    fprintf(stderr, "pthread_create(): %s\n", STRERROR(rc));
   }
 
-  rc = pthread_attr_destroy( &thread_attr );
-  if( rc != 0 ) {
-    fprintf( stderr, "pthread_attr_destroy(): %s\n", STRERROR( rc ) );
+  rc = pthread_attr_destroy(&thread_attr);
+  if (rc != 0) {
+    fprintf(stderr, "pthread_attr_destroy(): %s\n", STRERROR(rc));
   }
 
   return;
@@ -81,16 +74,14 @@ inline void create_thread(
  *  thread.
  */
 
-inline void cancel_thread( pthread_t thread )
-{
+inline void cancel_thread(pthread_t thread) {
   int rc;       /* Return code (error number)	 */
   STRERROR_BUF; /* Buffer for strerror_r()  	 */
 
+  rc = pthread_cancel(thread);
 
-  rc = pthread_cancel( thread );
-
-  if( rc != 0 ) {
-    fprintf( stderr, "pthread_cancel(): %s\n", STRERROR( rc ) );
+  if (rc != 0) {
+    fprintf(stderr, "pthread_cancel(): %s\n", STRERROR(rc));
   }
 
   return;
@@ -102,14 +93,13 @@ inline void cancel_thread( pthread_t thread )
  *  terminate.
  */
 
-inline void wait_for_thread( pthread_t thread )
-{
+inline void wait_for_thread(pthread_t thread) {
   int rc;       /* Return code (error number)        */
   STRERROR_BUF; /* Buffer for strerror_r()           */
 
-  rc = pthread_join( thread, nullptr );
-  if( rc != 0 ) {
-    fprintf( stderr, "pthread_join(): %s\n", STRERROR( rc ) );
+  rc = pthread_join(thread, nullptr);
+  if (rc != 0) {
+    fprintf(stderr, "pthread_join(): %s\n", STRERROR(rc));
   }
 
   return;
@@ -117,19 +107,18 @@ inline void wait_for_thread( pthread_t thread )
 
 /***********************************************************************/
 
-inline void cancelstate_thread( void )
-{
+inline void cancelstate_thread(void) {
   int rc;       /* Return code (error number)        */
   STRERROR_BUF; /* Buffer for strerror_r()           */
 
-  rc = pthread_setcancelstate( PTHREAD_CANCEL_ENABLE, nullptr );
-  if( rc != 0 ) {
-    fprintf( stderr, "pthread_setcancelstate(): %s\n", STRERROR( rc ) );
+  rc = pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, nullptr);
+  if (rc != 0) {
+    fprintf(stderr, "pthread_setcancelstate(): %s\n", STRERROR(rc));
   }
 
-  rc = pthread_setcanceltype( PTHREAD_CANCEL_DEFERRED, nullptr );
-  if( rc != 0 ) {
-    fprintf( stderr, "pthread_setcanceltype(): %s\n", STRERROR( rc ) );
+  rc = pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, nullptr);
+  if (rc != 0) {
+    fprintf(stderr, "pthread_setcanceltype(): %s\n", STRERROR(rc));
   }
 }
 
@@ -142,29 +131,28 @@ struct cancelArg {
 };
 
 #ifndef WIN32
-inline void *thread_timeout_scheduler( void *arg )
-{
+inline void *thread_timeout_scheduler(void *arg) {
   cancelstate_thread();
 
   cancelArg *ca             = (cancelArg *)arg;
-  pthread_t  thread_to_kill = *( ca->p );
+  pthread_t  thread_to_kill = *(ca->p);
 
-  timespec t1 = { ca->s, ca->ns };
+  timespec t1 = {ca->s, ca->ns};
   timespec t2;
 
-  if( nanosleep( &t1, &t2 ) == -1 ) {
-    pthread_exit( nullptr );
+  if (nanosleep(&t1, &t2) == -1) {
+    pthread_exit(nullptr);
   }
 
-  if( t2.tv_nsec > 0 ) {
-    pthread_exit( nullptr );
+  if (t2.tv_nsec > 0) {
+    pthread_exit(nullptr);
   }
 
-  cancel_thread( thread_to_kill );
-  wait_for_thread( thread_to_kill );
-  printf( "Timeout Exceeded: The thread as been cancelled !!! \n" );
+  cancel_thread(thread_to_kill);
+  wait_for_thread(thread_to_kill);
+  printf("Timeout Exceeded: The thread as been cancelled !!! \n");
 
-  pthread_exit( nullptr );
+  pthread_exit(nullptr);
   return nullptr;
 }
 

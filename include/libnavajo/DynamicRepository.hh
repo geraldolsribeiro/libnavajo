@@ -28,13 +28,11 @@ class DynamicRepository : public WebRepository {
   IndexMap                                     indexMap;
 
 public:
-  DynamicRepository()
-  {
+  DynamicRepository() {
     GR_JUMP_TRACE;
-    pthread_mutex_init( &_mutex, nullptr );
+    pthread_mutex_init(&_mutex, nullptr);
   }
-  virtual ~DynamicRepository()
-  {
+  virtual ~DynamicRepository() {
     GR_JUMP_TRACE;
     indexMap.clear();
   }
@@ -44,10 +42,9 @@ public:
    * called from WebServer::accept_request() method
    * @param webpage: a pointer to the generated page
    */
-  inline void freeFile( unsigned char *webpage ) override
-  {
+  inline void freeFile(unsigned char *webpage) override {
     GR_JUMP_TRACE;
-    ::free( webpage );
+    ::free(webpage);
   }
 
   /**
@@ -56,17 +53,16 @@ public:
    * @param page: the DynamicPage instance responsible for content generation
    */
   // GLSR FIXME
-  inline void add( const std::string url, DynamicPage *page )
-  {
+  inline void add(const std::string url, DynamicPage *page) {
     GR_JUMP_TRACE;
     size_t i = 0;
-    while( url.size() && url[i] == '/' ) {
+    while (url.size() && url[i] == '/') {
       GR_JUMP_TRACE;
       i++;
     }
-    pthread_mutex_lock( &_mutex );
-    indexMap.insert( std::pair<std::string, DynamicPage *>( url.substr( i, url.size() - i ), page ) );
-    pthread_mutex_unlock( &_mutex );
+    pthread_mutex_lock(&_mutex);
+    indexMap.insert(std::pair<std::string, DynamicPage *>(url.substr(i, url.size() - i), page));
+    pthread_mutex_unlock(&_mutex);
   }
 
   /**
@@ -75,33 +71,31 @@ public:
    * @param deleteDynamicPage: true if the related DynamicPage must be deleted
    */
   // GLSR FIXME
-  inline void remove( const std::string urlToRemove, bool deleteDynamicPage = false )
-  {
+  inline void remove(const std::string urlToRemove, bool deleteDynamicPage = false) {
     GR_JUMP_TRACE;
-    std::string url( urlToRemove );
-    while( url.size() && url[0] == '/' ) {
+    std::string url(urlToRemove);
+    while (url.size() && url[0] == '/') {
       GR_JUMP_TRACE;
-      url.erase( 0, 1 );
+      url.erase(0, 1);
     }
-    pthread_mutex_lock( &_mutex );
-    IndexMap::iterator i = indexMap.find( url );
-    if( i == indexMap.end() ) {
+    pthread_mutex_lock(&_mutex);
+    IndexMap::iterator i = indexMap.find(url);
+    if (i == indexMap.end()) {
       GR_JUMP_TRACE;
-      pthread_mutex_unlock( &_mutex );
+      pthread_mutex_unlock(&_mutex);
       return;
-    }
-    else {
+    } else {
       GR_JUMP_TRACE;
-      pthread_mutex_unlock( &_mutex );
-      if( deleteDynamicPage ) {
+      pthread_mutex_unlock(&_mutex);
+      if (deleteDynamicPage) {
         GR_JUMP_TRACE;
         delete i->second;
       }
-      indexMap.erase( i );
+      indexMap.erase(i);
       return;
     }
 
-    pthread_mutex_lock( &_mutex );
+    pthread_mutex_lock(&_mutex);
   }
 
   /**
@@ -112,26 +106,24 @@ public:
    * @param response: a pointer to the new generated response
    * \return true if the repository contains the requested resource
    */
-  inline bool getFile( HttpRequest *request, HttpResponse *response ) override
-  {
+  inline bool getFile(HttpRequest *request, HttpResponse *response) override {
     GR_JUMP_TRACE;
     std::string url = request->getUrl();
-    while( url.size() && url[0] == '/' ) {
-      url.erase( 0, 1 );
+    while (url.size() && url[0] == '/') {
+      url.erase(0, 1);
     }
-    pthread_mutex_lock( &_mutex );
-    IndexMap::const_iterator i = indexMap.find( url );
-    if( i == indexMap.end() ) {
+    pthread_mutex_lock(&_mutex);
+    IndexMap::const_iterator i = indexMap.find(url);
+    if (i == indexMap.end()) {
       GR_JUMP_TRACE;
-      pthread_mutex_unlock( &_mutex );
+      pthread_mutex_unlock(&_mutex);
       return false;
-    }
-    else {
+    } else {
       GR_JUMP_TRACE;
-      pthread_mutex_unlock( &_mutex );
-      bool res = i->second->getPage( request, response );
-      if( request->getSessionId().size() ) {
-        response->addSessionCookie( request->getSessionId() );
+      pthread_mutex_unlock(&_mutex);
+      bool res = i->second->getPage(request, response);
+      if (request->getSessionId().size()) {
+        response->addSessionCookie(request->getSessionId());
       }
       return res;
     }

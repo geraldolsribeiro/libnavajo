@@ -18,19 +18,18 @@
 
 #ifdef WIN32
 
-#define usleep( n ) Sleep( n / 1000 >= 1 ? n / 1000 : 1 )
+#define usleep(n) Sleep(n / 1000 >= 1 ? n / 1000 : 1)
 
-#define snprintf _snprintf_s
-#define vsnprintf _vsnprintf
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-#define close closesocket
-#define SHUT_RDWR SD_BOTH
-#define ushort USHORT
-#define poll( x, y, z ) WSAPoll( ( x ), ( y ), ( z ) )
-#define setsockoptCompat( a, b, c, d, e ) setsockopt( a, b, c, (const char *)d, (int)e )
-#define sendCompat( f, b, l, o ) send( ( f ), (const char *)( b ), (int)( l ), ( o ) )
-
+#define snprintf                        _snprintf_s
+#define vsnprintf                       _vsnprintf
+#define strcasecmp                      _stricmp
+#define strncasecmp                     _strnicmp
+#define close                           closesocket
+#define SHUT_RDWR                       SD_BOTH
+#define ushort                          USHORT
+#define poll(x, y, z)                   WSAPoll((x), (y), (z))
+#define setsockoptCompat(a, b, c, d, e) setsockopt(a, b, c, (const char *)d, (int)e)
+#define sendCompat(f, b, l, o)          send((f), (const char *)(b), (int)(l), (o))
 
 #else
 
@@ -44,9 +43,8 @@
 #include <unistd.h>
 
 #define setsockoptCompat setsockopt
-#define sendCompat send
+#define sendCompat       send
 #endif
-
 
 /***********************************************************************
  * setSocketIp6Only:  restricted socket able to send and receive IPv6 packets only
@@ -55,10 +53,9 @@
  * \return true is successful, otherwise false
  ***********************************************************************/
 
-inline bool setSocketIp6Only( int socket, bool v6only = true )
-{
+inline bool setSocketIp6Only(int socket, bool v6only = true) {
   int set = v6only ? 1 : 0;
-  return setsockoptCompat( socket, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&set, sizeof( int ) ) == 0;
+  return setsockoptCompat(socket, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&set, sizeof(int)) == 0;
 }
 
 /***********************************************************************
@@ -68,11 +65,10 @@ inline bool setSocketIp6Only( int socket, bool v6only = true )
  * \return true is successful, otherwise false
  ***********************************************************************/
 
-inline bool setSocketNoSigpipe( int socket, bool nosigpipe = true )
-{
-#if defined( SO_NOSIGPIPE )
+inline bool setSocketNoSigpipe(int socket, bool nosigpipe = true) {
+#if defined(SO_NOSIGPIPE)
   int set = nosigpipe ? 1 : 0;
-  return setsockoptCompat( socket, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof( int ) ) == 0;
+  return setsockoptCompat(socket, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof(int)) == 0;
 #else
   (void)socket;
   (void)nosigpipe;
@@ -87,10 +83,9 @@ inline bool setSocketNoSigpipe( int socket, bool nosigpipe = true )
  * \return true is successful, otherwise false
  ***********************************************************************/
 
-inline bool setSocketReuseAddr( int socket, bool reuse = true )
-{
+inline bool setSocketReuseAddr(int socket, bool reuse = true) {
   int optval = reuse ? 1 : 0;
-  return setsockoptCompat( socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval ) == 0;
+  return setsockoptCompat(socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval) == 0;
 }
 
 /***********************************************************************
@@ -100,10 +95,9 @@ inline bool setSocketReuseAddr( int socket, bool reuse = true )
  * \return true is successful, otherwise false
  ***********************************************************************/
 
-inline bool setSocketBindToDevice( int socket, const char *device )
-{
-#if defined( SO_BINDTODEVICE )
-  return setsockopt( socket, SOL_SOCKET, SO_BINDTODEVICE, device, strlen( device ) ) == 0;
+inline bool setSocketBindToDevice(int socket, const char *device) {
+#if defined(SO_BINDTODEVICE)
+  return setsockopt(socket, SOL_SOCKET, SO_BINDTODEVICE, device, strlen(device)) == 0;
 #else
   return true;
 #endif
@@ -116,10 +110,9 @@ inline bool setSocketBindToDevice( int socket, const char *device )
  * \return true is successful, otherwise false
  ***********************************************************************/
 
-inline bool setSocketKeepAlive( int socket, bool keepAlive )
-{
+inline bool setSocketKeepAlive(int socket, bool keepAlive) {
   int set = keepAlive ? 1 : 0;
-  return setsockopt( socket, SOL_SOCKET, SO_KEEPALIVE, (void *)&set, sizeof( int ) ) == 0;
+  return setsockopt(socket, SOL_SOCKET, SO_KEEPALIVE, (void *)&set, sizeof(int)) == 0;
 }
 
 /***********************************************************************
@@ -129,12 +122,11 @@ inline bool setSocketKeepAlive( int socket, bool keepAlive )
  * \return true is successful, otherwise false
  ***********************************************************************/
 
-inline bool setSocketDoLinger( int socket, bool dolinger )
-{
+inline bool setSocketDoLinger(int socket, bool dolinger) {
   linger value;
   value.l_onoff  = dolinger != 0;
   value.l_linger = dolinger;
-  return setsockopt( socket, SOL_SOCKET, SO_LINGER, (char *)&value, sizeof( linger ) ) == 0;
+  return setsockopt(socket, SOL_SOCKET, SO_LINGER, (char *)&value, sizeof(linger)) == 0;
 }
 /***********************************************************************
  * setSocketSndRcvTimeout:  Place a timeout on the socket
@@ -144,8 +136,7 @@ inline bool setSocketDoLinger( int socket, bool dolinger )
  * \return true is successful, otherwise false
  ***********************************************************************/
 
-inline bool setSocketSndRcvTimeout( int socket, time_t seconds, long int useconds = 0 )
-{
+inline bool setSocketSndRcvTimeout(int socket, time_t seconds, long int useconds = 0) {
 #ifdef WIN32
   int nTimeout = seconds * 1000 + useconds;
   if (  (setsockopt(socket, SOL_SOCKET, SO_RCVTIMEO,(const char*)&nTimeout, sizeof(int)) == 0 )
@@ -159,8 +150,8 @@ inline bool setSocketSndRcvTimeout( int socket, time_t seconds, long int usecond
   tv2.tv_sec  = seconds;
   tv2.tv_usec = useconds;
 
-  if( ( setsockoptCompat( socket, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof( struct timeval ) ) == 0 )
-      && ( setsockoptCompat( socket, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv2, sizeof( struct timeval ) ) == 0 ) ) {
+  if ((setsockoptCompat(socket, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(struct timeval)) == 0) &&
+      (setsockoptCompat(socket, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv2, sizeof(struct timeval)) == 0)) {
     return true;
   }
 #endif
@@ -176,11 +167,10 @@ inline bool setSocketSndRcvTimeout( int socket, time_t seconds, long int usecond
  * \return true is successful, otherwise false
  ***********************************************************************/
 
-inline bool setSocketTcpAckTimeout( int socket, int seconds, int milliseconds )
-{
-#if defined( SOL_TCP ) && defined( TCP_USER_TIMEOUT )
+inline bool setSocketTcpAckTimeout(int socket, int seconds, int milliseconds) {
+#if defined(SOL_TCP) && defined(TCP_USER_TIMEOUT)
   int timeout = 1000 * seconds + milliseconds; // user timeout in milliseconds [ms]
-  return setsockopt( socket, SOL_TCP, TCP_USER_TIMEOUT, (char *)&timeout, sizeof( timeout ) ) == 0;
+  return setsockopt(socket, SOL_TCP, TCP_USER_TIMEOUT, (char *)&timeout, sizeof(timeout)) == 0;
 #else
   return false;
 #endif
@@ -193,10 +183,9 @@ inline bool setSocketTcpAckTimeout( int socket, int seconds, int milliseconds )
  * \return true is successful, otherwise false
  ***********************************************************************/
 
-inline bool setSocketNagleAlgo( int socket, bool naggle = false )
-{
+inline bool setSocketNagleAlgo(int socket, bool naggle = false) {
   int flag = naggle ? 1 : 0;
-  return setsockopt( socket, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof( flag ) ) == 0;
+  return setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(flag)) == 0;
 }
 
 #endif

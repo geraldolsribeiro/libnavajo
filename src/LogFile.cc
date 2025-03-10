@@ -11,7 +11,6 @@
  */
 //********************************************************
 
-
 #include <cstdlib>
 #include <cstring>
 
@@ -24,11 +23,10 @@
  * \param l - type of entry
  * \param m - message
  */
-void LogFile::append( const NvjLogSeverity & /*l*/, const std::string &message, const std::string & /*details*/ )
-{
+void LogFile::append(const NvjLogSeverity & /*l*/, const std::string &message, const std::string & /*details*/) {
   GR_JUMP_TRACE;
-  if( file != nullptr ) {
-    ( *file ) << message << std::endl;
+  if (file != nullptr) {
+    (*file) << message << std::endl;
   }
 }
 
@@ -37,15 +35,14 @@ void LogFile::append( const NvjLogSeverity & /*l*/, const std::string &message, 
  * LogFile - initialize
  */
 
-void LogFile::initialize()
-{
+void LogFile::initialize() {
   GR_JUMP_TRACE;
   file = new std::ofstream;
-  file->open( filename, std::ios::out | std::ios::app );
+  file->open(filename, std::ios::out | std::ios::app);
 
-  if( file->fail() ) {
+  if (file->fail()) {
     std::cerr << "Can't open " << filename << std::endl;
-    exit( 1 );
+    exit(1);
   }
 }
 
@@ -54,10 +51,9 @@ void LogFile::initialize()
  * LogFile - constructor
  */
 
-LogFile::LogFile( const char *f )
-{
+LogFile::LogFile(const char *f) {
   GR_JUMP_TRACE;
-  strncpy( filename, f, 30 );
+  strncpy(filename, f, 30);
   file = nullptr;
   // setWithEndline(true);
 }
@@ -67,10 +63,9 @@ LogFile::LogFile( const char *f )
  * ~LogRecorder - destructor
  */
 
-LogFile::~LogFile()
-{
+LogFile::~LogFile() {
   GR_JUMP_TRACE;
-  if( file != nullptr ) {
+  if (file != nullptr) {
     file->close();
     delete file;
   }
