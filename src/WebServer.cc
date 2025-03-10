@@ -1707,6 +1707,10 @@ void WebServer::exit() {
     close(server_sock[nbServerSock]);
   }
   pthread_mutex_unlock(&clientsQueue_mutex);
+
+  if( mIsSSLEnabled ) {
+    SSL_CTX_free(sslCtx);
+  }
 }
 
 /***********************************************************************
@@ -1771,8 +1775,10 @@ int WebServer::verify_callback(int preverify_ok, X509_STORE_CTX *ctx) {
 void WebServer::initialize_ctx(const char *certfile, const char *cafile, const char *password) {
   GR_JUMP_TRACE;
   /* Global system initialization*/
-  SSL_library_init();
-  SSL_load_error_strings();
+  if(!sslCtx) {
+    SSL_library_init();
+    SSL_load_error_strings();
+  }
 
   /* Create our context*/
   sslCtx = SSL_CTX_new(SSLv23_method());
