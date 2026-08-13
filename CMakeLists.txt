@@ -19,21 +19,27 @@ set(LIBNAVAJO_BUILD_DATE `/bin/date +%s`)
 
 
 ###############            Minimal flags           #####################
-IF(${UNIX})
-  # -fsanitize=address,undefined
-  set (CMAKE_CXX_FLAGS " -Wall -O2 -DLINUX -Wextra -Wshadow -Wno-unused -Wpedantic -fexceptions -fPIC -D_REENTRANT -DLIBNAVAJO_SOFTWARE_VERSION=\"\\\"${LIBNAVAJO_VERSION}\\\"\" -DDEBUG_TRACES -DSPDLOG_FMT_EXTERNAL=1 -DFMT_HEADER_ONLY=1")
-ENDIF(${UNIX})
+add_compile_definitions(
+  LIBNAVAJO_SOFTWARE_VERSION="\"${LIBNAVAJO_VERSION}\""
+  DEBUG_TRACES
+  SPDLOG_FMT_EXTERNAL=1
+  SPDLOG_HEADER_ONLY=1
+  FMT_HEADER_ONLY=1
+  GR_USE_JUMP_TRACE=0
+)
 
-IF(${APPLE})
-  set (CMAKE_CXX_FLAGS " -Wall -O3 -D__darwin__ -D__x86__ -fPIC -fno-common -D_REENTRANT -DLIBNAVAJO_SOFTWARE_VERSION=\"\\\"${LIBNAVAJO_VERSION}\\\"\"")
-ENDIF(${APPLE})
+if(UNIX)
+  # -fsanitize=address,undefined
+  add_compile_options(-Wall -O2 -DLINUX -Wextra -Wshadow -Wno-unused -Wpedantic -fexceptions -fPIC -D_REENTRANT)
+endif()
+
+if(APPLE)
+  add_compile_options(-Wall -O3 -D__darwin__ -D__x86__ -fPIC -fno-common -D_REENTRANT)
+endif()
 
 if(NOT DEFINED CMAKE_MACOSX_RPATH)
   set(CMAKE_MACOSX_RPATH 0)
 endif()
-
-# 1 Habilita rotinas de debug
-add_definitions(-DGR_USE_JUMP_TRACE=0)
 
 #######   Check the compiler and set the compile and link flags  #######
 set(CMAKE_BUILD_TYPE Debug)
