@@ -25,7 +25,7 @@ IF(${UNIX})
 ENDIF(${UNIX})
 
 IF(${APPLE})
-  set (CMAKE_CXX_FLAGS " -Wall -O3 -D__darwin__ -D__x86__ -fPIC -fno-common -D_REENTRANT -DLIBNAVAJO_SOFTWARE_VERSION=\"\\\"${LIBNAVAJO_VERSION}\\\"\" -I../../external/include/ -I/opt/homebrew/include ")
+  set (CMAKE_CXX_FLAGS " -Wall -O3 -D__darwin__ -D__x86__ -fPIC -fno-common -D_REENTRANT -DLIBNAVAJO_SOFTWARE_VERSION=\"\\\"${LIBNAVAJO_VERSION}\\\"\"")
 ENDIF(${APPLE})
 
 if(NOT DEFINED CMAKE_MACOSX_RPATH)
@@ -46,6 +46,11 @@ include_directories (${OPENSSL_INCLUDE_DIR})
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
 
+###############       libmemcached include/lib dir     #####################
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBMEMCACHED REQUIRED libmemcached)
+include_directories(${LIBMEMCACHED_INCLUDE_DIRS})
+link_directories(${LIBMEMCACHED_LIBRARY_DIRS})
 
 ###############      library extension  #####################
 IF(${UNIX})
@@ -100,10 +105,15 @@ set_target_properties (navajo PROPERTIES VERSION ${LIBNAVAJO_VERSION} SOVERSION 
 set_target_properties(navajoStatic PROPERTIES OUTPUT_NAME navajo)
 
 include_directories (${PROJECT_SOURCE_DIR}/include)
+include_directories (${PROJECT_SOURCE_DIR}/../../external/include)
+if(APPLE)
+  include_directories(/opt/homebrew/include)
+endif()
 include_directories (/opt/intmain/dev/linux/usr/include)
 
 target_link_libraries(navajo ${OPENSSL_LIBRARIES})
 target_link_libraries(navajo ${ZLIB_LIBRARIES})
+target_link_libraries(navajo ${LIBMEMCACHED_LIBRARIES})
 
 ############### install the library ###################
 #install(TARGETS navajo DESTINATION lib)
