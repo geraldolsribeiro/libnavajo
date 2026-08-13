@@ -20,10 +20,10 @@ set(LIBNAVAJO_BUILD_DATE `/bin/date +%s`)
 
 ###############            Minimal flags           #####################
 add_compile_definitions(
-  LIBNAVAJO_SOFTWARE_VERSION="\"${LIBNAVAJO_VERSION}\""
+  LIBNAVAJO_SOFTWARE_VERSION=\"${LIBNAVAJO_VERSION}\"
   DEBUG_TRACES
   SPDLOG_FMT_EXTERNAL=1
-  SPDLOG_HEADER_ONLY=1
+  SPDLOG_HEADER_ONLY
   FMT_HEADER_ONLY=1
   GR_USE_JUMP_TRACE=0
 )
@@ -111,10 +111,7 @@ set_target_properties (navajo PROPERTIES VERSION ${LIBNAVAJO_VERSION} SOVERSION 
 set_target_properties(navajoStatic PROPERTIES OUTPUT_NAME navajo)
 
 include_directories (${PROJECT_SOURCE_DIR}/include)
-include_directories (${PROJECT_SOURCE_DIR}/../../external/include)
-if(APPLE)
-  include_directories(/opt/homebrew/include)
-endif()
+include_directories(BEFORE ${PROJECT_SOURCE_DIR}/../external/include)
 include_directories (/opt/intmain/dev/linux/usr/include)
 
 target_link_libraries(navajo ${OPENSSL_LIBRARIES})
