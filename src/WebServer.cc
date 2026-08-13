@@ -2199,12 +2199,24 @@ std::string WebServer::base64_encode(unsigned char const *bytes_to_encode, unsig
  ************************************************************************/
 std::string WebServer::SHA1_encode(const std::string &input) {
   GR_JUMP_TRACE;
-  std::string hash;
-  SHA_CTX     context;
-  SHA1_Init(&context);
-  SHA1_Update(&context, &input[0], input.size());
-  hash.resize(160 / 8);
-  SHA1_Final((unsigned char *)&hash[0], &context);
+  std::string      hash;
+  unsigned char    digest[EVP_MAX_MD_SIZE];
+  unsigned int     digestLen = 0;
+  EVP_MD_CTX      *ctx       = EVP_MD_CTX_new();
+
+  if (ctx == nullptr) {
+    return hash;
+  }
+
+  if (EVP_DigestInit_ex(ctx, EVP_sha1(), nullptr) != 1 ||
+      EVP_DigestUpdate(ctx, input.data(), input.size()) != 1 ||
+      EVP_DigestFinal_ex(ctx, digest, &digestLen) != 1) {
+    EVP_MD_CTX_free(ctx);
+    return hash;
+  }
+
+  EVP_MD_CTX_free(ctx);
+  hash.assign(reinterpret_cast<char *>(digest), digestLen);
   return hash;
 }
 
