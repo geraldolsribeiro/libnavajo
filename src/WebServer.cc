@@ -343,7 +343,7 @@ size_t WebServer::recvLine(int client, char *bufLine, size_t nsize) {
  * trim from start, thanks to https://stackoverflow.com/a/217605
  */
 static inline std::string &ltrim(std::string &s) {
-  s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+  s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) { return !std::isspace(ch); }));
   return s;
 }
 
@@ -352,7 +352,7 @@ static inline std::string &ltrim(std::string &s) {
  * trim from end, thanks to https://stackoverflow.com/a/217605
  */
 static inline std::string &rtrim(std::string &s) {
-  s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+  s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
   return s;
 }
 
@@ -402,7 +402,6 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
   HttpRequestHeadersMap requestExtraHeaders;
   char         *webSocketClientKey     = nullptr;
   bool          websocket              = false;
-  int           webSocketVersion       = -1;
   std::string   username;
   int           bufLineLen = 0;
 
@@ -468,7 +467,6 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
     };
 
     websocket        = false;
-    webSocketVersion = -1;
 
     //////////////////////////
 
@@ -646,7 +644,6 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
         if (strncasecmp(bufLine + j, "Sec-WebSocket-Version: ", 23) == 0) {
           GR_JUMP_TRACE;
           j += 23;
-          webSocketVersion = atoi(bufLine + j);
           continue;
         }
 

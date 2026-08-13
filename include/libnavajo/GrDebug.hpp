@@ -96,7 +96,7 @@
     explicit NAME( const std::string &message ) : std::invalid_argument( message )                                     \
     {                                                                                                                  \
     }                                                                                                                  \
-    virtual ~NAME() throw()                                                                                            \
+    virtual ~NAME() noexcept                                                                                          \
     {                                                                                                                  \
     }                                                                                                                  \
   };
