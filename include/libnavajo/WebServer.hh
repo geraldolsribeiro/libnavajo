@@ -81,10 +81,10 @@ class WebServer {
 
   bool httpdAuth;
 
-  volatile bool   exiting;
-  volatile size_t exitedThread;
-  volatile int    server_sock[3];
-  volatile size_t nbServerSock;
+  bool   exiting;
+  size_t exitedThread;
+  int    server_sock[3];
+  size_t nbServerSock;
 
   const static char authStr[];
   const static char authBearerStr[];
@@ -106,10 +106,10 @@ class WebServer {
   void         exit();
 
   static std::string webServerName;
-  volatile bool      disableIpV4, disableIpV6;
-  volatile ushort    socketTimeoutInSecond;
-  volatile ushort    tcpPort;
-  volatile size_t    threadsPoolSize;
+  bool               disableIpV4, disableIpV6;
+  ushort             socketTimeoutInSecond;
+  ushort             tcpPort;
+  size_t             threadsPoolSize;
   std::string        device;
 
   std::string multipartTempDirForFileUpload;

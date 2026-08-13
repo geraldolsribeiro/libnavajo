@@ -168,6 +168,7 @@ inline bool setSocketSndRcvTimeout(int socket, time_t seconds, long int useconds
  ***********************************************************************/
 
 inline bool setSocketTcpAckTimeout(int socket, int seconds, int milliseconds) {
+  (void)milliseconds;
 #if defined(SOL_TCP) && defined(TCP_USER_TIMEOUT)
   int timeout = 1000 * seconds + milliseconds; // user timeout in milliseconds [ms]
   return setsockopt(socket, SOL_TCP, TCP_USER_TIMEOUT, (char *)&timeout, sizeof(timeout)) == 0;
