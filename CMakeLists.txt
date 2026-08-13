@@ -5,7 +5,7 @@
 #         cmake -G Xcode .                                             #
 ###############             cmake version          #####################
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 4.4)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -21,11 +21,11 @@ set(LIBNAVAJO_BUILD_DATE `/bin/date +%s`)
 ###############            Minimal flags           #####################
 IF(${UNIX})
   # -fsanitize=address,undefined
-  set (CMAKE_CXX_FLAGS " -Wall -O2 -DLINUX -Wextra -Wshadow -Wno-unused -Wpedantic -fexceptions -fPIC -D_REENTRANT -DLIBNAVAJO_SOFTWARE_VERSION=\"\\\"${LIBNAVAJO_VERSION}\\\"\" -DDEBUG_TRACES -DSPDLOG_FMT_EXTERNAL=1 -DFMT_HEADER_ONLY=1")
+  set (CMAKE_CXX_FLAGS " -Wall -std=c++20 -O2 -DLINUX -Wextra -Wshadow -Wno-unused -Wpedantic -fexceptions -fPIC -D_REENTRANT -DLIBNAVAJO_SOFTWARE_VERSION=\"\\\"${LIBNAVAJO_VERSION}\\\"\" -DDEBUG_TRACES -DSPDLOG_FMT_EXTERNAL=1 -DFMT_HEADER_ONLY=1")
 ENDIF(${UNIX})
 
 IF(${APPLE})
-  set (CMAKE_CXX_FLAGS " -Wall -fPIC -fno-common -O3 -D__darwin__ -D__x86__ -fPIC -fno-common -D_REENTRANT -DLIBNAVAJO_SOFTWARE_VERSION=\"\\\"${LIBNAVAJO_VERSION}\\\"\" ")
+  set (CMAKE_CXX_FLAGS " -Wall -std=c++20 -fPIC -fno-common -O3 -D__darwin__ -D__x86__ -fPIC -fno-common -D_REENTRANT -DLIBNAVAJO_SOFTWARE_VERSION=\"\\\"${LIBNAVAJO_VERSION}\\\"\" -I../../external/include/ -I/opt/homebrew/include ")
 ENDIF(${APPLE})
 
 if(NOT DEFINED CMAKE_MACOSX_RPATH)
