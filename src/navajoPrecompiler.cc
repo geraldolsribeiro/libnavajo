@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  auto *conversionTable = (ConversionEntry *)malloc(filenamesVec.size() * sizeof(ConversionEntry));
+  auto *conversionTable = static_cast<ConversionEntry *>(malloc(filenamesVec.size() * sizeof(ConversionEntry)));
 
   fprintf(stdout, "#include \"libnavajo/PrecompiledRepository.hh\"\n\n");
   fprintf(stdout, "namespace webRepository\n{\n");
