@@ -6,7 +6,7 @@
 // ---- ORIGINAL -----
 
 #include "libnavajo/GrDebug.hpp"
-#include <spdlog/spdlog.h>
+#include "spdlog/spdlog.h"
 
 #include "MPFDParser/Parser.h"
 
@@ -26,12 +26,13 @@ MPFD::Field *MPFD::Parser::GetField(std::string Name) {
 
 MPFD::Parser::Parser() {
   GR_JUMP_TRACE;
-  DataCollector                  = nullptr;
-  DataCollectorLength            = 0;
+  DataCollector = nullptr;
+  DataCollectorLength = 0;
   _HeadersOfTheFieldAreProcessed = false;
-  CurrentStatus                  = Status_LookingForStartingBoundary;
+  CurrentStatus = Status_LookingForStartingBoundary;
 
-  MaxDataCollectorLength = 16 * 1024 * 1024; // 16 Mb default data collector size.
+  MaxDataCollectorLength =
+      16 * 1024 * 1024; // 16 Mb default data collector size.
 
   SetUploadedFilesStorage(StoreUploadedFilesInFilesystem);
 }
@@ -52,14 +53,17 @@ MPFD::Parser::~Parser() {
 void MPFD::Parser::SetContentType(const std::string type) {
   GR_JUMP_TRACE;
   if (type.find("multipart/form-data;") != 0) {
-    throw MPFD::Exception(std::string("Content type is not \"multipart/form-data\"\nIt is \"") + type +
-                          std::string("\""));
+    throw MPFD::Exception(
+        std::string("Content type is not \"multipart/form-data\"\nIt is \"") +
+        type + std::string("\""));
   }
 
   std::size_t bp = type.find("boundary=");
 
   if (bp == std::string::npos) {
-    throw MPFD::Exception(std::string("Cannot find boundary in Content-type: \"") + type + std::string("\""));
+    throw MPFD::Exception(
+        std::string("Cannot find boundary in Content-type: \"") + type +
+        std::string("\""));
   }
 
   // GLSR
@@ -75,7 +79,8 @@ void MPFD::Parser::AcceptSomeData(const char *data, const long length) {
       memcpy(DataCollector, data, length);
       DataCollectorLength = length;
     } else {
-      DataCollector = (char *)realloc(DataCollector, DataCollectorLength + length);
+      DataCollector =
+          (char *)realloc(DataCollector, DataCollectorLength + length);
       memcpy(DataCollector + DataCollectorLength, data, length);
       DataCollectorLength += length;
     }
@@ -102,21 +107,21 @@ void MPFD::Parser::_ProcessData() {
     case Status_LookingForStartingBoundary:
       if (FindStartingBoundaryAndTruncData()) {
         CurrentStatus = Status_ProcessingHeaders;
-        NeedToRepeat  = true;
+        NeedToRepeat = true;
       }
       break;
 
     case Status_ProcessingHeaders:
       if (WaitForHeadersEndAndParseThem()) {
         CurrentStatus = Status_ProcessingContentOfTheField;
-        NeedToRepeat  = true;
+        NeedToRepeat = true;
       }
       break;
 
     case Status_ProcessingContentOfTheField:
       if (ProcessContentOfTheField()) {
         CurrentStatus = Status_LookingForStartingBoundary;
-        NeedToRepeat  = true;
+        NeedToRepeat = true;
       }
       break;
     }
@@ -136,21 +141,25 @@ bool MPFD::Parser::ProcessContentOfTheField() {
   }
 
   if (DataLengthToSendToField > 0) {
-    Fields[ProcessingFieldName]->AcceptSomeData(DataCollector, DataLengthToSendToField);
+    Fields[ProcessingFieldName]->AcceptSomeData(DataCollector,
+                                                DataLengthToSendToField);
     TruncateDataCollectorFromTheBeginning(DataLengthToSendToField);
 
     // GLSR Campos duplicados
     auto processingFieldNameArr = ProcessingFieldName + "[]";
     if (Fields.count(processingFieldNameArr)) {
       Fields[processingFieldNameArr]->SetType(Field::TextType);
-      auto currentFieldContent = Fields[processingFieldNameArr]->GetTextTypeContent();
+      auto currentFieldContent =
+          Fields[processingFieldNameArr]->GetTextTypeContent();
       if (!currentFieldContent.empty()) {
         currentFieldContent = "|";
       }
       currentFieldContent += Fields[ProcessingFieldName]->GetTextTypeContent();
-      Fields[processingFieldNameArr]->AcceptSomeData(const_cast<char *>(currentFieldContent.c_str()),
-                                                     currentFieldContent.size());
-      // spdlog::debug( "ProcessContentOfTheField {} -> {}", ProcessingFieldName, currentFieldContent );
+      Fields[processingFieldNameArr]->AcceptSomeData(
+          const_cast<char *>(currentFieldContent.c_str()),
+          currentFieldContent.size());
+      // spdlog::debug( "ProcessContentOfTheField {} -> {}",
+      // ProcessingFieldName, currentFieldContent );
     }
   }
 
@@ -166,10 +175,10 @@ bool MPFD::Parser::WaitForHeadersEndAndParseThem() {
   GR_JUMP_TRACE;
 
   for (int i = 0; i < DataCollectorLength - 3; i++) {
-    if ((DataCollector[i] == 13) && (DataCollector[i + 1] == 10) && (DataCollector[i + 2] == 13) &&
-        (DataCollector[i + 3] == 10)) {
-      long  headers_length = i;
-      char *headers        = new char[headers_length + 1];
+    if ((DataCollector[i] == 13) && (DataCollector[i + 1] == 10) &&
+        (DataCollector[i + 2] == 13) && (DataCollector[i + 3] == 10)) {
+      long headers_length = i;
+      char *headers = new char[headers_length + 1];
       memset(headers, 0, headers_length + 1);
       memcpy(headers, DataCollector, headers_length);
 
@@ -221,9 +230,11 @@ void MPFD::Parser::_ParseHeaders(std::string headers) {
                                   "attribute.\nThe headers are: \"") +
                       headers + std::string("\""));
     } else {
-      ProcessingFieldName = headers.substr(name_pos + 6, name_end_pos - (name_pos + 6));
+      ProcessingFieldName =
+          headers.substr(name_pos + 6, name_end_pos - (name_pos + 6));
       // GLSR Campos duplicados
-      if (Fields.count(ProcessingFieldName) and Fields.count(ProcessingFieldName + "[]")) {
+      if (Fields.count(ProcessingFieldName) and
+          Fields.count(ProcessingFieldName + "[]")) {
         Fields[ProcessingFieldName + "[]"] = new Field();
         // spdlog::debug( "_ParseHeaders {}", ProcessingFieldName );
       }
@@ -237,15 +248,18 @@ void MPFD::Parser::_ParseHeaders(std::string headers) {
     } else {
       Fields[ProcessingFieldName]->SetType(Field::FileType);
       Fields[ProcessingFieldName]->SetTempDir(TempDirForFileUpload);
-      Fields[ProcessingFieldName]->SetUploadedFilesStorage(WhereToStoreUploadedFiles);
+      Fields[ProcessingFieldName]->SetUploadedFilesStorage(
+          WhereToStoreUploadedFiles);
 
       std::size_t filename_end_pos = headers.find("\"", filename_pos + 10);
       if (filename_end_pos == std::string::npos) {
-        throw Exception(std::string("Cannot find closing quote of \"filename=\" "
-                                    "attribute.\nThe headers are: \"") +
-                        headers + std::string("\""));
+        throw Exception(
+            std::string("Cannot find closing quote of \"filename=\" "
+                        "attribute.\nThe headers are: \"") +
+            headers + std::string("\""));
       } else {
-        std::string filename = headers.substr(filename_pos + 10, filename_end_pos - (filename_pos + 10));
+        std::string filename = headers.substr(
+            filename_pos + 10, filename_end_pos - (filename_pos + 10));
         Fields[ProcessingFieldName]->SetFileName(filename);
       }
 
@@ -253,13 +267,15 @@ void MPFD::Parser::_ParseHeaders(std::string headers) {
       std::size_t content_type_pos = headers.find("Content-Type: ");
       if (content_type_pos != std::string::npos) {
         std::size_t content_type_end_pos = 0;
-        for (std::size_t i = content_type_pos + 14; (i < headers.length()) && (!content_type_end_pos); i++) {
+        for (std::size_t i = content_type_pos + 14;
+             (i < headers.length()) && (!content_type_end_pos); i++) {
           if ((headers[i] == ' ') || (headers[i] == 10) || (headers[i] == 13)) {
             content_type_end_pos = i - 1;
           }
         }
         std::string content_type =
-            headers.substr(content_type_pos + 14, content_type_end_pos - (content_type_pos + 14));
+            headers.substr(content_type_pos + 14,
+                           content_type_end_pos - (content_type_pos + 14));
         Fields[ProcessingFieldName]->SetFileContentType(content_type);
       }
     }
@@ -289,8 +305,8 @@ void MPFD::Parser::TruncateDataCollectorFromTheBeginning(long n) {
 
 long MPFD::Parser::BoundaryPositionInDataCollector() {
   GR_JUMP_TRACE;
-  const char *b  = Boundary.c_str();
-  int         bl = Boundary.length();
+  const char *b = Boundary.c_str();
+  int bl = Boundary.length();
   if (DataCollectorLength >= bl) {
     bool found = false;
     for (int i = 0; (i <= DataCollectorLength - bl) && (!found); i++) {

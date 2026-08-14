@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-#include <spdlog/spdlog.h>
+#include "spdlog/spdlog.h"
 
 #include "libnavajo/GrDebug.hpp"
 
@@ -39,20 +39,23 @@ class HttpSession {
       OBJECT /**< objetos C++ criados com new */
     } type;
     union {
-      void                   *ptr; // usado pelo BASIC
+      void *ptr;                   // usado pelo BASIC
       SessionAttributeObject *obj; // usado pelo OBJECT
     };
   } SessionAttribute;
 
-  typedef std::map<std::string, std::map<std::string, SessionAttribute> *> HttpSessionsContainerMap;
+  typedef std::map<std::string, std::map<std::string, SessionAttribute> *>
+      HttpSessionsContainerMap;
 
   static HttpSessionsContainerMap sessions;
-  static pthread_mutex_t          sessions_mutex;
-  static time_t                   lastExpirationSearchTime;
-  static time_t                   sessionLifeTime;
+  static pthread_mutex_t sessions_mutex;
+  static time_t lastExpirationSearchTime;
+  static time_t sessionLifeTime;
 
 public:
-  inline static void setSessionLifeTime(const time_t sec) { sessionLifeTime = sec; };
+  inline static void setSessionLifeTime(const time_t sec) {
+    sessionLifeTime = sec;
+  };
 
   inline static time_t getSessionLifeTime() { return sessionLifeTime; };
 
@@ -60,8 +63,9 @@ public:
 
   static void create(std::string &id) {
     GR_JUMP_TRACE;
-    const size_t idLength   = 128;
-    const char   elements[] = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const size_t idLength = 128;
+    const char elements[] =
+        "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const size_t nbElements = sizeof(elements) / sizeof(char);
     srand(time(nullptr));
 
@@ -72,13 +76,14 @@ public:
       for (size_t i = 0; i < idLength; ++i) {
         id += elements[rand() % (nbElements - 1)];
       }
-    } while (exists(id)); // GLSR aqui usava updateExpirationIfExists, antiga find
+    } while (
+        exists(id)); // GLSR aqui usava updateExpirationIfExists, antiga find
 
     pthread_mutex_lock(&sessions_mutex);
     sessions[id] = new std::map<std::string, SessionAttribute>();
     pthread_mutex_unlock(&sessions_mutex);
     time_t *expiration = (time_t *)malloc(sizeof(time_t));
-    *expiration        = time(nullptr) + sessionLifeTime;
+    *expiration = time(nullptr) + sessionLifeTime;
     setAttribute(id, "session_expiration", expiration);
 
     // look for expired session (max every minute)
@@ -117,9 +122,10 @@ public:
     auto it = sessions.cbegin();
     while (it != sessions.cend()) {
       spdlog::debug("Removendo sessão expirada: {}", it->first);
-      std::map<std::string, SessionAttribute>          *attributesMap = it->second;
-      std::map<std::string, SessionAttribute>::iterator it2           = attributesMap->find("session_expiration");
-      time_t                                           *expiration    = nullptr;
+      std::map<std::string, SessionAttribute> *attributesMap = it->second;
+      std::map<std::string, SessionAttribute>::iterator it2 =
+          attributesMap->find("session_expiration");
+      time_t *expiration = nullptr;
       if (it2 != attributesMap->end()) {
         expiration = (time_t *)it2->second.ptr;
       }
@@ -197,8 +203,9 @@ public:
 
   /**********************************************************************/
 
-  static void setObjectAttribute(const std::string &sid, const std::string &name,
-                                 SessionAttributeObject *sessionAttributeObject) {
+  static void
+  setObjectAttribute(const std::string &sid, const std::string &name,
+                     SessionAttributeObject *sessionAttributeObject) {
     GR_JUMP_TRACE;
     pthread_mutex_lock(&sessions_mutex);
     HttpSessionsContainerMap::const_iterator it = sessions.find(sid);
@@ -210,14 +217,16 @@ public:
 
     SessionAttribute attribute;
     attribute.type = SessionAttribute::OBJECT;
-    attribute.obj  = sessionAttributeObject;
-    it->second->insert(std::pair<std::string, SessionAttribute>(name, attribute));
+    attribute.obj = sessionAttributeObject;
+    it->second->insert(
+        std::pair<std::string, SessionAttribute>(name, attribute));
     pthread_mutex_unlock(&sessions_mutex);
   }
 
   /**********************************************************************/
 
-  static void setAttribute(const std::string &sid, const std::string &name, void *value) {
+  static void setAttribute(const std::string &sid, const std::string &name,
+                           void *value) {
     GR_JUMP_TRACE;
     pthread_mutex_lock(&sessions_mutex);
     HttpSessionsContainerMap::const_iterator it = sessions.find(sid);
@@ -229,14 +238,16 @@ public:
 
     SessionAttribute attribute;
     attribute.type = SessionAttribute::BASIC;
-    attribute.ptr  = value;
-    it->second->insert(std::pair<std::string, SessionAttribute>(name, attribute));
+    attribute.ptr = value;
+    it->second->insert(
+        std::pair<std::string, SessionAttribute>(name, attribute));
     pthread_mutex_unlock(&sessions_mutex);
   }
 
   /**********************************************************************/
 
-  static SessionAttributeObject *getObjectAttribute(const std::string &sid, const std::string &name) {
+  static SessionAttributeObject *getObjectAttribute(const std::string &sid,
+                                                    const std::string &name) {
     GR_JUMP_TRACE;
     pthread_mutex_lock(&sessions_mutex);
     HttpSessionsContainerMap::iterator it = sessions.find(sid);
@@ -245,11 +256,13 @@ public:
       return nullptr;
     }
 
-    std::map<std::string, SessionAttribute>          *sessionMap = it->second;
-    std::map<std::string, SessionAttribute>::iterator it2        = sessionMap->find(name);
+    std::map<std::string, SessionAttribute> *sessionMap = it->second;
+    std::map<std::string, SessionAttribute>::iterator it2 =
+        sessionMap->find(name);
     pthread_mutex_unlock(&sessions_mutex);
 
-    if (it2 != sessionMap->end() && (it2->second.type == SessionAttribute::OBJECT)) {
+    if (it2 != sessionMap->end() &&
+        (it2->second.type == SessionAttribute::OBJECT)) {
       return it2->second.obj;
     }
     return nullptr;
@@ -266,11 +279,13 @@ public:
       return nullptr;
     }
 
-    std::map<std::string, SessionAttribute>          *sessionMap = it->second;
-    std::map<std::string, SessionAttribute>::iterator it2        = sessionMap->find(name);
+    std::map<std::string, SessionAttribute> *sessionMap = it->second;
+    std::map<std::string, SessionAttribute>::iterator it2 =
+        sessionMap->find(name);
     pthread_mutex_unlock(&sessions_mutex);
 
-    if (it2 != sessionMap->end() && (it2->second.type == SessionAttribute::BASIC)) {
+    if (it2 != sessionMap->end() &&
+        (it2->second.type == SessionAttribute::BASIC)) {
       return it2->second.ptr;
     }
     return nullptr;
@@ -278,7 +293,8 @@ public:
 
   /**********************************************************************/
 
-  static void removeAllAttribute(std::map<std::string, SessionAttribute> *attributesMap) {
+  static void
+  removeAllAttribute(std::map<std::string, SessionAttribute> *attributesMap) {
     GR_JUMP_TRACE;
     for (auto &iter : *attributesMap) {
       spdlog::debug("Removendo atributo: {}", iter.first);
@@ -306,8 +322,9 @@ public:
       pthread_mutex_unlock(&sessions_mutex);
       return;
     }
-    std::map<std::string, SessionAttribute>          *attributesMap = it->second;
-    std::map<std::string, SessionAttribute>::iterator it2           = attributesMap->find(name);
+    std::map<std::string, SessionAttribute> *attributesMap = it->second;
+    std::map<std::string, SessionAttribute>::iterator it2 =
+        attributesMap->find(name);
     if (it2 != attributesMap->end()) {
       if (it2->second.type == SessionAttribute::OBJECT) {
         if (it2->second.obj != nullptr) {
@@ -328,11 +345,12 @@ public:
   static std::vector<std::string> getAttributeNames(const std::string &sid) {
     GR_JUMP_TRACE;
     pthread_mutex_lock(&sessions_mutex);
-    std::vector<std::string>           res;
+    std::vector<std::string> res;
     HttpSessionsContainerMap::iterator it = sessions.find(sid);
     if (it != sessions.end()) {
-      std::map<std::string, SessionAttribute>          *attributesMap = it->second;
-      std::map<std::string, SessionAttribute>::iterator iter          = attributesMap->begin();
+      std::map<std::string, SessionAttribute> *attributesMap = it->second;
+      std::map<std::string, SessionAttribute>::iterator iter =
+          attributesMap->begin();
       for (; iter != attributesMap->end(); ++iter) {
         res.push_back(iter->first);
       }
@@ -350,7 +368,8 @@ public:
     for (; it != sessions.end(); ++it) {
       std::map<std::string, SessionAttribute> *attributesMap = it->second;
       printf("Session SID : '%s' \n", it->first.c_str());
-      std::map<std::string, SessionAttribute>::iterator iter = attributesMap->begin();
+      std::map<std::string, SessionAttribute>::iterator iter =
+          attributesMap->begin();
       for (; iter != attributesMap->end(); ++iter) {
         if (iter->second.ptr != nullptr) {
           printf("\t'%s'\n", iter->first.c_str());

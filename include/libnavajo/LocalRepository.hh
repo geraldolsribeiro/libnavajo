@@ -31,7 +31,8 @@ class LocalRepository : public WebRepository {
   std::string aliasName;
   std::string fullPathToLocalDir;
 
-  bool loadFilename_dir(const std::string &alias, const std::string &path, const std::string &subpath = "");
+  bool loadFilename_dir(const std::string &alias, const std::string &path,
+                        const std::string &subpath = "");
   bool fileExist(const std::string &url);
 
 public:

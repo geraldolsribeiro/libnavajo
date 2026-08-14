@@ -14,22 +14,23 @@
 #ifndef LOGRECORDER_HH_
 #define LOGRECORDER_HH_
 
-#include "libnavajo/LogOutput.hh"
-#include "libnavajo/nvjThread.h"
 #include <cstdarg>
 #include <cstdio>
 #include <list>
 #include <set>
-#include <spdlog/spdlog.h>
 #include <string>
+
+#include "libnavajo/LogOutput.hh"
+#include "libnavajo/nvjThread.h"
+#include "spdlog/spdlog.h"
 
 /**
  * LogRecorder - generic class to handle log trace
  */
 class LogRecorder {
 
-  pthread_mutex_t       log_mutex;
-  bool                  debugMode;
+  pthread_mutex_t log_mutex;
+  bool debugMode;
   std::set<std::string> uniqLog; // Only one entry !
 
 public:
@@ -66,8 +67,10 @@ public:
   void addLogOutput(LogOutput *);
   void removeLogOutputs();
 
-  void        append(const NvjLogSeverity &l, const std::string &msg, const std::string &details = "");
-  inline void appendUniq(const NvjLogSeverity &l, const std::string &msg, const std::string &details = "") {
+  void append(const NvjLogSeverity &l, const std::string &msg,
+              const std::string &details = "");
+  inline void appendUniq(const NvjLogSeverity &l, const std::string &msg,
+                         const std::string &details = "") {
     std::set<std::string>::iterator it;
     it = uniqLog.find(msg + details);
     if (it == uniqLog.end()) {
@@ -77,7 +80,7 @@ public:
   };
 
   inline void printf(const NvjLogSeverity severity, const char *fmt, ...) {
-    char    buff[512];
+    char buff[512];
     va_list argptr;
     va_start(argptr, fmt);
     vsnprintf(buff, 512, fmt, argptr);
