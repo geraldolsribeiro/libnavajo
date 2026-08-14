@@ -34,7 +34,7 @@ if(UNIX)
 endif()
 
 if(APPLE)
-  add_compile_options(-Wall -O3 -D__darwin__ -D__x86__ -fPIC -fno-common -D_REENTRANT)
+  add_compile_options(-Wall -O3 -D__darwin__ -fPIC -fno-common -D_REENTRANT)
 endif()
 
 if(NOT DEFINED CMAKE_MACOSX_RPATH)
