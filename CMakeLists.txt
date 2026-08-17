@@ -5,7 +5,7 @@
 #         cmake -G Xcode .                                             #
 ###############             cmake version          #####################
 
-cmake_minimum_required(VERSION 4.4)
+cmake_minimum_required(VERSION 3.31)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 20)
 
