@@ -8,15 +8,14 @@ git pull
 git fetch upstream
 
 git branch -D upstream-master-formatted || echo "Branch upstream-master not found"
-git branch -D local-master-formatted    || echo "Branch local-master-formatted not found"
+git branch -D local-master-formatted || echo "Branch local-master-formatted not found"
 
 git checkout -b upstream-master-formatted upstream/master
 
 CHECKS="readability-braces-around-statements,modernize-use-nullptr,modernize-use-override,modernize-raw-string-literal,modernize-deprecated-headers,modernize-loop-convert"
 CXXFLAGS="-std=c++11 -I./include/"
 
-for ext in cc hh h
-do
+for ext in cc hh h; do
   echo "Updating *.${ext}..."
   find . -name "*.${ext}" -exec sed -i "s/mutipart/multipart/g" {} \;
   find . -name "*.${ext}" -exec sed -i "s/Mutipart/Multipart/g" {} \;
@@ -27,8 +26,7 @@ done
 git commit -am "Code formatted"
 
 git checkout -b local-master-formatted master
-for ext in cc hh h
-do
+for ext in cc hh h; do
   echo "Updating *.${ext}..."
   find . -name "*.${ext}" -exec clang-tidy {} -fix -fix-errors -checks=${CHECKS} -- ${CXXFLAGS} \;
   find . -name "*.${ext}" -exec clang-format -i {} \;
