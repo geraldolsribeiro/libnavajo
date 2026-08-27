@@ -13,6 +13,8 @@
  */
 //********************************************************
 
+#define LIBNAVAJO_SOFTWARE_VERSION "1.6.0"
+
 #include <sys/stat.h>
 
 #include <cctype>
@@ -27,10 +29,10 @@
 #include <functional>
 #include <iostream>
 #include <locale>
-#include <sstream>
-#include <sys/types.h>
 #include <openssl/evp.h>
 #include <openssl/sha.h>
+#include <sstream>
+#include <sys/types.h>
 
 #include <libnavajo/HttpRequest.hh>
 
@@ -44,27 +46,28 @@
 #include "MPFDParser/Parser.h"
 
 #define DEFAULT_HTTP_SERVER_SOCKET_TIMEOUT 3
-#define DEFAULT_HTTP_PORT                  8080
-#define LOGHIST_EXPIRATION_DELAY           600
-#define BUFSIZE                            32768
-#define KEEPALIVE_MAX_NB_QUERY             25
+#define DEFAULT_HTTP_PORT 8080
+#define LOGHIST_EXPIRATION_DELAY 600
+#define BUFSIZE 32768
+#define KEEPALIVE_MAX_NB_QUERY 25
 
-const char                            WebServer::authStr[]       = "Authorization: Basic ";
-const char                            WebServer::authBearerStr[] = "Authorization: Bearer ";
-const int                             WebServer::verify_depth    = 512;
-char                                 *WebServer::certpass        = nullptr;
-std::string                           WebServer::webServerName;
-pthread_mutex_t                       IpAddress::resolvIP_mutex = PTHREAD_MUTEX_INITIALIZER;
+const char WebServer::authStr[] = "Authorization: Basic ";
+const char WebServer::authBearerStr[] = "Authorization: Bearer ";
+const int WebServer::verify_depth = 512;
+char *WebServer::certpass = nullptr;
+std::string WebServer::webServerName;
+pthread_mutex_t IpAddress::resolvIP_mutex = PTHREAD_MUTEX_INITIALIZER;
 HttpSession::HttpSessionsContainerMap HttpSession::sessions;
-pthread_mutex_t                       HttpSession::sessions_mutex     = PTHREAD_MUTEX_INITIALIZER;
-const std::string                     WebServer::base64_chars         = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                                                        "abcdefghijklmnopqrstuvwxyz"
-                                                                        "0123456789+/";
-const std::string                     WebServer::webSocketMagicString = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+pthread_mutex_t HttpSession::sessions_mutex = PTHREAD_MUTEX_INITIALIZER;
+const std::string WebServer::base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                            "abcdefghijklmnopqrstuvwxyz"
+                                            "0123456789+/";
+const std::string WebServer::webSocketMagicString =
+    "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
 std::map<unsigned, const char *> HttpResponse::mHttpReturnCodes;
-time_t                           HttpSession::lastExpirationSearchTime = 0;
-time_t                           HttpSession::sessionLifeTime          = 20 * 60;
+time_t HttpSession::lastExpirationSearchTime = 0;
+time_t HttpSession::sessionLifeTime = 20 * 60;
 
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
@@ -112,15 +115,15 @@ WebServer::WebServer() :
 void WebServer::updatePeerIpHistory(IpAddress &ip) {
   GR_JUMP_TRACE;
   time_t t = time(nullptr);
-  auto   i = peerIpHistory.find(ip);
+  auto i = peerIpHistory.find(ip);
 
   bool dispPeer = false;
   if (i != peerIpHistory.end()) {
-    dispPeer  = t - i->second > LOGHIST_EXPIRATION_DELAY;
+    dispPeer = t - i->second > LOGHIST_EXPIRATION_DELAY;
     i->second = t;
   } else {
     peerIpHistory[ip] = t;
-    dispPeer          = true;
+    dispPeer = true;
   }
 
   if (dispPeer) {
@@ -135,15 +138,15 @@ void WebServer::updatePeerDnHistory(std::string dn) {
 
   pthread_mutex_lock(&peerDnHistory_mutex);
   time_t t = time(nullptr);
-  auto   i = peerDnHistory.find(dn);
+  auto i = peerDnHistory.find(dn);
 
   bool dispPeer = false;
   if (i != peerDnHistory.end()) {
-    dispPeer  = t - i->second > LOGHIST_EXPIRATION_DELAY;
+    dispPeer = t - i->second > LOGHIST_EXPIRATION_DELAY;
     i->second = t;
   } else {
     peerDnHistory[dn] = t;
-    dispPeer          = true;
+    dispPeer = true;
   }
 
   if (dispPeer) {
@@ -167,7 +170,7 @@ bool WebServer::isUserAllowed(const std::string &pwdb64, std::string &login) {
   time_t t = time(nullptr);
 
   bool isNewUser = true;
-  auto i         = usersAuthHistory.find(pwdb64);
+  auto i = usersAuthHistory.find(pwdb64);
 
   if (i != usersAuthHistory.end()) {
     isNewUser = t - i->second > LOGHIST_EXPIRATION_DELAY;
@@ -180,15 +183,15 @@ bool WebServer::isUserAllowed(const std::string &pwdb64, std::string &login) {
   }
 
   // It's a new user !
-  bool        authOK      = false;
-  std::string loginPwd    = base64_decode(pwdb64.c_str());
-  size_t      loginPwdSep = loginPwd.find(':');
+  bool authOK = false;
+  std::string loginPwd = base64_decode(pwdb64.c_str());
+  size_t loginPwdSep = loginPwd.find(':');
   if (loginPwdSep == std::string::npos) {
     pthread_mutex_unlock(&usersAuthHistory_mutex);
     return false;
   }
 
-  login           = loginPwd.substr(0, loginPwdSep);
+  login = loginPwd.substr(0, loginPwdSep);
   std::string pwd = loginPwd.substr(loginPwdSep + 1);
 
   std::vector<std::string> httpAuthLoginPwd = authLoginPwdList;
@@ -223,18 +226,21 @@ bool WebServer::isUserAllowed(const std::string &pwdb64, std::string &login) {
  * attribute
  * @return true if token is allowed
  */
-bool WebServer::isTokenAllowed(const std::string &tokb64, const std::string &resourceUrl, std::string &respHeader) {
+bool WebServer::isTokenAllowed(const std::string &tokb64,
+                               const std::string &resourceUrl,
+                               std::string &respHeader) {
   GR_JUMP_TRACE;
-  std::string    logAuth    = "WebServer: Authentication passed for token '" + tokb64 + "'";
+  std::string logAuth =
+      "WebServer: Authentication passed for token '" + tokb64 + "'";
   NvjLogSeverity logAuthLvl = NVJ_DEBUG;
-  time_t         t          = time(nullptr);
-  struct tm     *timeinfo;
-  bool           isTokenExpired = true;
-  bool           authOK         = false;
-  time_t         expiration     = 0;
+  time_t t = time(nullptr);
+  struct tm *timeinfo;
+  bool isTokenExpired = true;
+  bool authOK = false;
+  time_t expiration = 0;
 
   timeinfo = localtime(&t);
-  t        = mktime(timeinfo);
+  t = mktime(timeinfo);
 
   pthread_mutex_lock(&tokensAuthHistory_mutex);
   auto i = tokensAuthHistory.find(tokb64);
@@ -248,7 +254,8 @@ bool WebServer::isTokenAllowed(const std::string &tokb64, const std::string &res
     if (isTokenExpired) {
       /* Remove token from the map to avoid infinite grow of it */
       tokensAuthHistory.erase(tokb64);
-      spdlog::debug("WebServer: removing outdated token from cache '" + tokb64 + "'");
+      spdlog::debug("WebServer: removing outdated token from cache '" + tokb64 +
+                    "'");
     }
 
     pthread_mutex_unlock(&tokensAuthHistory_mutex);
@@ -261,9 +268,10 @@ bool WebServer::isTokenAllowed(const std::string &tokb64, const std::string &res
 
   // Use callback configured to decode token
   if (tokDecodeCallback(tokb64, tokDecodeSecret, tokDecoded)) {
-    logAuth    = "WebServer: Authentication failed for token '" + tokb64 + "'";
+    logAuth = "WebServer: Authentication failed for token '" + tokb64 + "'";
     respHeader = "realm=\"" + authBearerRealm;
-    respHeader += R"(",error="invalid_token", error_description="invalid signature")";
+    respHeader +=
+        R"(",error="invalid_token", error_description="invalid signature")";
     goto end;
   }
 
@@ -281,9 +289,11 @@ bool WebServer::isTokenAllowed(const std::string &tokb64, const std::string &res
   }
 
   if (expiration < t) {
-    logAuth    = "WebServer: Authentication failed, validity expired for token '" + tokb64 + "'";
+    logAuth = "WebServer: Authentication failed, validity expired for token '" +
+              tokb64 + "'";
     respHeader = "realm=\"" + authBearerRealm;
-    respHeader += R"(",error="invalid_token", error_description="token expired")";
+    respHeader +=
+        R"(",error="invalid_token", error_description="token expired")";
     goto end;
   }
 
@@ -292,7 +302,8 @@ bool WebServer::isTokenAllowed(const std::string &tokb64, const std::string &res
     std::string errDescr;
 
     if (authBearTokDecScopesCb(tokDecoded, resourceUrl, errDescr)) {
-      logAuth    = "WebServer: Authentication failed, invalid scope for token '" + tokb64 + "'";
+      logAuth = "WebServer: Authentication failed, invalid scope for token '" +
+                tokb64 + "'";
       respHeader = "realm=\"" + authBearerRealm;
       respHeader += R"(",error="insufficient_scope",error_description=")";
       respHeader += errDescr + "\"";
@@ -303,8 +314,8 @@ bool WebServer::isTokenAllowed(const std::string &tokb64, const std::string &res
   // All checks passed successfully, store the token to speed up processing of
   // next request
   // proposing same token
-  authOK                    = true;
-  logAuthLvl                = NVJ_INFO;
+  authOK = true;
+  logAuthLvl = NVJ_INFO;
   tokensAuthHistory[tokb64] = expiration;
 
 end:
@@ -324,8 +335,8 @@ size_t WebServer::recvLine(int client, char *bufLine, size_t nsize) {
   GR_JUMP_TRACE;
 
   size_t bufLineLen = 0;
-  char   c;
-  int    n;
+  char c;
+  int n;
   do {
     n = recv(client, &c, 1, 0);
 
@@ -343,7 +354,9 @@ size_t WebServer::recvLine(int client, char *bufLine, size_t nsize) {
  * trim from start, thanks to https://stackoverflow.com/a/217605
  */
 static inline std::string &ltrim(std::string &s) {
-  s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+  s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+            return !std::isspace(ch);
+          }));
   return s;
 }
 
@@ -352,7 +365,10 @@ static inline std::string &ltrim(std::string &s) {
  * trim from end, thanks to https://stackoverflow.com/a/217605
  */
 static inline std::string &rtrim(std::string &s) {
-  s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
+  s.erase(std::find_if(s.rbegin(), s.rend(),
+                       [](unsigned char ch) { return !std::isspace(ch); })
+              .base(),
+          s.end());
   return s;
 }
 
@@ -369,8 +385,8 @@ static inline std::string &trim(std::string &s) { return ltrim(rtrim(s)); }
  */
 static void addExtraHeader(const char *l, HttpRequestHeadersMap &m) {
   std::stringstream ss(l);
-  std::string       header;
-  std::string       val;
+  std::string header;
+  std::string val;
   if (std::getline(ss, header, ':') && std::getline(ss, val, ':')) {
     m[header] = trim(val);
   }
@@ -382,53 +398,54 @@ static void addExtraHeader(const char *l, HttpRequestHeadersMap &m) {
  * \return true if the socket must to close
  ***********************************************************************/
 
-bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/) {
+bool WebServer::accept_request(ClientSockData *clientSockData,
+                               bool /*authSSL*/) {
   GR_JUMP_TRACE;
-  char              bufLine[BUFSIZE];
+  char bufLine[BUFSIZE];
   HttpRequestMethod requestMethod;
-  size_t            requestContentLength = 0;
-  bool              urlencodedForm       = false;
+  size_t requestContentLength = 0;
+  bool urlencodedForm = false;
 
   std::vector<uint8_t> payload;
-  char                 mimeType[64] = "\0";
+  char mimeType[64] = "\0";
 
-  char         *urlBuffer              = nullptr;
-  char         *multipartContent       = nullptr;
-  size_t        nbFileKeepAlive        = KEEPALIVE_MAX_NB_QUERY;
+  char *urlBuffer = nullptr;
+  char *multipartContent = nullptr;
+  size_t nbFileKeepAlive = KEEPALIVE_MAX_NB_QUERY;
   MPFD::Parser *multipartContentParser = nullptr;
-  char         *requestParams          = nullptr;
-  char         *requestCookies         = nullptr;
-  char         *requestOrigin          = nullptr;
+  char *requestParams = nullptr;
+  char *requestCookies = nullptr;
+  char *requestOrigin = nullptr;
   HttpRequestHeadersMap requestExtraHeaders;
-  char         *webSocketClientKey     = nullptr;
-  bool          websocket              = false;
-  std::string   username;
-  int           bufLineLen = 0;
+  char *webSocketClientKey = nullptr;
+  bool websocket = false;
+  std::string username;
+  int bufLineLen = 0;
 
   unsigned i = 0, j = 0;
 
-  bool        authOK      = authLoginPwdList.size() == 0;
-  char        httpVers[4] = "";
-  bool        keepAlive   = false;
-  bool        closing     = false;
-  bool        isQueryStr  = false;
+  bool authOK = authLoginPwdList.size() == 0;
+  char httpVers[4] = "";
+  bool keepAlive = false;
+  bool closing = false;
+  bool isQueryStr = false;
   std::string authRespHeader;
 
   if (authBearerEnabled) {
-    authOK         = false;
+    authOK = false;
     authRespHeader = "realm=\"Restricted area: please provide valid token\"";
   }
 
   do {
     GR_JUMP_TRACE;
     // Initialisation /////////
-    requestMethod        = UNKNOWN_METHOD;
+    requestMethod = UNKNOWN_METHOD;
     requestContentLength = 0;
-    urlencodedForm       = false;
-    username             = "";
-    keepAlive            = false;
-    closing              = false;
-    isQueryStr           = false;
+    urlencodedForm = false;
+    username = "";
+    keepAlive = false;
+    closing = false;
+    isQueryStr = false;
 
     if (urlBuffer != nullptr) {
       GR_JUMP_TRACE;
@@ -466,14 +483,14 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
       multipartContentParser = nullptr;
     };
 
-    websocket        = false;
+    websocket = false;
 
     //////////////////////////
 
     while (true) {
       GR_JUMP_TRACE;
       bufLineLen = 0;
-      *bufLine   = '\0';
+      *bufLine = '\0';
 
       if (mIsSSLEnabled) {
         GR_JUMP_TRACE;
@@ -506,7 +523,8 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
       if (bufLineLen <= 2) {
         GR_JUMP_TRACE;
         // only CRLF found (empty line) -> decoding is finished !
-        if ((*bufLine == '\n') || (*bufLine == '\r' && *(bufLine + 1) == '\n')) {
+        if ((*bufLine == '\n') ||
+            (*bufLine == '\r' && *(bufLine + 1) == '\n')) {
           GR_JUMP_TRACE;
           break;
         }
@@ -531,7 +549,8 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
           j += sizeof authStr - 1;
 
           std::string pwdb64 = "";
-          while (j < (unsigned)bufLineLen && *(bufLine + j) != 0x0d && *(bufLine + j) != 0x0a) {
+          while (j < (unsigned)bufLineLen && *(bufLine + j) != 0x0d &&
+                 *(bufLine + j) != 0x0a) {
             GR_JUMP_TRACE;
             pwdb64 += *(bufLine + j++);
           };
@@ -553,7 +572,8 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
             if (strstr(bufLine + j, "lose") != nullptr) {
               GR_JUMP_TRACE;
               closing = false;
-            } else if ((strstr(bufLine + j, "eep-") != nullptr) && (strstr(bufLine + j + 4, "live") != nullptr)) {
+            } else if ((strstr(bufLine + j, "eep-") != nullptr) &&
+                       (strstr(bufLine + j + 4, "live") != nullptr)) {
               GR_JUMP_TRACE;
               keepAlive = true;
             }
@@ -574,7 +594,7 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
         if (strncasecmp(bufLine + j, "Content-Type: ", 14) == 0) {
           GR_JUMP_TRACE;
           j += 14;
-          char  *start = bufLine + j, *end = nullptr;
+          char *start = bufLine + j, *end = nullptr;
           size_t length = 0;
           if ((end = index(start, ';')) != nullptr) {
             GR_JUMP_TRACE;
@@ -590,12 +610,14 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
           strncpy(mimeType, start, length);
           mimeType[length] = '\0';
 
-          if (strncasecmp(mimeType, "application/x-www-form-urlencoded", 33) == 0) {
+          if (strncasecmp(mimeType, "application/x-www-form-urlencoded", 33) ==
+              0) {
             GR_JUMP_TRACE;
             urlencodedForm = true;
           } else if (strncasecmp(mimeType, "multipart/form-data", 19) == 0) {
             GR_JUMP_TRACE;
-            multipartContent = (char *)malloc((strlen(bufLine + j) + 1) * sizeof(char));
+            multipartContent =
+                (char *)malloc((strlen(bufLine + j) + 1) * sizeof(char));
             strcpy(multipartContent, bufLine + j);
           }
           continue;
@@ -611,7 +633,8 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
         if (strncasecmp(bufLine + j, "Cookie: ", 8) == 0) {
           GR_JUMP_TRACE;
           j += 8;
-          requestCookies = (char *)malloc((strlen(bufLine + j) + 1) * sizeof(char));
+          requestCookies =
+              (char *)malloc((strlen(bufLine + j) + 1) * sizeof(char));
           strcpy(requestCookies, bufLine + j);
           continue;
         }
@@ -619,7 +642,8 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
         if (strncasecmp(bufLine + j, "Origin: ", 8) == 0) {
           GR_JUMP_TRACE;
           j += 8;
-          requestOrigin = (char *)malloc((strlen(bufLine + j) + 1) * sizeof(char));
+          requestOrigin =
+              (char *)malloc((strlen(bufLine + j) + 1) * sizeof(char));
           strcpy(requestOrigin, bufLine + j);
           continue;
         }
@@ -627,7 +651,8 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
         if (strncasecmp(bufLine + j, "Sec-WebSocket-Key: ", 19) == 0) {
           GR_JUMP_TRACE;
           j += 19;
-          webSocketClientKey = (char *)malloc((strlen(bufLine + j) + 1) * sizeof(char));
+          webSocketClientKey =
+              (char *)malloc((strlen(bufLine + j) + 1) * sizeof(char));
           strcpy(webSocketClientKey, bufLine + j);
           continue;
         }
@@ -652,37 +677,37 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
         if (strncmp(bufLine + j, "GET", 3) == 0) {
           GR_JUMP_TRACE;
           requestMethod = GET_METHOD;
-          isQueryStr    = true;
+          isQueryStr = true;
           j += 4;
         } else if (strncmp(bufLine + j, "POST", 4) == 0) {
           GR_JUMP_TRACE;
           requestMethod = POST_METHOD;
-          isQueryStr    = true;
+          isQueryStr = true;
           j += 5;
         } else if (strncmp(bufLine + j, "PUT", 3) == 0) {
           GR_JUMP_TRACE;
           requestMethod = PUT_METHOD;
-          isQueryStr    = true;
+          isQueryStr = true;
           j += 4;
         } else if (strncmp(bufLine + j, "DELETE", 6) == 0) {
           GR_JUMP_TRACE;
           requestMethod = DELETE_METHOD;
-          isQueryStr    = true;
+          isQueryStr = true;
           j += 7;
         } else if (strncmp(bufLine + j, "UPDATE", 6) == 0) {
           GR_JUMP_TRACE;
           requestMethod = UPDATE_METHOD;
-          isQueryStr    = true;
+          isQueryStr = true;
           j += 7;
         } else if (strncmp(bufLine + j, "PATCH", 5) == 0) {
           GR_JUMP_TRACE;
           requestMethod = PATCH_METHOD;
-          isQueryStr    = true;
+          isQueryStr = true;
           j += 6;
         } else if (strncmp(bufLine + j, "OPTIONS", 7) == 0) {
           GR_JUMP_TRACE;
           requestMethod = OPTIONS_METHOD;
-          isQueryStr    = true;
+          isQueryStr = true;
           j += 7;
         }
 
@@ -695,8 +720,9 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
 
           // Decode URL
           urlBuffer = (char *)malloc((strlen(bufLine + j) + 1) * sizeof(char));
-          i         = 0;
-          while (!isspace((int)(bufLine[j])) && (i < BUFSIZE - 1) && (j < (unsigned)bufLineLen) && bufLine[j] != '?') {
+          i = 0;
+          while (!isspace((int)(bufLine[j])) && (i < BUFSIZE - 1) &&
+                 (j < (unsigned)bufLineLen) && bufLine[j] != '?') {
             GR_JUMP_TRACE;
             if (!i && (bufLine[j] == '/')) { // remove first '/'
               j++;
@@ -712,7 +738,8 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
             i = 0;
             j++;
             requestParams = (char *)malloc(BUFSIZE * sizeof(char));
-            while (!isspace((int)(bufLine[j])) && (i < BUFSIZE - 1) && (j < (unsigned)bufLineLen)) {
+            while (!isspace((int)(bufLine[j])) && (i < BUFSIZE - 1) &&
+                   (j < (unsigned)bufLineLen)) {
               requestParams[i++] = bufLine[j++];
             }
             requestParams[i] = '\0';
@@ -733,12 +760,14 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
         }
 
         //  authorization through bearer token, RFC 6750
-        if (strncmp(bufLine + j, authBearerStr, sizeof authBearerStr - 1) == 0) {
+        if (strncmp(bufLine + j, authBearerStr, sizeof authBearerStr - 1) ==
+            0) {
           GR_JUMP_TRACE;
           j += sizeof authStr;
 
           std::string tokb64 = "";
-          while (j < (unsigned)bufLineLen && *(bufLine + j) != 0x0d && *(bufLine + j) != 0x0a) {
+          while (j < (unsigned)bufLineLen && *(bufLine + j) != 0x0d &&
+                 *(bufLine + j) != 0x0a) {
             GR_JUMP_TRACE;
             tokb64 += *(bufLine + j++);
           }
@@ -753,8 +782,10 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
 
     if (!authOK) {
       GR_JUMP_TRACE;
-      const char *abh = authRespHeader.empty() ? nullptr : authRespHeader.c_str();
-      std::string msg = getHttpHeader("401 Authorization Required", 0, false, abh);
+      const char *abh =
+          authRespHeader.empty() ? nullptr : authRespHeader.c_str();
+      std::string msg =
+          getHttpHeader("401 Authorization Required", 0, false, abh);
       httpSend(clientSockData, (const void *)msg.c_str(), msg.length());
       goto FREE_RETURN_TRUE;
     }
@@ -775,7 +806,7 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
 
     // Interpret '%' character
     std::string urlString(urlBuffer);
-    size_t      start = 0, end = 0;
+    size_t start = 0, end = 0;
 
     while ((end = urlString.find_first_of('%', start)) != std::string::npos) {
       GR_JUMP_TRACE;
@@ -789,13 +820,13 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
           GR_JUMP_TRACE;
           if (len >= 2) {
             GR_JUMP_TRACE;
-            unsigned int      specar;
-            std::string       hexChar = urlString.substr(end + 1, 2);
+            unsigned int specar;
+            std::string hexChar = urlString.substr(end + 1, 2);
             std::stringstream ss;
             ss << std::hex << hexChar.c_str();
             ss >> specar;
             urlString[end] = (char)specar;
-            urlString      = urlString.erase(end + 1, 2);
+            urlString = urlString.erase(end + 1, 2);
           }
         }
       }
@@ -810,8 +841,8 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
              " requestCookies='%s'  (httpVers=%s "
              "keepAlive=%d zipSupport=%d "
              "closing=%d)\n",
-             urlBuffer, requestMethod, requestParams, requestCookies, httpVers, keepAlive, clientSockData->compression,
-             closing);
+             urlBuffer, requestMethod, requestParams, requestCookies, httpVers,
+             keepAlive, clientSockData->compression, closing);
     spdlog::debug(logBuffer);
 #endif
 
@@ -820,14 +851,18 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
       try {
         // Initialize MPFDParser
         multipartContentParser = new MPFD::Parser();
-        multipartContentParser->SetUploadedFilesStorage(MPFD::Parser::StoreUploadedFilesInFilesystem);
-        multipartContentParser->SetTempDirForFileUpload(multipartTempDirForFileUpload);
-        multipartContentParser->SetMaxCollectedDataLength(multipartMaxCollectedDataLength);
+        multipartContentParser->SetUploadedFilesStorage(
+            MPFD::Parser::StoreUploadedFilesInFilesystem);
+        multipartContentParser->SetTempDirForFileUpload(
+            multipartTempDirForFileUpload);
+        multipartContentParser->SetMaxCollectedDataLength(
+            multipartMaxCollectedDataLength);
         multipartContentParser->SetContentType(multipartContent);
         GR_JUMP_TRACE;
       } catch (const MPFD::Exception &e) {
         GR_JUMP_TRACE;
-        spdlog::debug("WebServer::accept_request -  MPFD::Exception: " + e.GetError());
+        spdlog::debug("WebServer::accept_request -  MPFD::Exception: " +
+                      e.GetError());
         delete multipartContentParser;
         multipartContentParser = nullptr;
       }
@@ -840,12 +875,15 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
 
       while (datalen < requestContentLength) {
         GR_JUMP_TRACE;
-        char   buffer[BUFSIZE];
-        size_t requestedLength = (requestContentLength - datalen > BUFSIZE) ? BUFSIZE : requestContentLength - datalen;
+        char buffer[BUFSIZE];
+        size_t requestedLength = (requestContentLength - datalen > BUFSIZE)
+                                     ? BUFSIZE
+                                     : requestContentLength - datalen;
 
         if (mIsSSLEnabled) {
           GR_JUMP_TRACE;
-          int r = BIO_gets(clientSockData->bio, buffer, requestedLength + 1); // BUFSIZE);
+          int r = BIO_gets(clientSockData->bio, buffer,
+                           requestedLength + 1); // BUFSIZE);
 
           switch (SSL_get_error(clientSockData->ssl, r)) {
           case SSL_ERROR_NONE:
@@ -863,7 +901,8 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
           }
         } else {
           GR_JUMP_TRACE;
-          bufLineLen = recvLine(clientSockData->socketId, buffer, requestedLength);
+          bufLineLen =
+              recvLine(clientSockData->socketId, buffer, requestedLength);
         }
 
         if (urlencodedForm) {
@@ -873,12 +912,14 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
             requestParams = (char *)malloc((bufLineLen + 1) * sizeof(char));
           } else {
             GR_JUMP_TRACE;
-            requestParams = (char *)realloc(requestParams, (datalen + bufLineLen + 1));
+            requestParams =
+                (char *)realloc(requestParams, (datalen + bufLineLen + 1));
           }
 
           if (requestParams == nullptr) {
             GR_JUMP_TRACE;
-            spdlog::debug("WebServer::accept_request -  memory allocation failed");
+            spdlog::debug(
+                "WebServer::accept_request -  memory allocation failed");
             break;
           }
           memcpy(requestParams + datalen, buffer, bufLineLen);
@@ -889,7 +930,8 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
             try {
               multipartContentParser->AcceptSomeData(buffer, bufLineLen);
             } catch (const MPFD::Exception &e) {
-              spdlog::debug("WebServer::accept_request -  MPFD::Exception: " + e.GetError());
+              spdlog::debug("WebServer::accept_request -  MPFD::Exception: " +
+                            e.GetError());
               break;
             }
           } else {
@@ -935,17 +977,21 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
           clientSockData->compression = NONE;
         }
 
-        std::string header =
-            getHttpWebSocketHeader("101 Switching Protocols", webSocketClientKey, clientSockData->compression == ZLIB);
+        std::string header = getHttpWebSocketHeader(
+            "101 Switching Protocols", webSocketClientKey,
+            clientSockData->compression == ZLIB);
 
-        if (!httpSend(clientSockData, (const void *)header.c_str(), header.length())) {
+        if (!httpSend(clientSockData, (const void *)header.c_str(),
+                      header.length())) {
           GR_JUMP_TRACE;
           goto FREE_RETURN_TRUE;
         }
 
         GR_JUMP_TRACE;
-        auto *request = new HttpRequest(requestMethod, urlBuffer, requestParams, requestCookies, requestExtraHeaders, requestOrigin,
-                                        username, clientSockData, mimeType, &payload, multipartContentParser);
+        auto *request = new HttpRequest(
+            requestMethod, urlBuffer, requestParams, requestCookies,
+            requestExtraHeaders, requestOrigin, username, clientSockData,
+            mimeType, &payload, multipartContentParser);
 
         GR_JUMP_TRACE;
         webSocket->newConnectionRequest(request);
@@ -986,16 +1032,18 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
 
     /* ********************* */
 
-    bool           fileFound   = false;
-    unsigned char *webpage     = nullptr;
-    size_t         webpageLen  = 0;
+    bool fileFound = false;
+    unsigned char *webpage = nullptr;
+    size_t webpageLen = 0;
     unsigned char *gzipWebPage = nullptr;
-    int            sizeZip     = 0;
-    bool           zippedFile  = false;
+    int sizeZip = 0;
+    bool zippedFile = false;
 
     GR_JUMP_TRACE;
-    HttpRequest request(requestMethod, urlBuffer, requestParams, requestCookies, requestExtraHeaders, requestOrigin, username,
-                        clientSockData, mimeType, &payload, multipartContentParser);
+    HttpRequest request(requestMethod, urlBuffer, requestParams, requestCookies,
+                        requestExtraHeaders, requestOrigin, username,
+                        clientSockData, mimeType, &payload,
+                        multipartContentParser);
 
     GR_JUMP_TRACE;
     const char *mime = get_mime_type(urlBuffer);
@@ -1017,11 +1065,12 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
       fileFound = (*repo)->getFile(&request, &response);
       if (fileFound && response.getForwardedUrl() != "") {
         GR_JUMP_TRACE;
-        urlBuffer = (char *)realloc(urlBuffer, (response.getForwardedUrl().size() + 1) * sizeof(char));
+        urlBuffer = (char *)realloc(
+            urlBuffer, (response.getForwardedUrl().size() + 1) * sizeof(char));
         strcpy(urlBuffer, response.getForwardedUrl().c_str());
         request.setUrl(urlBuffer);
         response.forwardTo("");
-        repo      = webRepositories.begin();
+        repo = webRepositories.begin();
         fileFound = false;
       } else {
         GR_JUMP_TRACE;
@@ -1043,7 +1092,8 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
       response.getContent(&webpage, &webpageLen, &zippedFile);
 
       if (webpage == nullptr || !webpageLen) {
-        std::string msg = getHttpHeader(response.getHttpReturnCodeStr().c_str(), 0, false); // getNoContentErrorMsg();
+        std::string msg = getHttpHeader(response.getHttpReturnCodeStr().c_str(),
+                                        0, false); // getNoContentErrorMsg();
         httpSend(clientSockData, (const void *)msg.c_str(), msg.length());
         if (webpage != nullptr) {
           (*repo)->freeFile(webpage);
@@ -1054,7 +1104,7 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
       if (zippedFile) {
         GR_JUMP_TRACE;
         gzipWebPage = webpage;
-        sizeZip     = webpageLen;
+        sizeZip = webpageLen;
       }
     }
 #ifdef DEBUG_TRACES
@@ -1065,7 +1115,8 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
       GR_JUMP_TRACE;
       // Need to uncompress
       try {
-        if ((int)(webpageLen = nvj_gunzip(&webpage, gzipWebPage, sizeZip)) < 0) {
+        if ((int)(webpageLen = nvj_gunzip(&webpage, gzipWebPage, sizeZip)) <
+            0) {
           spdlog::error("Webserver: gunzip decompression failed !");
           std::string msg = getInternalServerErrorMsg();
           httpSend(clientSockData, (const void *)msg.c_str(), msg.length());
@@ -1082,11 +1133,14 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
     }
 
     // Need to compress
-    if (!zippedFile && (clientSockData->compression == GZIP) && (webpageLen > 2048)) {
+    if (!zippedFile && (clientSockData->compression == GZIP) &&
+        (webpageLen > 2048)) {
       const char *mimetype = response.getMimeType().c_str();
-      if (mimetype != nullptr && (strncmp(mimetype, "application", 11) == 0 || strncmp(mimetype, "text", 4) == 0)) {
+      if (mimetype != nullptr && (strncmp(mimetype, "application", 11) == 0 ||
+                                  strncmp(mimetype, "text", 4) == 0)) {
         try {
-          if ((int)(sizeZip = nvj_gzip(&gzipWebPage, webpage, webpageLen)) < 0) {
+          if ((int)(sizeZip = nvj_gzip(&gzipWebPage, webpage, webpageLen)) <
+              0) {
             spdlog::error("Webserver: gunzip compression failed !");
             std::string msg = getInternalServerErrorMsg();
             httpSend(clientSockData, (const void *)msg.c_str(), msg.length());
@@ -1106,24 +1160,33 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
       }
     }
 
-    if (keepAlive && (--nbFileKeepAlive <= 0)) { // GLSR aqui eu havia trocado para ==
+    if (keepAlive &&
+        (--nbFileKeepAlive <= 0)) { // GLSR aqui eu havia trocado para ==
       closing = true;
     }
 
     if (sizeZip > 0 && (clientSockData->compression == GZIP)) {
       std::string header =
-          getHttpHeader(response.getHttpReturnCodeStr().c_str(), sizeZip, keepAlive, nullptr, true, &response);
-      if (!httpSend(clientSockData, (const void *)header.c_str(), header.length()) ||
+          getHttpHeader(response.getHttpReturnCodeStr().c_str(), sizeZip,
+                        keepAlive, nullptr, true, &response);
+      if (!httpSend(clientSockData, (const void *)header.c_str(),
+                    header.length()) ||
           !httpSend(clientSockData, (const void *)gzipWebPage, sizeZip)) {
-        spdlog::error("Webserver: httpSend failed sending the zipped page: {}- err: {}", urlBuffer, strerror(errno));
+        spdlog::error(
+            "Webserver: httpSend failed sending the zipped page: {}- err: {}",
+            urlBuffer, strerror(errno));
         closing = true;
       }
     } else {
       std::string header =
-          getHttpHeader(response.getHttpReturnCodeStr().c_str(), webpageLen, keepAlive, nullptr, false, &response);
-      if (!httpSend(clientSockData, (const void *)header.c_str(), header.length()) ||
+          getHttpHeader(response.getHttpReturnCodeStr().c_str(), webpageLen,
+                        keepAlive, nullptr, false, &response);
+      if (!httpSend(clientSockData, (const void *)header.c_str(),
+                    header.length()) ||
           !httpSend(clientSockData, (const void *)webpage, webpageLen)) {
-        spdlog::error("Webserver: httpSend failed sending the page: {}- err: {}", urlBuffer, strerror(errno));
+        spdlog::error(
+            "Webserver: httpSend failed sending the page: {}- err: {}",
+            urlBuffer, strerror(errno));
         closing = true;
       }
     }
@@ -1132,7 +1195,8 @@ bool WebServer::accept_request(ClientSockData *clientSockData, bool /*authSSL*/)
     {
       free(gzipWebPage);
       (*repo)->freeFile(webpage);
-    } else if ((clientSockData->compression == NONE) && zippedFile) // cas décompression = double desalloc
+    } else if ((clientSockData->compression == NONE) &&
+               zippedFile) // cas décompression = double desalloc
     {
       free(webpage);
       (*repo)->freeFile(gzipWebPage);
@@ -1186,16 +1250,16 @@ bool WebServer::httpSend(ClientSockData *client, const void *buf, size_t len) {
     return false;
   }
 
-  bool           useSSL      = client->bio != nullptr;
-  size_t         totalSent   = 0;
-  int            sent        = 0;
+  bool useSSL = client->bio != nullptr;
+  size_t totalSent = 0;
+  int sent = 0;
   unsigned char *buffer_left = (unsigned char *)buf;
 
   fd_set writeset;
   FD_ZERO(&writeset);
   FD_SET(client->socketId, &writeset);
   struct timeval tv;
-  tv.tv_sec  = 10;
+  tv.tv_sec = 10;
   tv.tv_usec = 0;
   int result;
 
@@ -1203,32 +1267,38 @@ bool WebServer::httpSend(ClientSockData *client, const void *buf, size_t len) {
     if (useSSL) {
       sent = BIO_write(client->bio, buffer_left, len - totalSent);
     } else {
-      sent = sendCompat(client->socketId, buffer_left, len - totalSent, MSG_NOSIGNAL);
+      sent = sendCompat(client->socketId, buffer_left, len - totalSent,
+                        MSG_NOSIGNAL);
     }
 
     if (sent < 0) {
-      if (errno == EAGAIN || errno == EWOULDBLOCK || (useSSL && BIO_should_retry(client->bio))) {
+      if (errno == EAGAIN || errno == EWOULDBLOCK ||
+          (useSSL && BIO_should_retry(client->bio))) {
         spdlog::error("Webserver: send buffer full, retrying in 1 second");
         sleep(1);
 
-        /* retry to send data a second time before returning a failure to caller */
+        /* retry to send data a second time before returning a failure to caller
+         */
         if (useSSL) {
           sent = BIO_write(client->bio, buffer_left, len - totalSent);
         } else {
-          result = select(client->socketId + 1, nullptr, &writeset, nullptr, &tv);
+          result =
+              select(client->socketId + 1, nullptr, &writeset, nullptr, &tv);
 
           if ((result <= 0) || (!FD_ISSET(client->socketId, &writeset))) {
             return false;
           }
 
-          sent = sendCompat(client->socketId, buffer_left, len - totalSent, MSG_NOSIGNAL);
+          sent = sendCompat(client->socketId, buffer_left, len - totalSent,
+                            MSG_NOSIGNAL);
         }
 
         if (sent < 0) {
           /* this is the second time it failed, no need to be more stubborn */
           return false;
         } else {
-          /* retry succeeded, don't forget to update counters and buffer left to send */
+          /* retry succeeded, don't forget to update counters and buffer left to
+           * send */
           totalSent += (size_t)sent;
           buffer_left += sent;
         }
@@ -1275,7 +1345,7 @@ const char *WebServer::get_mime_type(const char *name) {
     return nullptr;
   }
 
-  char     extLowerCase[6];
+  char extLowerCase[6];
   unsigned i = 0;
   for (; i < 5 && i < strlen(ext); i++) {
     extLowerCase[i] = ext[i];
@@ -1368,7 +1438,8 @@ const char *WebServer::get_mime_type(const char *name) {
   if (strcmp(extLowerCase, ".pdf") == 0) {
     return "application/pdf";
   }
-  if (strcmp(extLowerCase, ".ps") == 0 || strcmp(extLowerCase, ".eps") == 0 || strcmp(extLowerCase, ".ai") == 0) {
+  if (strcmp(extLowerCase, ".ps") == 0 || strcmp(extLowerCase, ".eps") == 0 ||
+      strcmp(extLowerCase, ".ai") == 0) {
     return "application/postscript";
   }
   if (strcmp(extLowerCase, ".tar") == 0) {
@@ -1397,15 +1468,18 @@ const char *WebServer::get_mime_type(const char *name) {
  * \return result of send function (successfull: >=0, otherwise <0)
  ***********************************************************************/
 
-std::string WebServer::getHttpHeader(const char *messageType, const size_t len, const bool keepAlive,
-                                     const char *authBearerAdditionalHeaders, const bool zipped,
+std::string WebServer::getHttpHeader(const char *messageType, const size_t len,
+                                     const bool keepAlive,
+                                     const char *authBearerAdditionalHeaders,
+                                     const bool zipped,
                                      HttpResponse *response) {
   GR_JUMP_TRACE;
-  char      timeBuf[200];
-  time_t    rawtime;
+  char timeBuf[200];
+  time_t rawtime;
   struct tm timeinfo;
 
-  std::string header = "HTTP/1.1 " + std::string(messageType) + std::string("\r\n");
+  std::string header =
+      "HTTP/1.1 " + std::string(messageType) + std::string("\r\n");
   time(&rawtime);
   gmtime_r(&rawtime, &timeinfo);
   strftime(timeBuf, 200, "Date: %a, %d %b %Y %H:%M:%S GMT", &timeinfo);
@@ -1426,7 +1500,8 @@ std::string WebServer::getHttpHeader(const char *messageType, const size_t len, 
 
   if (response != nullptr) {
     if (response->isCORS()) {
-      header += "Access-Control-Allow-Origin: " + response->getCORSdomain() + "\r\n";
+      header +=
+          "Access-Control-Allow-Origin: " + response->getCORSdomain() + "\r\n";
       if (response->isCORSwithCredentials()) {
         header += "Access-Control-Allow-Credentials: true\r\n";
       } else {
@@ -1508,7 +1583,8 @@ std::string WebServer::getBadRequestErrorMsg() {
 </html>
 )";
 
-  std::string header = getHttpHeader("400 Bad Request", errorMessage.length(), false);
+  std::string header =
+      getHttpHeader("400 Bad Request", errorMessage.length(), false);
 
   return header + errorMessage;
 }
@@ -1538,7 +1614,8 @@ std::string WebServer::getNotFoundErrorMsg() {
 </html>
 )";
 
-  std::string header = getHttpHeader("404 Not Found", errorMessage.length(), false);
+  std::string header =
+      getHttpHeader("404 Not Found", errorMessage.length(), false);
 
   return header + errorMessage;
 }
@@ -1568,7 +1645,8 @@ std::string WebServer::getInternalServerErrorMsg() {
 </html>
 )";
 
-  std::string header = getHttpHeader("500 Internal Server Error", errorMessage.length(), false);
+  std::string header =
+      getHttpHeader("500 Internal Server Error", errorMessage.length(), false);
 
   return header + errorMessage;
 }
@@ -1598,7 +1676,8 @@ std::string WebServer::getNotImplementedErrorMsg() {
 </html>
 )";
 
-  std::string header = getHttpHeader("501 Method Not Implemented", errorMessage.length(), false);
+  std::string header =
+      getHttpHeader("501 Method Not Implemented", errorMessage.length(), false);
 
   return header + errorMessage;
 }
@@ -1615,18 +1694,18 @@ u_short WebServer::init() {
     initialize_ctx(sslCertFile.c_str(), sslCaFile.c_str(), sslCertPwd.c_str());
   }
 
-  struct addrinfo  hints;
+  struct addrinfo hints;
   struct addrinfo *result, *rp;
 
   nbServerSock = 0;
   memset(&hints, 0, sizeof(struct addrinfo));
-  hints.ai_family    = AF_UNSPEC;   /* Allow IPv4 or IPv6 */
-  hints.ai_socktype  = SOCK_STREAM; /* TCP socket */
-  hints.ai_flags     = AI_PASSIVE;  /* For wildcard IP address */
-  hints.ai_protocol  = IPPROTO_TCP;
+  hints.ai_family = AF_UNSPEC;     /* Allow IPv4 or IPv6 */
+  hints.ai_socktype = SOCK_STREAM; /* TCP socket */
+  hints.ai_flags = AI_PASSIVE;     /* For wildcard IP address */
+  hints.ai_protocol = IPPROTO_TCP;
   hints.ai_canonname = nullptr;
-  hints.ai_addr      = nullptr;
-  hints.ai_next      = nullptr;
+  hints.ai_addr = nullptr;
+  hints.ai_next = nullptr;
 
   char portStr[10];
   snprintf(portStr, 10, "%d", tcpPort);
@@ -1635,8 +1714,11 @@ u_short WebServer::init() {
     fatalError("WebServer : getaddrinfo error ");
   }
 
-  for (rp = result; rp != nullptr && nbServerSock < sizeof(server_sock) / sizeof(int); rp = rp->ai_next) {
-    if ((server_sock[nbServerSock] = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol)) == -1) {
+  for (rp = result;
+       rp != nullptr && nbServerSock < sizeof(server_sock) / sizeof(int);
+       rp = rp->ai_next) {
+    if ((server_sock[nbServerSock] =
+             socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol)) == -1) {
       continue;
     }
 
@@ -1644,7 +1726,8 @@ u_short WebServer::init() {
 
     if (device.length()) {
 #ifndef LINUX
-      spdlog::warn("WebServer: HttpdDevice parameter will be ignored on your system");
+      spdlog::warn(
+          "WebServer: HttpdDevice parameter will be ignored on your system");
 #else
       setSocketBindToDevice(server_sock[nbServerSock], device.c_str());
 #endif
@@ -1663,7 +1746,8 @@ u_short WebServer::init() {
       // Disable IPv4 mapped addresses.
       setSocketIp6Only(server_sock[nbServerSock]);
 #else
-      spdlog::warn("WebServer: Cannot set IPV6_V6ONLY socket option.  Closing IPv6 socket.");
+      spdlog::warn("WebServer: Cannot set IPV6_V6ONLY socket option.  Closing "
+                   "IPv6 socket.");
       close(server_sock[nbServerSock]);
       continue;
 #endif
@@ -1705,7 +1789,7 @@ void WebServer::exit() {
   }
   pthread_mutex_unlock(&clientsQueue_mutex);
 
-  if( mIsSSLEnabled ) {
+  if (mIsSSLEnabled) {
     SSL_CTX_free(sslCtx);
   }
 }
@@ -1714,7 +1798,8 @@ void WebServer::exit() {
  * password_cb
  ************************************************************************/
 
-int WebServer::password_cb(char *buf, int num, int /*rwflag*/, void * /*userdata*/) {
+int WebServer::password_cb(char *buf, int num, int /*rwflag*/,
+                           void * /*userdata*/) {
   GR_JUMP_TRACE;
   if ((size_t)num < strlen(certpass) + 1) {
     return (0);
@@ -1730,26 +1815,26 @@ int WebServer::password_cb(char *buf, int num, int /*rwflag*/, void * /*userdata
 
 int WebServer::verify_callback(int preverify_ok, X509_STORE_CTX *ctx) {
   GR_JUMP_TRACE;
-  char  buf[256];
+  char buf[256];
   X509 *err_cert;
-  int   err, depth;
+  int err, depth;
 
   err_cert = X509_STORE_CTX_get_current_cert(ctx);
-  err      = X509_STORE_CTX_get_error(ctx);
-  depth    = X509_STORE_CTX_get_error_depth(ctx);
+  err = X509_STORE_CTX_get_error(ctx);
+  depth = X509_STORE_CTX_get_error_depth(ctx);
 
   X509_NAME_oneline(X509_get_subject_name(err_cert), buf, 256);
 
   /* Catch a too long certificate chain */
   if (depth > verify_depth) {
     preverify_ok = 0;
-    err          = X509_V_ERR_CERT_CHAIN_TOO_LONG;
+    err = X509_V_ERR_CERT_CHAIN_TOO_LONG;
     X509_STORE_CTX_set_error(ctx, err);
   }
   if (!preverify_ok) {
     char buftmp[300];
-    snprintf(buftmp, 300, "X509_verify_cert error: num=%d:%s:depth=%d:%s", err, X509_verify_cert_error_string(err),
-             depth, buf);
+    snprintf(buftmp, 300, "X509_verify_cert error: num=%d:%s:depth=%d:%s", err,
+             X509_verify_cert_error_string(err), depth, buf);
   }
 
   /*
@@ -1769,10 +1854,11 @@ int WebServer::verify_callback(int preverify_ok, X509_STORE_CTX *ctx) {
  * initialize_ctx:
  ************************************************************************/
 
-void WebServer::initialize_ctx(const char *certfile, const char *cafile, const char *password) {
+void WebServer::initialize_ctx(const char *certfile, const char *cafile,
+                               const char *password) {
   GR_JUMP_TRACE;
   /* Global system initialization*/
-  if(!sslCtx) {
+  if (!sslCtx) {
     SSL_library_init();
     SSL_load_error_strings();
   }
@@ -1793,8 +1879,9 @@ void WebServer::initialize_ctx(const char *certfile, const char *cafile, const c
     ::exit(1);
   }
 
-  SSL_CTX_set_session_id_context(sslCtx, (const unsigned char *)&s_server_session_id_context,
-                                 sizeof s_server_session_id_context);
+  SSL_CTX_set_session_id_context(
+      sslCtx, (const unsigned char *)&s_server_session_id_context,
+      sizeof s_server_session_id_context);
 
   if (mIsAuthPeerSSL) {
     if (!(SSL_CTX_load_verify_locations(sslCtx, cafile, nullptr))) {
@@ -1802,7 +1889,8 @@ void WebServer::initialize_ctx(const char *certfile, const char *cafile, const c
       ::exit(1);
     }
 
-    SSL_CTX_set_verify(sslCtx, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, verify_callback);
+    SSL_CTX_set_verify(sslCtx, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE,
+                       verify_callback);
 
     SSL_CTX_set_verify_depth(sslCtx, verify_depth + 1);
   }
@@ -1814,7 +1902,8 @@ bool WebServer::isAuthorizedDN(const std::string str) // GLSR FIXME
 {
   GR_JUMP_TRACE;
   bool res = false;
-  for (std::vector<std::string>::const_iterator i = authDnList.begin(); i != authDnList.end() && !res; ++i) {
+  for (std::vector<std::string>::const_iterator i = authDnList.begin();
+       i != authDnList.end() && !res; ++i) {
     res = (*i == str);
   }
   return res;
@@ -1824,8 +1913,8 @@ bool WebServer::isAuthorizedDN(const std::string str) // GLSR FIXME
 
 void WebServer::poolThreadProcessing() {
   GR_JUMP_TRACE;
-  X509           *peer           = nullptr;
-  bool            authSSL        = false;
+  X509 *peer = nullptr;
+  bool authSSL = false;
   ClientSockData *clientSockData = nullptr;
 
   sigset_t sigset;
@@ -1873,7 +1962,7 @@ void WebServer::poolThreadProcessing() {
       // SIGSEGV
       if (SSL_accept(clientSockData->ssl) <= 0) {
         const char *sslmsg = ERR_reason_error_string(ERR_get_error());
-        std::string msg    = "SSL accept error ";
+        std::string msg = "SSL accept error ";
         if (sslmsg != nullptr) {
           msg += ": " + std::string(sslmsg);
         }
@@ -1887,10 +1976,11 @@ void WebServer::poolThreadProcessing() {
         if ((peer = SSL_get_peer_certificate(clientSockData->ssl)) != nullptr) {
           if (SSL_get_verify_result(clientSockData->ssl) == X509_V_OK) {
             // The clientSockData sent a certificate which verified OK
-            char *str = X509_NAME_oneline(X509_get_subject_name(peer), nullptr, 0);
+            char *str =
+                X509_NAME_oneline(X509_get_subject_name(peer), nullptr, 0);
 
             if ((authSSL = isAuthorizedDN(str)) == true) {
-              authSSL                = true;
+              authSSL = true;
               clientSockData->peerDN = new std::string(str);
               updatePeerDnHistory(*(clientSockData->peerDN));
             }
@@ -1908,12 +1998,13 @@ void WebServer::poolThreadProcessing() {
       BIO *ssl_bio = nullptr;
 
       clientSockData->bio = BIO_new(BIO_f_buffer());
-      ssl_bio             = BIO_new(BIO_f_ssl());
+      ssl_bio = BIO_new(BIO_f_ssl());
       BIO_set_ssl(ssl_bio, clientSockData->ssl, BIO_CLOSE);
       BIO_push(clientSockData->bio, ssl_bio);
 
       if (mIsAuthPeerSSL && !authSSL) {
-        std::string msg = getHttpHeader("403 Forbidden clientSockData Certificate Required", 0, false);
+        std::string msg = getHttpHeader(
+            "403 Forbidden clientSockData Certificate Required", 0, false);
         httpSend(clientSockData, (const void *)msg.c_str(), msg.length());
         freeClientSockData(clientSockData);
         pthread_mutex_unlock(&clientsQueue_mutex);
@@ -1940,7 +2031,8 @@ void WebServer::initPoolThreads() {
   GR_JUMP_TRACE;
   pthread_t newthread;
   for (unsigned i = 0; i < threadsPoolSize; i++) {
-    create_thread(&newthread, WebServer::startPoolThread, static_cast<void *>(this));
+    create_thread(&newthread, WebServer::startPoolThread,
+                  static_cast<void *>(this));
     usleep(500);
   }
   exitedThread = 0;
@@ -1964,11 +2056,11 @@ void WebServer::threadProcessing() {
   GR_JUMP_TRACE;
   int client_sock = 0;
 
-  exiting      = false;
+  exiting = false;
   exitedThread = 0;
 
   struct sockaddr_storage clientAddress;
-  socklen_t               clientAddressLength = sizeof(clientAddress);
+  socklen_t clientAddressLength = sizeof(clientAddress);
 
   sigset_t set;
   sigemptyset(&set);
@@ -1983,16 +2075,17 @@ void WebServer::threadProcessing() {
   spdlog::info("WebServer listen on port {}", port);
 
   struct pollfd *pfd;
-  if ((pfd = (pollfd *)malloc(nbServerSock * sizeof(struct pollfd))) == nullptr) {
+  if ((pfd = (pollfd *)malloc(nbServerSock * sizeof(struct pollfd))) ==
+      nullptr) {
     fatalError("WebServer : malloc error ");
   }
 
   unsigned idx;
-  int      status;
+  int status;
 
   for (idx = 0; idx < nbServerSock; idx++) {
-    pfd[idx].fd      = server_sock[idx];
-    pfd[idx].events  = POLLIN;
+    pfd[idx].fd = server_sock[idx];
+    pfd[idx].events = POLLIN;
     pfd[idx].revents = 0;
   }
 
@@ -2007,18 +2100,21 @@ void WebServer::threadProcessing() {
         continue;
       }
 
-      client_sock = accept(pfd[idx].fd, (struct sockaddr *)&clientAddress, &clientAddressLength);
+      client_sock = accept(pfd[idx].fd, (struct sockaddr *)&clientAddress,
+                           &clientAddressLength);
 
       IpAddress webClientAddr;
 
       if (clientAddress.ss_family == AF_INET) {
         webClientAddr.ipversion = 4;
-        webClientAddr.ip.v4     = ((struct sockaddr_in *)&clientAddress)->sin_addr.s_addr;
+        webClientAddr.ip.v4 =
+            ((struct sockaddr_in *)&clientAddress)->sin_addr.s_addr;
       }
 
       if (clientAddress.ss_family == AF_INET6) {
         webClientAddr.ipversion = 6;
-        webClientAddr.ip.v6     = ((struct sockaddr_in6 *)&clientAddress)->sin6_addr;
+        webClientAddr.ip.v6 =
+            ((struct sockaddr_in6 *)&clientAddress)->sin6_addr;
       }
 
       if (exiting) {
@@ -2026,7 +2122,8 @@ void WebServer::threadProcessing() {
         break;
       };
 
-      if (hostsAllowed.size() && !isIpBelongToIpNetwork(webClientAddr, hostsAllowed)) {
+      if (hostsAllowed.size() &&
+          !isIpBelongToIpNetwork(webClientAddr, hostsAllowed)) {
         shutdown(client_sock, SHUT_RDWR);
         close(client_sock);
         continue;
@@ -2036,24 +2133,27 @@ void WebServer::threadProcessing() {
 
       updatePeerIpHistory(webClientAddr);
       if (client_sock == -1) {
-        spdlog::error("WebServer : An error occurred when attempting to access the socket (accept == -1)");
+        spdlog::error("WebServer : An error occurred when attempting to access "
+                      "the socket (accept == -1)");
       } else {
         if (socketTimeoutInSecond) {
           if (!setSocketSndRcvTimeout(client_sock, socketTimeoutInSecond, 0)) {
-            spdlog::error("WebServer : setSocketSndRcvTimeout error - {}", strerror(errno));
+            spdlog::error("WebServer : setSocketSndRcvTimeout error - {}",
+                          strerror(errno));
           }
         }
         if (!setSocketNoSigpipe(client_sock)) {
-          spdlog::error("WebServer : setSocketNoSigpipe error - {}", strerror(errno));
+          spdlog::error("WebServer : setSocketNoSigpipe error - {}",
+                        strerror(errno));
         }
 
-        auto *client        = (ClientSockData *)malloc(sizeof(ClientSockData));
-        client->socketId    = client_sock;
-        client->ip          = webClientAddr;
+        auto *client = (ClientSockData *)malloc(sizeof(ClientSockData));
+        client->socketId = client_sock;
+        client->ip = webClientAddr;
         client->compression = NONE;
-        client->ssl         = nullptr;
-        client->bio         = nullptr;
-        client->peerDN      = nullptr;
+        client->ssl = nullptr;
+        client->bio = nullptr;
+        client->peerDN = nullptr;
         // pthread_mutex_init ( &client->client_mutex, NULL );
 
         pthread_mutex_lock(&clientsQueue_mutex);
@@ -2101,14 +2201,15 @@ void WebServer::closeSocket(ClientSockData *clientSockData) {
 std::string WebServer::base64_decode(const std::string &encoded_string) {
   GR_JUMP_TRACE;
 
-  int           in_len = encoded_string.size();
-  int           i      = 0;
-  int           j      = 0;
-  int           in_    = 0;
+  int in_len = encoded_string.size();
+  int i = 0;
+  int j = 0;
+  int in_ = 0;
   unsigned char char_array_4[4], char_array_3[3];
-  std::string   ret;
+  std::string ret;
 
-  while (in_len-- && (encoded_string[in_] != '=') && is_base64(encoded_string[in_])) {
+  while (in_len-- && (encoded_string[in_] != '=') &&
+         is_base64(encoded_string[in_])) {
     char_array_4[i++] = encoded_string[in_];
     in_++;
     if (i == 4) {
@@ -2116,8 +2217,10 @@ std::string WebServer::base64_decode(const std::string &encoded_string) {
         char_array_4[i] = base64_chars.find(char_array_4[i]);
       }
 
-      char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-      char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+      char_array_3[0] =
+          (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+      char_array_3[1] =
+          ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
       char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
 
       for (i = 0; (i < 3); i++) {
@@ -2137,7 +2240,8 @@ std::string WebServer::base64_decode(const std::string &encoded_string) {
     }
 
     char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-    char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+    char_array_3[1] =
+        ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
     char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
 
     for (j = 0; (j < i - 1); j++) {
@@ -2148,11 +2252,12 @@ std::string WebServer::base64_decode(const std::string &encoded_string) {
   return ret;
 }
 
-std::string WebServer::base64_encode(unsigned char const *bytes_to_encode, unsigned int in_len) {
+std::string WebServer::base64_encode(unsigned char const *bytes_to_encode,
+                                     unsigned int in_len) {
   GR_JUMP_TRACE;
-  std::string   ret;
-  int           i = 0;
-  int           j = 0;
+  std::string ret;
+  int i = 0;
+  int j = 0;
   unsigned char char_array_3[3];
   unsigned char char_array_4[4];
 
@@ -2160,8 +2265,10 @@ std::string WebServer::base64_encode(unsigned char const *bytes_to_encode, unsig
     char_array_3[i++] = *(bytes_to_encode++);
     if (i == 3) {
       char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-      char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-      char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+      char_array_4[1] =
+          ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+      char_array_4[2] =
+          ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
       char_array_4[3] = char_array_3[2] & 0x3f;
 
       for (i = 0; (i < 4); i++) {
@@ -2177,8 +2284,10 @@ std::string WebServer::base64_encode(unsigned char const *bytes_to_encode, unsig
     }
 
     char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-    char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
-    char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+    char_array_4[1] =
+        ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+    char_array_4[2] =
+        ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
     char_array_4[3] = char_array_3[2] & 0x3f;
 
     for (j = 0; (j < i + 1); j++) {
@@ -2199,10 +2308,10 @@ std::string WebServer::base64_encode(unsigned char const *bytes_to_encode, unsig
  ************************************************************************/
 std::string WebServer::SHA1_encode(const std::string &input) {
   GR_JUMP_TRACE;
-  std::string      hash;
-  unsigned char    digest[EVP_MAX_MD_SIZE];
-  unsigned int     digestLen = 0;
-  EVP_MD_CTX      *ctx       = EVP_MD_CTX_new();
+  std::string hash;
+  unsigned char digest[EVP_MAX_MD_SIZE];
+  unsigned int digestLen = 0;
+  EVP_MD_CTX *ctx = EVP_MD_CTX_new();
 
   if (ctx == nullptr) {
     return hash;
@@ -2228,7 +2337,8 @@ std::string WebServer::SHA1_encode(const std::string &input) {
 std::string WebServer::generateWebSocketServerKey(std::string webSocketKey) {
   GR_JUMP_TRACE;
   std::string sha1Key = SHA1_encode(webSocketKey + webSocketMagicString);
-  return base64_encode(reinterpret_cast<const unsigned char *>(sha1Key.c_str()), sha1Key.length());
+  return base64_encode(reinterpret_cast<const unsigned char *>(sha1Key.c_str()),
+                       sha1Key.length());
 }
 
 /***********************************************************************
@@ -2237,14 +2347,16 @@ std::string WebServer::generateWebSocketServerKey(std::string webSocketKey) {
  * \return the header
  ***********************************************************************/
 
-std::string WebServer::getHttpWebSocketHeader(const char *messageType, const char *webSocketClientKey,
+std::string WebServer::getHttpWebSocketHeader(const char *messageType,
+                                              const char *webSocketClientKey,
                                               const bool webSocketDeflate) {
   GR_JUMP_TRACE;
-  char      timeBuf[200];
-  time_t    rawtime;
+  char timeBuf[200];
+  time_t rawtime;
   struct tm timeinfo;
 
-  std::string header = "HTTP/1.1 " + std::string(messageType) + std::string("\r\n");
+  std::string header =
+      "HTTP/1.1 " + std::string(messageType) + std::string("\r\n");
   header += "Upgrade: websocket\r\n";
   header += "Connection: Upgrade\r\n";
 
@@ -2255,10 +2367,12 @@ std::string WebServer::getHttpWebSocketHeader(const char *messageType, const cha
 
   header += webServerName + "\r\n";
 
-  header += "Sec-WebSocket-Accept: " + generateWebSocketServerKey(webSocketClientKey) + "\r\n";
+  header += "Sec-WebSocket-Accept: " +
+            generateWebSocketServerKey(webSocketClientKey) + "\r\n";
 
   if (webSocketDeflate) {
-    header += "Sec-WebSocket-Extensions: permessage-deflate\r\n"; // x-webkit-deflate-frame
+    header +=
+        "Sec-WebSocket-Extensions: permessage-deflate\r\n"; // x-webkit-deflate-frame
   }
 
   header += "\r\n";

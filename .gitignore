@@ -7,3 +7,5 @@ examples/3_websocket/PrecompiledRepository.cc
 examples/3_websocket/example
 test/example
 Doxygen.log
+/bin/navajoPrecompiler
+/lib/libnavajo.a

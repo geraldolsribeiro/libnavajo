@@ -85,18 +85,22 @@ class MyDynamicRepository : public DynamicRepository {
 
       MPFD::Parser *parser = request->getMPFDparser();
 
-      std::map<std::string, MPFD::Field *>           fields = parser->GetFieldsMap();
+      std::map<std::string, MPFD::Field *> fields = parser->GetFieldsMap();
       std::map<std::string, MPFD::Field *>::iterator it;
       for (it = fields.begin(); it != fields.end(); ++it) {
         if (fields[it->first]->GetType() == MPFD::Field::TextType) {
-          spdlog::info("Got text field: [{}], value: [{}]", it->first, fields[it->first]->GetTextTypeContent());
+          spdlog::info("Got text field: [{}], value: [{}]", it->first,
+                       fields[it->first]->GetTextTypeContent());
         } else {
-          spdlog::info("Got file field: [{}] Filename:[{}] TempFilename:[{}]", it->first,
-                       fields[it->first]->GetFileName(), fields[it->first]->GetTempFileName());
+          spdlog::info("Got file field: [{}] Filename:[{}] TempFilename:[{}]",
+                       it->first, fields[it->first]->GetFileName(),
+                       fields[it->first]->GetTempFileName());
 
           // Copy files to upload directory
-          std::ifstream src(fields[it->first]->GetTempFileName().c_str(), std::ios::binary);
-          std::string   dstFilename = std::string(UPLOAD_DIR) + '/' + fields[it->first]->GetFileName();
+          std::ifstream src(fields[it->first]->GetTempFileName().c_str(),
+                            std::ios::binary);
+          std::string dstFilename =
+              std::string(UPLOAD_DIR) + '/' + fields[it->first]->GetFileName();
           std::ofstream dst(dstFilename.c_str(), std::ios::binary);
           if (!src || !dst) {
             spdlog::error("Copy error: check read/write permissions");
@@ -115,9 +119,9 @@ class MyDynamicRepository : public DynamicRepository {
 
   class ListUploadedFiles : public DynamicPage {
     bool getPage(HttpRequest *request, HttpResponse *response) override {
-      std::string                     json      = "{ \"data\" : [";
-      std::set<std::string>          *filenames = myUploadRepo->getFilenames();
-      std::set<std::string>::iterator it        = filenames->begin();
+      std::string json = "{ \"data\" : [";
+      std::set<std::string> *filenames = myUploadRepo->getFilenames();
+      std::set<std::string>::iterator it = filenames->begin();
       while (it != filenames->end()) {
         json += std::string("\"") + escape_json(it->c_str()) + '\"';
         if (++it != filenames->end()) {
@@ -141,7 +145,7 @@ class MyDynamicRepository : public DynamicRepository {
 
       MPFD::Parser *parser = request->getMPFDparser();
 
-      std::map<std::string, MPFD::Field *>           fields = parser->GetFieldsMap();
+      std::map<std::string, MPFD::Field *> fields = parser->GetFieldsMap();
       std::map<std::string, MPFD::Field *>::iterator it;
       for (it = fields.begin(); it != fields.end(); ++it) {
         if (fields[it->first]->GetType() == MPFD::Field::TextType) {
@@ -172,6 +176,8 @@ int main() {
   signal(SIGINT, exitFunction);
 
   webServer = new WebServer;
+
+  webServer->setServerPort(8085);
 
   LocalRepository myLocalRepo("", "./html");
   webServer->addRepository(&myLocalRepo);
