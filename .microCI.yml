@@ -1,0 +1,29 @@
+steps:
+
+  - name: "Fetch clang-format configuration"
+    description: "Retrieve build dependencies from external sources."
+    ssh:
+      format: "id_ed25519"
+    network: host
+    plugin:
+      name: "fetch"
+      target: .
+      items:
+        - git_archive: ssh://gitolite/dot_clang_format.git
+          files:
+            - .clang-format
+
+  - name: "Build libnavajo library"
+    docker: "intmain/microci_intmain:latest"
+    run_as: user
+    envs:
+      OS: linux
+    volumes:
+      - source: /opt/intmain/dev/linux/
+        destination: /opt/intmain/dev/linux/
+        mode: rw
+    plugin:
+      name: bash
+      bash: |
+        make -C src clean
+        make -C src all -j
