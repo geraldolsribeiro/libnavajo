@@ -30,8 +30,8 @@ LogRecorder *LogRecorder::theLogRecorder = nullptr;
 std::string LogRecorder::getDateStr() {
   GR_JUMP_TRACE;
   struct tm today;
-  char      tmpbuf[128];
-  time_t    ltime;
+  char tmpbuf[128];
+  time_t ltime;
 
   time(&ltime);
   gmtime_r(&ltime, &today);
@@ -48,7 +48,8 @@ std::string LogRecorder::getDateStr() {
  * \param l - type of entry
  * \param m - message
  */
-void LogRecorder::append(const NvjLogSeverity &l, const std::string &m, const std::string &details) {
+void LogRecorder::append(const NvjLogSeverity &l, const std::string &m,
+                         const std::string &details) {
   GR_JUMP_TRACE;
   pthread_mutex_lock(&log_mutex);
 

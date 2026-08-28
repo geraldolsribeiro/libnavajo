@@ -17,13 +17,13 @@
 #include "libnavajo/GrDebug.hpp"
 #include "libnavajo/LogStdOutput.hh"
 
-#define RED   "\x1B[31m"
-#define GRN   "\x1B[32m"
-#define YEL   "\x1B[33m"
-#define BLU   "\x1B[34m"
-#define MAG   "\x1B[35m"
-#define CYN   "\x1B[36m"
-#define WHT   "\x1B[37m"
+#define RED "\x1B[31m"
+#define GRN "\x1B[32m"
+#define YEL "\x1B[33m"
+#define BLU "\x1B[34m"
+#define MAG "\x1B[35m"
+#define CYN "\x1B[36m"
+#define WHT "\x1B[37m"
 #define RESET "\x1B[0m"
 
 /***********************************************************************/
@@ -32,7 +32,8 @@
  * \param l - LogSeverity
  * \param m - message
  */
-void LogStdOutput::append(const NvjLogSeverity &l, const std::string &message, const std::string & /*details*/) {
+void LogStdOutput::append(const NvjLogSeverity &l, const std::string &message,
+                          const std::string & /*details*/) {
   GR_JUMP_TRACE;
 
   switch (l) {

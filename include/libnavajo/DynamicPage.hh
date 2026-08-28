@@ -38,7 +38,7 @@ public:
     }
 
     std::istringstream iss(s);
-    T                  tmp;
+    T tmp;
     iss >> tmp;
 
     if (iss.fail()) {
@@ -50,10 +50,13 @@ public:
 
   /**********************************************************************/
 
-  static inline bool isNotPrintable(char c) { return !isprint(static_cast<unsigned char>(c)); }
+  static inline bool isNotPrintable(char c) {
+    return !isprint(static_cast<unsigned char>(c));
+  }
 
   static inline void stripUnprintableChar(std::string &str) {
-    str.erase(std::remove_if(str.begin(), str.end(), isNotPrintable), str.end());
+    str.erase(std::remove_if(str.begin(), str.end(), isNotPrintable),
+              str.end());
   }
 
   /**********************************************************************/
@@ -65,10 +68,12 @@ public:
 
   /**********************************************************************/
 
-  inline bool fromString(const std::string &resultat, HttpResponse *response) const {
-    size_t         webpageLen;
+  inline bool fromString(const std::string &resultat,
+                         HttpResponse *response) const {
+    size_t webpageLen;
     unsigned char *webpage;
-    if ((webpage = (unsigned char *)malloc(resultat.size() + 1 * sizeof(char))) == nullptr) {
+    if ((webpage = (unsigned char *)malloc(resultat.size() +
+                                           1 * sizeof(char))) == nullptr) {
       return false;
     }
     webpageLen = resultat.size();

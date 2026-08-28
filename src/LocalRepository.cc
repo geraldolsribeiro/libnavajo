@@ -25,7 +25,8 @@
 
 /**********************************************************************/
 
-LocalRepository::LocalRepository(const std::string &alias, const std::string &dirPath) {
+LocalRepository::LocalRepository(const std::string &alias,
+                                 const std::string &dirPath) {
   GR_JUMP_TRACE;
   char resolved_path[4096];
 
@@ -57,26 +58,30 @@ void LocalRepository::reload() {
 
 /**********************************************************************/
 
-bool LocalRepository::loadFilename_dir(const std::string &alias, const std::string &path, const std::string &subpath) {
+bool LocalRepository::loadFilename_dir(const std::string &alias,
+                                       const std::string &path,
+                                       const std::string &subpath) {
   GR_JUMP_TRACE;
   struct dirent *entry;
-  DIR           *dir;
-  struct stat    s;
-  std::string    fullPath = path + subpath;
+  DIR *dir;
+  struct stat s;
+  std::string fullPath = path + subpath;
 
   dir = opendir(fullPath.c_str());
   if (dir == nullptr) {
     return false;
   }
   while ((entry = readdir(dir)) != nullptr) {
-    if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..") || !strlen(entry->d_name)) {
+    if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..") ||
+        !strlen(entry->d_name)) {
       continue;
     }
 
     std::string filepath = fullPath + '/' + entry->d_name;
 
     if (stat(filepath.c_str(), &s) == -1) {
-      spdlog::error("LocalRepository - stat error reading file '{}': {}", filepath, strerror(errno));
+      spdlog::error("LocalRepository - stat error reading file '{}': {}",
+                    filepath, strerror(errno));
       continue;
     }
 
@@ -110,8 +115,8 @@ bool LocalRepository::fileExist(const std::string &url) {
 
 bool LocalRepository::getFile(HttpRequest *request, HttpResponse *response) {
   GR_JUMP_TRACE;
-  std::string    url = request->getUrl();
-  size_t         webpageLen;
+  std::string url = request->getUrl();
+  size_t webpageLen;
   unsigned char *webpage;
   pthread_mutex_lock(&_mutex);
 
@@ -144,7 +149,8 @@ bool LocalRepository::getFile(HttpRequest *request, HttpResponse *response) {
   webpageLen = ftell(pFile);
   rewind(pFile);
 
-  if ((webpage = (unsigned char *)malloc(webpageLen + 1 * sizeof(char))) == nullptr) {
+  if ((webpage = (unsigned char *)malloc(webpageLen + 1 * sizeof(char))) ==
+      nullptr) {
     GR_JUMP_TRACE;
     // fclose( pFile ); // GLSR FIXME resource leak
     return false;

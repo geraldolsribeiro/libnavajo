@@ -23,7 +23,8 @@
  * \param l - type of entry
  * \param m - message
  */
-void LogFile::append(const NvjLogSeverity & /*l*/, const std::string &message, const std::string & /*details*/) {
+void LogFile::append(const NvjLogSeverity & /*l*/, const std::string &message,
+                     const std::string & /*details*/) {
   GR_JUMP_TRACE;
   if (file != nullptr) {
     (*file) << message << std::endl;

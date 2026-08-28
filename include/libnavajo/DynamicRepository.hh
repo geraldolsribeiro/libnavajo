@@ -23,9 +23,9 @@
 
 class DynamicRepository : public WebRepository {
 
-  pthread_mutex_t                              _mutex;
+  pthread_mutex_t _mutex;
   typedef std::map<std::string, DynamicPage *> IndexMap;
-  IndexMap                                     indexMap;
+  IndexMap indexMap;
 
 public:
   DynamicRepository() {
@@ -61,7 +61,8 @@ public:
       i++;
     }
     pthread_mutex_lock(&_mutex);
-    indexMap.insert(std::pair<std::string, DynamicPage *>(url.substr(i, url.size() - i), page));
+    indexMap.insert(std::pair<std::string, DynamicPage *>(
+        url.substr(i, url.size() - i), page));
     pthread_mutex_unlock(&_mutex);
   }
 
@@ -71,7 +72,8 @@ public:
    * @param deleteDynamicPage: true if the related DynamicPage must be deleted
    */
   // GLSR FIXME
-  inline void remove(const std::string urlToRemove, bool deleteDynamicPage = false) {
+  inline void remove(const std::string urlToRemove,
+                     bool deleteDynamicPage = false) {
     GR_JUMP_TRACE;
     std::string url(urlToRemove);
     while (url.size() && url[0] == '/') {

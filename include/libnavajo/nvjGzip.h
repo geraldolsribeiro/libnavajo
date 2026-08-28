@@ -27,32 +27,33 @@
 
 //********************************************************
 
-inline size_t nvj_gzip(unsigned char **dst, const unsigned char *src, const size_t sizeSrc,
-                       bool rawDeflateData = false) {
+inline size_t nvj_gzip(unsigned char **dst, const unsigned char *src,
+                       const size_t sizeSrc, bool rawDeflateData = false) {
   z_stream strm;
-  size_t   sizeDst = CHUNK;
+  size_t sizeDst = CHUNK;
 
   /* allocate deflate state */
   strm.zalloc = Z_NULL;
-  strm.zfree  = Z_NULL;
+  strm.zfree = Z_NULL;
   strm.opaque = Z_NULL;
 
-  if (deflateInit2(&strm, Z_BEST_SPEED, Z_DEFLATED, rawDeflateData ? -15 : 16 + MAX_WBITS, 9, Z_DEFAULT_STRATEGY) !=
-      Z_OK)
+  if (deflateInit2(&strm, Z_BEST_SPEED, Z_DEFLATED,
+                   rawDeflateData ? -15 : 16 + MAX_WBITS, 9,
+                   Z_DEFAULT_STRATEGY) != Z_OK)
     throw std::runtime_error(std::string("gzip : inflateInit2 error"));
 
   if ((*dst = (unsigned char *)malloc(CHUNK * sizeof(unsigned char))) == NULL)
     throw std::runtime_error(std::string("gzip : malloc error (1)"));
 
   strm.avail_in = sizeSrc;
-  strm.next_in  = (Bytef *)src;
+  strm.next_in = (Bytef *)src;
 
   int i = 0;
 
   do {
     strm.avail_out = CHUNK;
-    strm.next_out  = (Bytef *)*dst + i * CHUNK;
-    sizeDst        = CHUNK * (i + 1);
+    strm.next_out = (Bytef *)*dst + i * CHUNK;
+    sizeDst = CHUNK * (i + 1);
 
     if (deflate(&strm, Z_FINISH) == Z_STREAM_ERROR) /* state not clobbered */
     {
@@ -63,7 +64,8 @@ inline size_t nvj_gzip(unsigned char **dst, const unsigned char *src, const size
     i++;
 
     if (strm.avail_out == 0) {
-      unsigned char *reallocDst = (unsigned char *)realloc(*dst, CHUNK * (i + 1) * sizeof(unsigned char));
+      unsigned char *reallocDst = (unsigned char *)realloc(
+          *dst, CHUNK * (i + 1) * sizeof(unsigned char));
 
       if (reallocDst != nullptr) {
         *dst = reallocDst;
@@ -82,21 +84,21 @@ inline size_t nvj_gzip(unsigned char **dst, const unsigned char *src, const size
 
 //********************************************************
 
-inline size_t nvj_gunzip(unsigned char **dst, const unsigned char *src, const size_t sizeSrc,
-                         bool rawDeflateData = false) {
+inline size_t nvj_gunzip(unsigned char **dst, const unsigned char *src,
+                         const size_t sizeSrc, bool rawDeflateData = false) {
   z_stream strm;
-  size_t   sizeDst = CHUNK;
-  int      ret;
+  size_t sizeDst = CHUNK;
+  int ret;
 
   if (src == NULL)
     throw std::runtime_error(std::string("gunzip : src == NULL !"));
 
   /* allocate inflate state */
-  strm.zalloc   = Z_NULL;
-  strm.zfree    = Z_NULL;
-  strm.opaque   = Z_NULL;
+  strm.zalloc = Z_NULL;
+  strm.zfree = Z_NULL;
+  strm.opaque = Z_NULL;
   strm.avail_in = 0;
-  strm.next_in  = Z_NULL;
+  strm.next_in = Z_NULL;
 
   if (inflateInit2(&strm, rawDeflateData ? -15 : 16 + MAX_WBITS) != Z_OK)
     throw std::runtime_error(std::string("gunzip : inflateInit2 error"));
@@ -105,14 +107,14 @@ inline size_t nvj_gunzip(unsigned char **dst, const unsigned char *src, const si
     throw std::runtime_error(std::string("gunzip : malloc error (2)"));
 
   strm.avail_in = sizeSrc;
-  strm.next_in  = (Bytef *)src;
+  strm.next_in = (Bytef *)src;
 
   int i = 0;
 
   do {
     strm.avail_out = CHUNK;
-    strm.next_out  = (Bytef *)*dst + i * CHUNK;
-    sizeDst        = CHUNK * (i + 1);
+    strm.next_out = (Bytef *)*dst + i * CHUNK;
+    sizeDst = CHUNK * (i + 1);
 
     ret = inflate(&strm, Z_NO_FLUSH);
 
@@ -130,7 +132,8 @@ inline size_t nvj_gunzip(unsigned char **dst, const unsigned char *src, const si
 
     i++;
     if (strm.avail_out == 0) {
-      unsigned char *reallocDst = (unsigned char *)realloc(*dst, CHUNK * (i + 1) * sizeof(unsigned char));
+      unsigned char *reallocDst = (unsigned char *)realloc(
+          *dst, CHUNK * (i + 1) * sizeof(unsigned char));
 
       if (reallocDst != nullptr) {
         *dst = reallocDst;
@@ -149,15 +152,18 @@ inline size_t nvj_gunzip(unsigned char **dst, const unsigned char *src, const si
 
 //----------------------------------------------------------------------------------------
 
-inline size_t nvj_gzip_websocket_v2(unsigned char **dst, const unsigned char *src, const size_t sizeSrc,
-                                    z_stream *pstream = nullptr, const unsigned int sizeChunk = CHUNK) {
+inline size_t nvj_gzip_websocket_v2(unsigned char **dst,
+                                    const unsigned char *src,
+                                    const size_t sizeSrc,
+                                    z_stream *pstream = nullptr,
+                                    const unsigned int sizeChunk = CHUNK) {
 
   size_t sizeDst = 0;
 
-  int rmndr      = sizeSrc % sizeChunk;
+  int rmndr = sizeSrc % sizeChunk;
   int iterations = (rmndr == 0 ? sizeSrc / sizeChunk : sizeSrc / sizeChunk + 1);
-  int in         = sizeChunk;
-  int flush      = Z_NO_FLUSH;
+  int in = sizeChunk;
+  int flush = Z_NO_FLUSH;
 
   *dst = nullptr;
 
@@ -170,10 +176,11 @@ inline size_t nvj_gzip_websocket_v2(unsigned char **dst, const unsigned char *sr
     }
 
     (*pstream).avail_in = in;
-    (*pstream).next_in  = (Bytef *)src + i * sizeChunk;
+    (*pstream).next_in = (Bytef *)src + i * sizeChunk;
 
     do {
-      unsigned char *reallocDst = (unsigned char *)realloc(*dst, (sizeDst + sizeChunk) * sizeof(unsigned char));
+      unsigned char *reallocDst = (unsigned char *)realloc(
+          *dst, (sizeDst + sizeChunk) * sizeof(unsigned char));
 
       if (reallocDst != nullptr) {
         *dst = reallocDst;
@@ -184,7 +191,7 @@ inline size_t nvj_gzip_websocket_v2(unsigned char **dst, const unsigned char *sr
       }
 
       (*pstream).avail_out = sizeChunk;
-      (*pstream).next_out  = (Bytef *)*dst + sizeDst;
+      (*pstream).next_out = (Bytef *)*dst + sizeDst;
 
       if (deflate(pstream, flush) == Z_STREAM_ERROR) /* state not clobbered */
       {
@@ -197,7 +204,8 @@ inline size_t nvj_gzip_websocket_v2(unsigned char **dst, const unsigned char *sr
 
   sizeDst -= 4;
 
-  unsigned char *reallocDst = (unsigned char *)realloc(*dst, sizeDst * sizeof(unsigned char));
+  unsigned char *reallocDst =
+      (unsigned char *)realloc(*dst, sizeDst * sizeof(unsigned char));
 
   if (reallocDst != nullptr) {
     *dst = reallocDst;
@@ -212,48 +220,57 @@ inline size_t nvj_gzip_websocket_v2(unsigned char **dst, const unsigned char *sr
 
 //********************************************************
 
-inline void nvj_end_stream(z_stream *pstream = nullptr) { (void)deflateEnd(pstream); }
+inline void nvj_end_stream(z_stream *pstream = nullptr) {
+  (void)deflateEnd(pstream);
+}
 
 //********************************************************
 
-inline void nvj_init_stream(z_stream *pstream = nullptr, bool rawDeflateData = false, int level = Z_BEST_COMPRESSION,
+inline void nvj_init_stream(z_stream *pstream = nullptr,
+                            bool rawDeflateData = false,
+                            int level = Z_BEST_COMPRESSION,
                             int strategy = Z_DEFAULT_STRATEGY) {
   (*pstream).zalloc = Z_NULL;
-  (*pstream).zfree  = Z_NULL;
+  (*pstream).zfree = Z_NULL;
   (*pstream).opaque = Z_NULL;
-  if (deflateInit2(pstream, level, Z_DEFLATED, rawDeflateData ? -15 : 16 + MAX_WBITS, 9, strategy) != Z_OK)
+  if (deflateInit2(pstream, level, Z_DEFLATED,
+                   rawDeflateData ? -15 : 16 + MAX_WBITS, 9, strategy) != Z_OK)
     throw std::runtime_error(std::string("gzip : deflateInit2 error"));
 }
 
 //********************************************************
 
-inline size_t nvj_gunzip_websocket_v2(unsigned char **dst, const unsigned char *src, size_t sizeSrc,
-                                      bool rawDeflateData = false, unsigned char *dictionary = nullptr,
-                                      unsigned int *dictLength = nullptr, const unsigned int sizeChunk = CHUNK) {
+inline size_t nvj_gunzip_websocket_v2(unsigned char **dst,
+                                      const unsigned char *src, size_t sizeSrc,
+                                      bool rawDeflateData = false,
+                                      unsigned char *dictionary = nullptr,
+                                      unsigned int *dictLength = nullptr,
+                                      const unsigned int sizeChunk = CHUNK) {
   z_stream strm;
-  size_t   sizeDst    = 0;
-  int      rmndr      = sizeSrc % sizeChunk;
-  int      iterations = (rmndr == 0 ? sizeSrc / sizeChunk : sizeSrc / sizeChunk + 1);
-  int      in         = sizeChunk;
-  int      ret;
+  size_t sizeDst = 0;
+  int rmndr = sizeSrc % sizeChunk;
+  int iterations = (rmndr == 0 ? sizeSrc / sizeChunk : sizeSrc / sizeChunk + 1);
+  int in = sizeChunk;
+  int ret;
   *dst = nullptr;
 
   if (src == NULL)
     throw std::runtime_error(std::string("gunzip : src == NULL !"));
 
   /* allocate inflate state */
-  strm.zalloc   = Z_NULL;
-  strm.zfree    = Z_NULL;
-  strm.opaque   = Z_NULL;
+  strm.zalloc = Z_NULL;
+  strm.zfree = Z_NULL;
+  strm.opaque = Z_NULL;
   strm.avail_in = 0;
-  strm.next_in  = Z_NULL;
+  strm.next_in = Z_NULL;
 
   if (inflateInit2(&strm, rawDeflateData ? -15 : 16 + MAX_WBITS) != Z_OK)
     throw std::runtime_error(std::string("gunzip : inflateInit2 error"));
 
   if (*dictLength != 0) {
     if (inflateSetDictionary(&strm, (Bytef *)dictionary, *dictLength) != Z_OK)
-      throw std::runtime_error(std::string("gunzip : inflateSetDictionary error"));
+      throw std::runtime_error(
+          std::string("gunzip : inflateSetDictionary error"));
   }
 
   for (int i = 0; i < iterations; i++) // TODO Ne pas oublier le reste
@@ -264,11 +281,12 @@ inline size_t nvj_gunzip_websocket_v2(unsigned char **dst, const unsigned char *
     }
 
     strm.avail_in = in;
-    strm.next_in  = (Bytef *)src + i * sizeChunk;
+    strm.next_in = (Bytef *)src + i * sizeChunk;
 
     do {
 
-      unsigned char *reallocDst = (unsigned char *)realloc(*dst, (sizeDst + sizeChunk) * sizeof(unsigned char));
+      unsigned char *reallocDst = (unsigned char *)realloc(
+          *dst, (sizeDst + sizeChunk) * sizeof(unsigned char));
 
       if (reallocDst != nullptr) {
         *dst = reallocDst;
@@ -279,14 +297,15 @@ inline size_t nvj_gunzip_websocket_v2(unsigned char **dst, const unsigned char *
       }
 
       strm.avail_out = sizeChunk;
-      strm.next_out  = (Bytef *)*dst + sizeDst;
+      strm.next_out = (Bytef *)*dst + sizeDst;
 
       ret = inflate(&strm, Z_NO_FLUSH);
 
       switch (ret) {
       case Z_STREAM_ERROR:
         free(*dst);
-        throw std::runtime_error(std::string("gunzip : inflate Z_STREAM_ERROR"));
+        throw std::runtime_error(
+            std::string("gunzip : inflate Z_STREAM_ERROR"));
       case Z_NEED_DICT:
       case Z_DATA_ERROR:
         // ICI
@@ -300,7 +319,8 @@ inline size_t nvj_gunzip_websocket_v2(unsigned char **dst, const unsigned char *
     } while (strm.avail_out == 0);
   }
 
-  unsigned char *reallocDst = (unsigned char *)realloc(*dst, (sizeDst) * sizeof(unsigned char));
+  unsigned char *reallocDst =
+      (unsigned char *)realloc(*dst, (sizeDst) * sizeof(unsigned char));
 
   if (reallocDst != nullptr) {
     *dst = reallocDst;

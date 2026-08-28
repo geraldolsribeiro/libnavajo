@@ -22,7 +22,8 @@
 
 /***********************************************************************/
 
-WebSocketClient::WebSocketClient(WebSocket *ws, HttpRequest *req) : mWebsocket(ws), mRequest(req), mClosing(false) {
+WebSocketClient::WebSocketClient(WebSocket *ws, HttpRequest *req)
+    : mWebsocket(ws), mRequest(req), mClosing(false) {
   GR_JUMP_TRACE;
   snd_maxLatency = ws->getClientSendingMaxLatency();
   pthread_mutex_init(&sendingQueueMutex, nullptr);
@@ -52,10 +53,13 @@ void WebSocketClient::sendingThread() {
     sendingQueue.pop();
     pthread_mutex_unlock(&sendingQueueMutex);
 
-    long long msgLatency = (unsigned long long)(std::chrono::duration_cast<std::chrono::milliseconds>(
-                                                    std::chrono::steady_clock::now().time_since_epoch())
-                                                    .count() -
-                                                msg->date_ms);
+    long long msgLatency =
+        (unsigned long long)(std::chrono::duration_cast<
+                                 std::chrono::milliseconds>(
+                                 std::chrono::steady_clock::now()
+                                     .time_since_epoch())
+                                 .count() -
+                             msg->date_ms);
 
     if (msgLatency > snd_maxLatency || !sendMessage(msg)) {
       free(msg->message);
@@ -77,26 +81,29 @@ void WebSocketClient::sendingThread() {
 
 void WebSocketClient::receivingThread() {
   GR_JUMP_TRACE;
-  char      bufferRecv[BUFSIZE];
+  char bufferRecv[BUFSIZE];
   u_int64_t msgLength = 0, msgContentIt = 0;
-  bool      msgMask = false;
+  bool msgMask = false;
 
-  unsigned char  msgKeys[4];
+  unsigned char msgKeys[4];
   unsigned char *msgContent = nullptr;
   enum MsgDecodSteps { FIRSTBYTE, LENGTH, MASK, CONTENT };
 
   ClientSockData *client = mRequest->getClientSockData();
 
   if (mWebsocket->getWebsocketTimeoutInMilliSecond() &&
-      !setSocketSndRcvTimeout(client->socketId, 0,
-                              mWebsocket->getWebsocketTimeoutInMilliSecond())) { // Reduce socket timeout
+      !setSocketSndRcvTimeout(
+          client->socketId, 0,
+          mWebsocket
+              ->getWebsocketTimeoutInMilliSecond())) { // Reduce socket timeout
     spdlog::error("WebSocketClient : setSocketSndRcvTimeout error");
     closeRecv();
     return;
   }
 
   if (!mWebsocket->isUsingNaggleAlgo()) {
-    if (!setSocketNagleAlgo(client->socketId, false)) // Disable Naggle Algorithm
+    if (!setSocketNagleAlgo(client->socketId,
+                            false)) // Disable Naggle Algorithm
     {
       spdlog::error("WebSocketClient : setSocketNagleAlgo error");
       closeRecv();
@@ -104,15 +111,15 @@ void WebSocketClient::receivingThread() {
     }
   }
 
-  bool          fin = false;
+  bool fin = false;
   unsigned char rsv = 0, opcode = 0;
-  u_int64_t     readLength = 1;
-  MsgDecodSteps step       = FIRSTBYTE;
+  u_int64_t readLength = 1;
+  MsgDecodSteps step = FIRSTBYTE;
   memset(msgKeys, 0, 4 * sizeof(unsigned char));
 
   for (; !mClosing;) {
-    int    n      = 0;
-    size_t it     = 0;
+    int n = 0;
+    size_t it = 0;
     size_t length = readLength;
 
     if (length > BUFSIZE) {
@@ -151,11 +158,11 @@ void WebSocketClient::receivingThread() {
     // Decode message header
     switch (step) {
     case FIRSTBYTE:
-      fin    = (bufferRecv[0] & 0x80) >> 7;
-      rsv    = (bufferRecv[0] & 0x70) >> 4;
+      fin = (bufferRecv[0] & 0x80) >> 7;
+      rsv = (bufferRecv[0] & 0x70) >> 4;
       opcode = bufferRecv[0] & 0xf;
 
-      step       = LENGTH;
+      step = LENGTH;
       readLength = 1;
       break;
 
@@ -170,9 +177,9 @@ void WebSocketClient::receivingThread() {
         msgLength = bufferRecv[0] & 0x7f;
         if (!msgLength) {
           spdlog::warn("Websocket: Message length is null. Closing socket.");
-          msgLength  = 0;
+          msgLength = 0;
           msgContent = nullptr;
-          step       = CONTENT;
+          step = CONTENT;
           continue;
         }
         if (msgLength == 126) {
@@ -194,19 +201,21 @@ void WebSocketClient::receivingThread() {
         }
       }
 
-      if ((msgContent = (unsigned char *)malloc(msgLength * sizeof(unsigned char))) == nullptr) {
+      if ((msgContent = (unsigned char *)malloc(
+               msgLength * sizeof(unsigned char))) == nullptr) {
         char logBuffer[500];
-        snprintf(logBuffer, 500, " Websocket: Message content allocation failed (length: %llu)",
+        snprintf(logBuffer, 500,
+                 " Websocket: Message content allocation failed (length: %llu)",
                  static_cast<unsigned long long>(msgLength));
         spdlog::warn(logBuffer);
         msgContent = nullptr;
       }
       msgContentIt = 0;
       if (msgMask) {
-        step       = MASK;
+        step = MASK;
         readLength = 4;
       } else {
-        step       = CONTENT;
+        step = CONTENT;
         readLength = msgLength;
       }
       break;
@@ -214,7 +223,7 @@ void WebSocketClient::receivingThread() {
     case MASK:
       memcpy(msgKeys, bufferRecv, 4 * sizeof(unsigned char));
       readLength = msgLength;
-      step       = CONTENT;
+      step = CONTENT;
       break;
 
     case CONTENT:
@@ -222,12 +231,14 @@ void WebSocketClient::receivingThread() {
       snprintf(buf3, 300,
                "WebSocket: new message received (len=%llu fin=%d "
                "rsv=%d opcode=%d mask=%d)",
-               static_cast<unsigned long long>(msgLength), fin, rsv, opcode, msgMask);
+               static_cast<unsigned long long>(msgLength), fin, rsv, opcode,
+               msgMask);
       spdlog::debug(buf3);
       if (msgContent != nullptr) {
         for (size_t i = 0; i < length; i++) {
           if (msgMask) {
-            msgContent[msgContentIt] = bufferRecv[i] ^ msgKeys[msgContentIt % 4];
+            msgContent[msgContentIt] =
+                bufferRecv[i] ^ msgKeys[msgContentIt % 4];
           } else {
             msgContent[msgContentIt] = bufferRecv[i];
           }
@@ -237,18 +248,21 @@ void WebSocketClient::receivingThread() {
       }
 
       if (msgContentIt == msgLength) {
-        if (msgContent != nullptr && (client->compression == ZLIB) && (rsv & 4)) {
+        if (msgContent != nullptr && (client->compression == ZLIB) &&
+            (rsv & 4)) {
           try {
             unsigned char *msg = nullptr;
-            size_t msgLen = nvj_gunzip_websocket_v2(&msg, msgContent, msgLength, true, gzipcontext.z_dictionary_inflate,
-                                                    &(gzipcontext.dictInfLength));
+            size_t msgLen = nvj_gunzip_websocket_v2(
+                &msg, msgContent, msgLength, true,
+                gzipcontext.z_dictionary_inflate, &(gzipcontext.dictInfLength));
             free(msgContent);
             msgContent = msg;
-            msgLength  = msgLen;
+            msgLength = msgLen;
 
             msgContent[msgLength] = '\0';
           } catch (std::exception &e) {
-            spdlog::error("Websocket: nvj_gzip raised an exception: {}", e.what());
+            spdlog::error("Websocket: nvj_gzip raised an exception: {}",
+                          e.what());
             msgLength = 0;
           }
         }
@@ -256,7 +270,8 @@ void WebSocketClient::receivingThread() {
         switch (opcode) {
         case 0x1:
           if (msgLength) {
-            mWebsocket->onTextMessage(this, std::string((char *)msgContent, msgLength), fin);
+            mWebsocket->onTextMessage(
+                this, std::string((char *)msgContent, msgLength), fin);
           } else {
             mWebsocket->onTextMessage(this, "", fin);
           }
@@ -280,7 +295,9 @@ void WebSocketClient::receivingThread() {
           mWebsocket->onPongCtrlFrame(this, msgContent, msgLength);
           break;
         default:
-          spdlog::info("WebSocket: message received with unknown opcode ({}) has been ignored", opcode);
+          spdlog::info("WebSocket: message received with unknown opcode ({}) "
+                       "has been ignored",
+                       opcode);
           break;
         }
 
@@ -288,16 +305,16 @@ void WebSocketClient::receivingThread() {
           free(msgContent);
         }
 
-        fin          = false;
-        rsv          = 0;
-        opcode       = 0;
-        msgLength    = 0;
+        fin = false;
+        rsv = 0;
+        opcode = 0;
+        msgLength = 0;
         msgContentIt = 0;
-        msgMask      = false;
+        msgMask = false;
         memset(msgKeys, 0, 4 * sizeof(unsigned char));
         msgContent = nullptr;
         readLength = 1;
-        step       = FIRSTBYTE;
+        step = FIRSTBYTE;
       }
       break;
     }
@@ -371,11 +388,11 @@ bool WebSocketClient::sendMessage(const MessageContent *msgContent) {
   GR_JUMP_TRACE;
   ClientSockData *client = mRequest->getClientSockData();
 
-  unsigned char  headerBuffer[10]; // 10 is the max header size
-  size_t         headerLen = 2;    // default header size
-  unsigned char *msg       = nullptr;
-  size_t         msgLen    = 0;
-  bool           result    = true;
+  unsigned char headerBuffer[10]; // 10 is the max header size
+  size_t headerLen = 2;           // default header size
+  unsigned char *msg = nullptr;
+  size_t msgLen = 0;
+  bool result = true;
 
   if (client == nullptr) {
     return false;
@@ -385,13 +402,15 @@ bool WebSocketClient::sendMessage(const MessageContent *msgContent) {
   if (client->compression == ZLIB) {
     headerBuffer[0] |= 0x40; // Set RSV1
     try {
-      msgLen = nvj_gzip_websocket_v2(&msg, msgContent->message, msgContent->length, &(gzipcontext.strm_deflate));
+      msgLen =
+          nvj_gzip_websocket_v2(&msg, msgContent->message, msgContent->length,
+                                &(gzipcontext.strm_deflate));
     } catch (...) {
       spdlog::error("Websocket: nvj_gzip raised an exception");
       return false;
     }
   } else {
-    msg    = msgContent->message;
+    msg = msgContent->message;
     msgLen = msgContent->length;
   }
 
@@ -399,17 +418,18 @@ bool WebSocketClient::sendMessage(const MessageContent *msgContent) {
     headerBuffer[1] = msgLen;
   } else {
     if (msgLen < 0xFFFF) {
-      headerBuffer[1]                  = 126;
+      headerBuffer[1] = 126;
       *(u_int16_t *)(headerBuffer + 2) = htons((u_int16_t)msgLen);
       headerLen += 2;
     } else {
-      headerBuffer[1]                  = 127;
+      headerBuffer[1] = 127;
       *(u_int64_t *)(headerBuffer + 2) = htonll((u_int64_t)msgLen);
       headerLen += 8;
     }
   }
 
-  if (!WebServer::httpSend(client, headerBuffer, headerLen) || !WebServer::httpSend(client, msg, msgLen)) {
+  if (!WebServer::httpSend(client, headerBuffer, headerLen) ||
+      !WebServer::httpSend(client, msg, msgLen)) {
     result = false;
   }
 
@@ -436,47 +456,50 @@ void WebSocketClient::addSendingQueue(MessageContent *msgContent) {
 
 void WebSocketClient::sendTextMessage(const std::string &message, bool fin) {
   GR_JUMP_TRACE;
-  auto *msgContent    = (MessageContent *)malloc(sizeof(MessageContent));
-  msgContent->opcode  = 0x1;
-  msgContent->message = (unsigned char *)malloc(message.length() * sizeof(char));
+  auto *msgContent = (MessageContent *)malloc(sizeof(MessageContent));
+  msgContent->opcode = 0x1;
+  msgContent->message =
+      (unsigned char *)malloc(message.length() * sizeof(char));
   message.copy((char *)msgContent->message, message.length());
   msgContent->length = message.length();
-  msgContent->fin    = fin;
-  msgContent->date_ms =
-      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
-          .count();
+  msgContent->fin = fin;
+  msgContent->date_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                            std::chrono::steady_clock::now().time_since_epoch())
+                            .count();
   addSendingQueue(msgContent);
 }
 
 /***********************************************************************/
 
-void WebSocketClient::sendBinaryMessage(const unsigned char *message, size_t length, bool fin) {
+void WebSocketClient::sendBinaryMessage(const unsigned char *message,
+                                        size_t length, bool fin) {
   GR_JUMP_TRACE;
-  auto *msgContent    = (MessageContent *)malloc(sizeof(MessageContent));
-  msgContent->opcode  = 0x2;
+  auto *msgContent = (MessageContent *)malloc(sizeof(MessageContent));
+  msgContent->opcode = 0x2;
   msgContent->message = (unsigned char *)malloc(length * sizeof(unsigned char));
   memcpy(msgContent->message, message, length);
   msgContent->length = length;
-  msgContent->fin    = fin;
-  msgContent->date_ms =
-      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
-          .count();
+  msgContent->fin = fin;
+  msgContent->date_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                            std::chrono::steady_clock::now().time_since_epoch())
+                            .count();
   addSendingQueue(msgContent);
 }
 
 /***********************************************************************/
 
-void WebSocketClient::sendPingCtrlFrame(const unsigned char *message, size_t length) {
+void WebSocketClient::sendPingCtrlFrame(const unsigned char *message,
+                                        size_t length) {
   GR_JUMP_TRACE;
-  auto *msgContent    = (MessageContent *)malloc(sizeof(MessageContent));
-  msgContent->opcode  = 0x9;
+  auto *msgContent = (MessageContent *)malloc(sizeof(MessageContent));
+  msgContent->opcode = 0x9;
   msgContent->message = (unsigned char *)malloc(length * sizeof(unsigned char));
   memcpy(msgContent->message, message, length);
   msgContent->length = length;
-  msgContent->fin    = true;
-  msgContent->date_ms =
-      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
-          .count();
+  msgContent->fin = true;
+  msgContent->date_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                            std::chrono::steady_clock::now().time_since_epoch())
+                            .count();
   addSendingQueue(msgContent);
 }
 
@@ -487,17 +510,18 @@ void WebSocketClient::sendPingCtrlFrame(const std::string &message) {
 
 /***********************************************************************/
 
-void WebSocketClient::sendPongCtrlFrame(const unsigned char *message, size_t length) {
+void WebSocketClient::sendPongCtrlFrame(const unsigned char *message,
+                                        size_t length) {
   GR_JUMP_TRACE;
-  auto *msgContent    = (MessageContent *)malloc(sizeof(MessageContent));
-  msgContent->opcode  = 0xa;
+  auto *msgContent = (MessageContent *)malloc(sizeof(MessageContent));
+  msgContent->opcode = 0xa;
   msgContent->message = (unsigned char *)malloc(length * sizeof(unsigned char));
   memcpy(msgContent->message, message, length);
   msgContent->length = length;
-  msgContent->fin    = false;
-  msgContent->date_ms =
-      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
-          .count();
+  msgContent->fin = false;
+  msgContent->date_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                            std::chrono::steady_clock::now().time_since_epoch())
+                            .count();
 
   addSendingQueue(msgContent);
 }
@@ -509,17 +533,18 @@ void WebSocketClient::sendPongCtrlFrame(const std::string &message) {
 
 /***********************************************************************/
 
-void WebSocketClient::sendCloseCtrlFrame(const unsigned char *message, size_t length) {
+void WebSocketClient::sendCloseCtrlFrame(const unsigned char *message,
+                                         size_t length) {
   GR_JUMP_TRACE;
-  auto *msgContent    = (MessageContent *)malloc(sizeof(MessageContent));
-  msgContent->opcode  = 0x8;
+  auto *msgContent = (MessageContent *)malloc(sizeof(MessageContent));
+  msgContent->opcode = 0x8;
   msgContent->message = (unsigned char *)malloc(length * sizeof(unsigned char));
   memcpy(msgContent->message, message, length);
   msgContent->length = length;
-  msgContent->fin    = true;
-  msgContent->date_ms =
-      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
-          .count();
+  msgContent->fin = true;
+  msgContent->date_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                            std::chrono::steady_clock::now().time_since_epoch())
+                            .count();
 
   addSendingQueue(msgContent);
 }

@@ -23,29 +23,29 @@
 class WebSocket;
 class WebSocketClient {
   typedef struct {
-    u_int8_t       opcode;
+    u_int8_t opcode;
     unsigned char *message;
-    size_t         length;
-    bool           fin;
+    size_t length;
+    bool fin;
     unsigned long long date_ms;
   } MessageContent;
 
   typedef struct {
     unsigned char z_dictionary_inflate[32768];
-    unsigned int  dictInfLength;
-    z_stream      strm_deflate;
+    unsigned int dictInfLength;
+    z_stream strm_deflate;
   } GzipContext;
 
-  GzipContext                  gzipcontext;
+  GzipContext gzipcontext;
   std::queue<MessageContent *> sendingQueue;
-  pthread_mutex_t              sendingQueueMutex;
-  pthread_cond_t               sendingNotification;
-  void                         addSendingQueue(MessageContent *msgContent);
+  pthread_mutex_t sendingQueueMutex;
+  pthread_cond_t sendingNotification;
+  void addSendingQueue(MessageContent *msgContent);
 
-  WebSocket    *mWebsocket;
-  HttpRequest  *mRequest;
+  WebSocket *mWebsocket;
+  HttpRequest *mRequest;
   volatile bool mClosing;
-  pthread_t     mReceivingThreadId, mSendingThreadId;
+  pthread_t mReceivingThreadId, mSendingThreadId;
 
   void receivingThread();
   void sendingThread();
@@ -69,8 +69,10 @@ class WebSocketClient {
   };
 
   void startWebSocketThreads() {
-    create_thread(&mReceivingThreadId, WebSocketClient::startReceivingThread, static_cast<void *>(this));
-    create_thread(&mSendingThreadId, WebSocketClient::startSendingThread, static_cast<void *>(this));
+    create_thread(&mReceivingThreadId, WebSocketClient::startReceivingThread,
+                  static_cast<void *>(this));
+    create_thread(&mSendingThreadId, WebSocketClient::startSendingThread,
+                  static_cast<void *>(this));
   }
 
   void freeSendingQueue() {
@@ -112,7 +114,8 @@ public:
    * @param length: the message length
    * @param fin: is-it the final fragment of the message ?
    */
-  void sendBinaryMessage(const unsigned char *message, size_t length, bool fin = true);
+  void sendBinaryMessage(const unsigned char *message, size_t length,
+                         bool fin = true);
 
   /**
    * Send Close Message Notification on the websocket

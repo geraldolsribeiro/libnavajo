@@ -29,11 +29,12 @@ public:
   LogFile(const char *filename);
   ~LogFile() override;
 
-  void append(const NvjLogSeverity &l, const std::string &m, const std::string &details = "") override;
+  void append(const NvjLogSeverity &l, const std::string &m,
+              const std::string &details = "") override;
   void initialize() override;
 
 private:
-  char           filename[30];
+  char filename[30];
   std::ofstream *file;
 };
 

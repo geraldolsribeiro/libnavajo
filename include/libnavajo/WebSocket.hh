@@ -23,19 +23,20 @@
 
 // Max latency allowed is fixed to 500ms by default
 #define CLIENTSENDING_MAXLATENCY_DEFAULT 500
-#define DEFAULT_WEBSOCKET_TIMEOUT        750
+#define DEFAULT_WEBSOCKET_TIMEOUT 750
 
 class WebSocket {
   std::list<WebSocketClient *> webSocketClientList;
-  pthread_mutex_t              webSocketClientList_mutex;
-  bool                         useCompression;
-  bool                         useNaggleAlgo;
-  unsigned short               clientSending_maxLatency;
-  ushort                       websocketTimeoutInMilliSecond;
+  pthread_mutex_t webSocketClientList_mutex;
+  bool useCompression;
+  bool useNaggleAlgo;
+  unsigned short clientSending_maxLatency;
+  ushort websocketTimeoutInMilliSecond;
 
 public:
   WebSocket(bool compression = true)
-      : useCompression(compression), useNaggleAlgo(true), clientSending_maxLatency(CLIENTSENDING_MAXLATENCY_DEFAULT),
+      : useCompression(compression), useNaggleAlgo(true),
+        clientSending_maxLatency(CLIENTSENDING_MAXLATENCY_DEFAULT),
         websocketTimeoutInMilliSecond(DEFAULT_WEBSOCKET_TIMEOUT)
 
   {
@@ -65,7 +66,9 @@ public:
    * @param message: the message
    * @param fin: is the current message finished ?
    */
-  virtual void onTextMessage(WebSocketClient * /*client*/, const std::string & /*message*/, const bool /*fin*/) {};
+  virtual void onTextMessage(WebSocketClient * /*client*/,
+                             const std::string & /*message*/,
+                             const bool /*fin*/) {};
 
   /**
    * Callback on new binary message
@@ -74,8 +77,9 @@ public:
    * @param len: the message length
    * @param fin: is the current message finished ?
    */
-  virtual void onBinaryMessage(WebSocketClient * /*client*/, const unsigned char * /*message*/, size_t /*len*/,
-                               const bool /*fin*/) {};
+  virtual void onBinaryMessage(WebSocketClient * /*client*/,
+                               const unsigned char * /*message*/,
+                               size_t /*len*/, const bool /*fin*/) {};
 
   /**
    * Callback on new pong message (should came after a ping message)
@@ -83,8 +87,11 @@ public:
    * @param message: the message
    * @param len: the message length
    */
-  virtual void onPongCtrlFrame(WebSocketClient * /*client*/, const unsigned char * /*message*/, size_t /*len*/) {
-    /* should check application data received is the same than in the ping message */
+  virtual void onPongCtrlFrame(WebSocketClient * /*client*/,
+                               const unsigned char * /*message*/,
+                               size_t /*len*/) {
+    /* should check application data received is the same than in the ping
+       message */
   };
 
   /**
@@ -94,7 +101,9 @@ public:
    * @param len: the message length
    * @return true to send an automatic pong reply message
    */
-  virtual bool onPingCtrlFrame(WebSocketClient * /*client*/, const unsigned char * /*message*/, size_t /*len*/) {
+  virtual bool onPingCtrlFrame(WebSocketClient * /*client*/,
+                               const unsigned char * /*message*/,
+                               size_t /*len*/) {
     return true;
   };
 
@@ -103,7 +112,9 @@ public:
    * @param request: the http request object
    * @return true to send an automatic close reply message
    */
-  virtual bool onCloseCtrlFrame(WebSocketClient * /*client*/, const unsigned char * /*message*/, size_t /*len*/) {
+  virtual bool onCloseCtrlFrame(WebSocketClient * /*client*/,
+                                const unsigned char * /*message*/,
+                                size_t /*len*/) {
     return true;
   };
 
@@ -112,7 +123,8 @@ public:
    * @param message: the message content
    * @param fin: is-it the final fragment of the message ?
    */
-  inline void sendBroadcastTextMessage(const std::string &message, bool fin = true) {
+  inline void sendBroadcastTextMessage(const std::string &message,
+                                       bool fin = true) {
     pthread_mutex_lock(&webSocketClientList_mutex);
     for (auto &it : webSocketClientList) {
       it->sendTextMessage(message, fin);
@@ -126,7 +138,8 @@ public:
    * @param length: the message length
    * @param fin: is-it the final fragment of the message ?
    */
-  inline void sendBroadcastBinaryMessage(const unsigned char *message, size_t length, bool fin = true) {
+  inline void sendBroadcastBinaryMessage(const unsigned char *message,
+                                         size_t length, bool fin = true) {
     pthread_mutex_lock(&webSocketClientList_mutex);
     for (auto &it : webSocketClientList) {
       it->sendBinaryMessage(message, length, fin);
@@ -139,7 +152,8 @@ public:
    * @param reasonMsg: the message content
    * @param length: the message length
    */
-  inline void sendBroadcastCloseCtrlFrame(const unsigned char *message, size_t length) {
+  inline void sendBroadcastCloseCtrlFrame(const unsigned char *message,
+                                          size_t length) {
     pthread_mutex_lock(&webSocketClientList_mutex);
     for (auto &it : webSocketClientList) {
       it->sendCloseCtrlFrame(message, length);
@@ -152,7 +166,8 @@ public:
    * @param reasonMsg: the message content
    */
   inline void sendBroadcastCloseCtrlFrame(const std::string &reasonMsg = "") {
-    sendBroadcastCloseCtrlFrame((const unsigned char *)reasonMsg.c_str(), reasonMsg.length());
+    sendBroadcastCloseCtrlFrame((const unsigned char *)reasonMsg.c_str(),
+                                reasonMsg.length());
   }
 
   /**
@@ -160,7 +175,8 @@ public:
    * @param message: the message content
    * @param length: the message length
    */
-  inline void sendBroadcastPingCtrlFrame(const unsigned char *message, size_t length) {
+  inline void sendBroadcastPingCtrlFrame(const unsigned char *message,
+                                         size_t length) {
     pthread_mutex_lock(&webSocketClientList_mutex);
     for (auto &it : webSocketClientList) {
       it->sendPingCtrlFrame(message, length);
@@ -173,7 +189,8 @@ public:
    * @param message: the message content
    */
   inline void sendBroadcastPingCtrlFrame(const std::string &message) {
-    sendBroadcastPingCtrlFrame((const unsigned char *)message.c_str(), message.length());
+    sendBroadcastPingCtrlFrame((const unsigned char *)message.c_str(),
+                               message.length());
   }
 
   /**
@@ -181,7 +198,8 @@ public:
    * @param message: the message content
    * @param length: the message length
    */
-  inline void sendBroadcastPongCtrlFrame(const unsigned char *message, size_t length) {
+  inline void sendBroadcastPongCtrlFrame(const unsigned char *message,
+                                         size_t length) {
     pthread_mutex_lock(&webSocketClientList_mutex);
     for (auto &it : webSocketClientList) {
       it->sendPongCtrlFrame(message, length);
@@ -194,7 +212,8 @@ public:
    * @param message: the message content
    */
   inline void sendBroadcastPongCtrlFrame(const std::string &message) {
-    sendBroadcastPongCtrlFrame((const unsigned char *)message.c_str(), message.length());
+    sendBroadcastPongCtrlFrame((const unsigned char *)message.c_str(),
+                               message.length());
   }
 
   /**
@@ -219,7 +238,9 @@ public:
    */
   inline void removeAllClients() {
     pthread_mutex_lock(&webSocketClientList_mutex);
-    for (std::list<WebSocketClient *>::iterator it = webSocketClientList.begin(); it != webSocketClientList.end();) {
+    for (std::list<WebSocketClient *>::iterator it =
+             webSocketClientList.begin();
+         it != webSocketClientList.end();) {
       WebSocketClient *client = *it;
       ++it;
       client->closeWS();
@@ -236,8 +257,8 @@ public:
     if (!cs) {
       pthread_mutex_lock(&webSocketClientList_mutex);
     }
-    std::list<WebSocketClient *>::iterator it =
-        std::find(webSocketClientList.begin(), webSocketClientList.end(), client);
+    std::list<WebSocketClient *>::iterator it = std::find(
+        webSocketClientList.begin(), webSocketClientList.end(), client);
     if (it != webSocketClientList.end()) {
       webSocketClientList.erase(it);
     }
@@ -252,7 +273,9 @@ public:
    */
   inline void removeClient(HttpRequest *request) {
     pthread_mutex_lock(&webSocketClientList_mutex);
-    for (std::list<WebSocketClient *>::iterator it = webSocketClientList.begin(); it != webSocketClientList.end();) {
+    for (std::list<WebSocketClient *>::iterator it =
+             webSocketClientList.begin();
+         it != webSocketClientList.end();) {
       WebSocketClient *client = *it;
       ++it;
       if (client->getHttpRequest() == request) {
@@ -273,7 +296,9 @@ public:
    * Set if client should compress data (if it's supported by browser) or not
    * @param compression: true to compress
    */
-  inline void setUseCompression(bool compression) { useCompression = compression; }
+  inline void setUseCompression(bool compression) {
+    useCompression = compression;
+  }
 
   /**
    * Get if client socket behavior: Naggle Algorithm is used or not
@@ -291,25 +316,33 @@ public:
    * Get the maximum latency allowed to send data
    * @return the latency in milliseconds
    */
-  inline unsigned short getClientSendingMaxLatency() { return clientSending_maxLatency; }
+  inline unsigned short getClientSendingMaxLatency() {
+    return clientSending_maxLatency;
+  }
 
   /**
    * Set the maximum latency allowed to the clients to send data
    * @param ms: the latency in milliseconds
    */
-  inline void setClientSendingMaxLatency(unsigned short ms) { clientSending_maxLatency = ms; }
+  inline void setClientSendingMaxLatency(unsigned short ms) {
+    clientSending_maxLatency = ms;
+  }
 
   /**
    * Get the websocket timeout value in milliseconds
    * @return the value in milliseconds
    */
-  inline ushort getWebsocketTimeoutInMilliSecond() { return websocketTimeoutInMilliSecond; }
+  inline ushort getWebsocketTimeoutInMilliSecond() {
+    return websocketTimeoutInMilliSecond;
+  }
 
   /**
    * Get the websocket timeout value in milliseconds
    * @param ms: the value in milliseconds
    */
-  inline void setWebsocketTimeoutInMilliSecond(unsigned short ms) { websocketTimeoutInMilliSecond = ms; }
+  inline void setWebsocketTimeoutInMilliSecond(unsigned short ms) {
+    websocketTimeoutInMilliSecond = ms;
+  }
 };
 
 #endif

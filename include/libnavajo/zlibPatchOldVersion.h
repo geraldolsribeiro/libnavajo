@@ -90,8 +90,10 @@ inflateGetDictionary(z_streamp strm, Bytef *dictionary, uInt *dictLength) {
   state = (inflate_state2 FAR *)strm->state;
   /* copy dictionary */
   if (state->whave && dictionary != Z_NULL) {
-    memcpy(dictionary, state->window + state->wnext, state->whave - state->wnext);
-    memcpy(dictionary + state->whave - state->wnext, state->window, state->wnext);
+    memcpy(dictionary, state->window + state->wnext,
+           state->whave - state->wnext);
+    memcpy(dictionary + state->whave - state->wnext, state->window,
+           state->wnext);
   }
   if (dictLength != Z_NULL)
     *dictLength = state->whave;

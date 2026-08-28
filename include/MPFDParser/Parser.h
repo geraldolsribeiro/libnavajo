@@ -18,7 +18,8 @@ namespace MPFD {
 
 class Parser {
 public:
-  static const int StoreUploadedFilesInFilesystem = 1, StoreUploadedFilesInMemory = 2;
+  static const int StoreUploadedFilesInFilesystem = 1,
+                   StoreUploadedFilesInMemory = 2;
 
   Parser();
   ~Parser();
@@ -32,7 +33,7 @@ public:
   void SetUploadedFilesStorage(int where);
 
   std::map<std::string, Field *> GetFieldsMap();
-  Field                         *GetField(std::string Name);
+  Field *GetField(std::string Name);
 
 private:
   int WhereToStoreUploadedFiles;
@@ -40,26 +41,26 @@ private:
   std::map<std::string, Field *> Fields;
 
   std::string TempDirForFileUpload;
-  int         CurrentStatus;
+  int CurrentStatus;
 
   // Work statuses
-  static int const Status_LookingForStartingBoundary  = 1;
-  static int const Status_ProcessingHeaders           = 2;
+  static int const Status_LookingForStartingBoundary = 1;
+  static int const Status_ProcessingHeaders = 2;
   static int const Status_ProcessingContentOfTheField = 3;
 
   std::string Boundary;
   std::string ProcessingFieldName;
-  bool        _HeadersOfTheFieldAreProcessed;
-  long        ContentLength;
-  char       *DataCollector;
-  long        DataCollectorLength, MaxDataCollectorLength;
-  bool        FindStartingBoundaryAndTruncData();
-  void        _ProcessData();
-  void        _ParseHeaders(std::string headers);
-  bool        WaitForHeadersEndAndParseThem();
-  void        TruncateDataCollectorFromTheBeginning(long n);
-  long        BoundaryPositionInDataCollector();
-  bool        ProcessContentOfTheField();
+  bool _HeadersOfTheFieldAreProcessed;
+  long ContentLength;
+  char *DataCollector;
+  long DataCollectorLength, MaxDataCollectorLength;
+  bool FindStartingBoundaryAndTruncData();
+  void _ProcessData();
+  void _ParseHeaders(std::string headers);
+  bool WaitForHeadersEndAndParseThem();
+  void TruncateDataCollectorFromTheBeginning(long n);
+  long BoundaryPositionInDataCollector();
+  bool ProcessContentOfTheField();
 };
 } // namespace MPFD
 

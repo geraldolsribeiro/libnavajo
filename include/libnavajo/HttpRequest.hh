@@ -33,23 +33,23 @@
 
 typedef enum {
   UNKNOWN_METHOD = 0,
-  GET_METHOD     = 1,
-  POST_METHOD    = 2,
-  PUT_METHOD     = 3,
-  DELETE_METHOD  = 4,
-  UPDATE_METHOD  = 5,
-  PATCH_METHOD   = 6,
+  GET_METHOD = 1,
+  POST_METHOD = 2,
+  PUT_METHOD = 3,
+  DELETE_METHOD = 4,
+  UPDATE_METHOD = 5,
+  PATCH_METHOD = 6,
   OPTIONS_METHOD = 7
 } HttpRequestMethod;
 
 typedef enum { GZIP, ZLIB, NONE } CompressionMode;
 typedef struct {
-  int             socketId;
-  IpAddress       ip;
+  int socketId;
+  IpAddress ip;
   CompressionMode compression;
-  SSL            *ssl;
-  BIO            *bio;
-  std::string    *peerDN;
+  SSL *ssl;
+  BIO *bio;
+  std::string *peerDN;
   //  pthread_mutex_t client_mutex;
 } ClientSockData;
 
@@ -59,18 +59,18 @@ class HttpRequest {
   typedef std::map<std::string, std::string> HttpRequestParametersMap;
   typedef std::map<std::string, std::string> HttpRequestCookiesMap;
 
-  const char              *mUrl;
-  const char              *mOrigin;
-  ClientSockData          *mClientSockData;
-  std::string              mHttpAuthUsername;
-  HttpRequestMethod        mHttpMethod;
-  HttpRequestCookiesMap    mCookies;
+  const char *mUrl;
+  const char *mOrigin;
+  ClientSockData *mClientSockData;
+  std::string mHttpAuthUsername;
+  HttpRequestMethod mHttpMethod;
+  HttpRequestCookiesMap mCookies;
   HttpRequestParametersMap mParameters;
-  HttpRequestHeadersMap    mExtraHeaders;
-  std::string              mSessionId;
-  MPFD::Parser            *mMultipartContentParser;
-  const char              *mMimeType;
-  std::vector<uint8_t>    *mPayload;
+  HttpRequestHeadersMap mExtraHeaders;
+  std::string mSessionId;
+  MPFD::Parser *mMultipartContentParser;
+  const char *mMimeType;
+  std::vector<uint8_t> *mPayload;
 
   /**********************************************************************/
   /**
@@ -79,7 +79,7 @@ class HttpRequest {
    */
   inline void decodParams(const std::string &p) {
     GR_JUMP_TRACE;
-    size_t      start = 0, end = 0;
+    size_t start = 0, end = 0;
     std::string paramstr = p;
 
     while ((end = paramstr.find_first_of("%+", start)) != std::string::npos) {
@@ -94,13 +94,13 @@ class HttpRequest {
             break;
           }
 
-          unsigned int      specar;
-          std::string       hexChar = paramstr.substr(end + 1, 2);
+          unsigned int specar;
+          std::string hexChar = paramstr.substr(end + 1, 2);
           std::stringstream ss;
           ss << std::hex << hexChar.c_str();
           ss >> specar;
           paramstr[end] = (char)specar;
-          paramstr      = paramstr.erase(end + 1, 2);
+          paramstr = paramstr.erase(end + 1, 2);
         }
         break;
 
@@ -112,8 +112,8 @@ class HttpRequest {
       start = end + 1;
     }
 
-    start            = 0;
-    end              = 0;
+    start = 0;
+    end = 0;
     bool islastParam = false;
     while (!islastParam) {
       GR_JUMP_TRACE;
@@ -130,7 +130,7 @@ class HttpRequest {
         mParameters[theParam] = "";
       } else {
         GR_JUMP_TRACE;
-        std::string key   = theParam.substr(0, posEq);
+        std::string key = theParam.substr(0, posEq);
         std::string value = theParam.substr(posEq + 1);
         if (mParameters.count(key) == 0) {
           GR_JUMP_TRACE;
@@ -161,7 +161,7 @@ class HttpRequest {
   inline void decodCookies(const std::string &c) {
     GR_JUMP_TRACE;
     std::stringstream ss(c);
-    std::string       theCookie;
+    std::string theCookie;
     while (std::getline(ss, theCookie, ';')) {
       GR_JUMP_TRACE;
       size_t posEq = 0;
@@ -175,7 +175,8 @@ class HttpRequest {
 
         if (posEq - firstC > 0 && theCookie.length() - posEq > 0) {
           GR_JUMP_TRACE;
-          mCookies[theCookie.substr(firstC, posEq - firstC)] = theCookie.substr(posEq + 1, theCookie.length() - posEq);
+          mCookies[theCookie.substr(firstC, posEq - firstC)] =
+              theCookie.substr(posEq + 1, theCookie.length() - posEq);
         }
       }
     }
@@ -183,14 +184,15 @@ class HttpRequest {
 
   /**********************************************************************/
   /**
-   * check the SID cookie and set the sessionID attribute if the session is valid
-   * (called by constructor)
+   * check the SID cookie and set the sessionID attribute if the session is
+   * valid (called by constructor)
    */
   inline void getSession() {
     GR_JUMP_TRACE;
     mSessionId = getCookie("SID");
 
-    if (mSessionId.length() && HttpSession::updateExpirationIfExists(mSessionId)) {
+    if (mSessionId.length() &&
+        HttpSession::updateExpirationIfExists(mSessionId)) {
       return;
     }
 
@@ -250,7 +252,8 @@ public:
    * @param value: the header value
    * @return true is the header exists
    */
-  inline bool getExtraHeader(const std::string &name, std::string &value) const {
+  inline bool getExtraHeader(const std::string &name,
+                             std::string &value) const {
     if (!mExtraHeaders.empty()) {
       HttpRequestHeadersMap::const_iterator it;
       if ((it = mExtraHeaders.find(name)) != mExtraHeaders.end()) {
@@ -369,7 +372,8 @@ public:
    * @param name: the attribute name
    * @param value: the object instance
    */
-  void setSessionObjectAttribute(const std::string &name, SessionAttributeObject *value) {
+  void setSessionObjectAttribute(const std::string &name,
+                                 SessionAttributeObject *value) {
     GR_JUMP_TRACE;
     if (mSessionId.empty()) {
       GR_JUMP_TRACE;
@@ -455,19 +459,22 @@ public:
    * @param params:  raw http parameters string
    * @cookies params: raw http cookies string
    */
-  HttpRequest(const HttpRequestMethod type, const char *url, const char *params, const char *cookies,
-              HttpRequestHeadersMap &hMap, const char *origin, const std::string &username, ClientSockData *client, const char *mimeType,
-std::vector<uint8_t> *payload = nullptr, MPFD::Parser *parser = nullptr) {
+  HttpRequest(const HttpRequestMethod type, const char *url, const char *params,
+              const char *cookies, HttpRequestHeadersMap &hMap,
+              const char *origin, const std::string &username,
+              ClientSockData *client, const char *mimeType,
+              std::vector<uint8_t> *payload = nullptr,
+              MPFD::Parser *parser = nullptr) {
     GR_JUMP_TRACE;
-    mHttpMethod             = type;
-    mUrl                    = url;
-    mOrigin                 = origin;
-    mHttpAuthUsername       = username;
-    mClientSockData         = client;
-    mMimeType               = mimeType;
-    mPayload                = payload;
+    mHttpMethod = type;
+    mUrl = url;
+    mOrigin = origin;
+    mHttpAuthUsername = username;
+    mClientSockData = client;
+    mMimeType = mimeType;
+    mPayload = payload;
     mMultipartContentParser = parser;
-    mExtraHeaders           = hMap;
+    mExtraHeaders = hMap;
 
     setParams(params);
 

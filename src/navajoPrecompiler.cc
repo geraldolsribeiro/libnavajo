@@ -42,12 +42,12 @@ void dump_buffer(FILE *f, unsigned n, const unsigned char *buf) {
 
 char *str_replace_first(char *buffer, const char *s, const char *by) {
   GR_JUMP_TRACE;
-  char *p   = strstr(buffer, s);
+  char *p = strstr(buffer, s);
   char *ret = nullptr;
 
   if (p != nullptr) {
-    size_t len_p  = strlen(p);
-    size_t len_s  = strlen(s);
+    size_t len_p = strlen(p);
+    size_t len_s = strlen(s);
     size_t len_by = strlen(by);
 
     if (len_s != len_by) {
@@ -66,7 +66,7 @@ char *str_replace_first(char *buffer, const char *s, const char *by) {
 typedef struct {
   std::string *URL;
   std::string *varName;
-  size_t       length;
+  size_t length;
 } ConversionEntry;
 
 std::vector<std::string> filenamesVec;
@@ -74,11 +74,12 @@ std::vector<std::string> listExcludeDir;
 
 /**********************************************************************/
 
-bool loadFilename_dir(const std::string &path, const std::string &subpath = "") {
+bool loadFilename_dir(const std::string &path,
+                      const std::string &subpath = "") {
   GR_JUMP_TRACE;
   struct dirent *entry;
-  DIR           *dir;
-  struct stat    s;
+  DIR *dir;
+  struct stat s;
 
   std::string fullPath = path + '/' + subpath;
 
@@ -92,7 +93,8 @@ bool loadFilename_dir(const std::string &path, const std::string &subpath = "") 
     return false;
   }
   while ((entry = readdir(dir)) != nullptr) {
-    if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..") || !strlen(entry->d_name)) {
+    if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..") ||
+        !strlen(entry->d_name)) {
       continue;
     }
 
@@ -105,12 +107,14 @@ bool loadFilename_dir(const std::string &path, const std::string &subpath = "") 
 
     int type = s.st_mode & S_IFMT;
     if ((type == S_IFREG || type == S_IFLNK) &&
-        (std::find(listExcludeDir.begin(), listExcludeDir.end(), spath + entry->d_name) == listExcludeDir.end())) {
+        (std::find(listExcludeDir.begin(), listExcludeDir.end(),
+                   spath + entry->d_name) == listExcludeDir.end())) {
       filenamesVec.push_back(spath + entry->d_name);
     }
 
     if (type == S_IFDIR &&
-        (std::find(listExcludeDir.begin(), listExcludeDir.end(), spath + entry->d_name) == listExcludeDir.end())) {
+        (std::find(listExcludeDir.begin(), listExcludeDir.end(),
+                   spath + entry->d_name) == listExcludeDir.end())) {
       loadFilename_dir(path, spath + entry->d_name);
     }
   }
@@ -144,7 +148,8 @@ void parseDirectory(const std::string &dirPath) {
 int main(int argc, char *argv[]) {
   GR_JUMP_TRACE;
   if (argc <= 1) {
-    printf("Usage: %s htmlRepository [--exclude [file directory ...]] \n", argv[0]);
+    printf("Usage: %s htmlRepository [--exclude [file directory ...]] \n",
+           argv[0]);
     fflush(nullptr);
     exit(EXIT_FAILURE);
   }
@@ -169,14 +174,15 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  auto *conversionTable = static_cast<ConversionEntry *>(malloc(filenamesVec.size() * sizeof(ConversionEntry)));
+  auto *conversionTable = static_cast<ConversionEntry *>(
+      malloc(filenamesVec.size() * sizeof(ConversionEntry)));
 
   fprintf(stdout, "#include \"libnavajo/PrecompiledRepository.hh\"\n\n");
   fprintf(stdout, "namespace webRepository\n{\n");
 
   for (size_t i = 0; i < filenamesVec.size(); i++) {
-    FILE          *pFile;
-    size_t         lSize;
+    FILE *pFile;
+    size_t lSize;
     unsigned char *buffer;
 
     std::string filename = directory + '/' + filenamesVec[i];
@@ -195,14 +201,16 @@ int main(int argc, char *argv[]) {
     // allocate memory to contain the whole file.
     buffer = (unsigned char *)malloc((lSize + 1) * sizeof(unsigned char));
     if (buffer == nullptr) {
-      fprintf(stderr, "ERROR: can't malloc reading file: %s\n", filenamesVec[i].c_str());
+      fprintf(stderr, "ERROR: can't malloc reading file: %s\n",
+              filenamesVec[i].c_str());
       fclose(pFile);
       exit(EXIT_FAILURE);
     }
 
     // copy the file into the buffer.
     if (fread(buffer, 1, lSize, pFile) != lSize) {
-      fprintf(stderr, "\nCan't read file %s ... ABORT !\n", filenamesVec[i].c_str());
+      fprintf(stderr, "\nCan't read file %s ... ABORT !\n",
+              filenamesVec[i].c_str());
       fclose(pFile);
       exit(EXIT_FAILURE);
     };
@@ -213,21 +221,23 @@ int main(int argc, char *argv[]) {
     std::replace(outFilename.begin(), outFilename.end(), ' ', '_');
     std::replace(outFilename.begin(), outFilename.end(), '-', '_');
 
-    fprintf(stdout, "  static const unsigned char %s[] =\n", outFilename.c_str());
+    fprintf(stdout, "  static const unsigned char %s[] =\n",
+            outFilename.c_str());
     fprintf(stdout, "  {\n");
     dump_buffer(stdout, lSize, const_cast<unsigned char *>(buffer));
     fprintf(stdout, "\n  };\n\n");
     fclose(pFile);
     free(buffer);
 
-    (*(conversionTable + i)).URL     = new std::string(filenamesVec[i]);
+    (*(conversionTable + i)).URL = new std::string(filenamesVec[i]);
     (*(conversionTable + i)).varName = new std::string(outFilename);
-    (*(conversionTable + i)).length  = lSize;
+    (*(conversionTable + i)).length = lSize;
   }
 
   fprintf(stdout, "}\n\n");
 
-  fprintf(stdout, "PrecompiledRepository::IndexMap PrecompiledRepository::indexMap;\n");
+  fprintf(stdout,
+          "PrecompiledRepository::IndexMap PrecompiledRepository::indexMap;\n");
   fprintf(stdout, "std::string PrecompiledRepository::location;\n");
   fprintf(stdout, "\nvoid PrecompiledRepository::initIndexMap()\n{\n");
 
@@ -237,7 +247,8 @@ int main(int argc, char *argv[]) {
             "indexMap.insert(IndexMap::value_type(\"%s\","
             "PrecompiledRepository::WebStaticPage((const unsigned "
             "char*)&webRepository::%s, sizeof webRepository::%s)));\n",
-            (*(conversionTable + i)).URL->c_str(), (*(conversionTable + i)).varName->c_str(),
+            (*(conversionTable + i)).URL->c_str(),
+            (*(conversionTable + i)).varName->c_str(),
             (*(conversionTable + i)).varName->c_str());
     delete (*(conversionTable + i)).URL;
     delete (*(conversionTable + i)).varName;

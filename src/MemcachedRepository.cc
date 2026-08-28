@@ -8,7 +8,9 @@
 // ----------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------
-MemcachedRepository::MemcachedRepository(const std::string &prefix, const std::string &server, const int port)
+MemcachedRepository::MemcachedRepository(const std::string &prefix,
+                                         const std::string &server,
+                                         const int port)
     : mPrefix(prefix), mServer(server), mPort(port) {
   GR_JUMP_TRACE;
   mMemCacheClient = std::make_shared<memcache::Memcache>(mServer, mPort);
@@ -17,7 +19,8 @@ MemcachedRepository::MemcachedRepository(const std::string &prefix, const std::s
 // ----------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------
-bool MemcachedRepository::getFile(HttpRequest *request, HttpResponse *response) {
+bool MemcachedRepository::getFile(HttpRequest *request,
+                                  HttpResponse *response) {
   GR_JUMP_TRACE;
   std::string webpage;
 
@@ -52,7 +55,8 @@ time_t MemcachedRepository::expiryTime(const time_t t) {
 // ----------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------
-bool MemcachedRepository::set(const std::string &url, const std::string &value, time_t expiry, uint32_t flags) {
+bool MemcachedRepository::set(const std::string &url, const std::string &value,
+                              time_t expiry, uint32_t flags) {
   auto vec = std::vector<char>(value.begin(), value.end());
   return mMemCacheClient->set(mPrefix + url, vec, expiryTime(expiry), flags);
 }
@@ -60,7 +64,9 @@ bool MemcachedRepository::set(const std::string &url, const std::string &value, 
 // ----------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------
-bool MemcachedRepository::set(const std::string &url, const std::vector<char> &vec, time_t expiry, uint32_t flags) {
+bool MemcachedRepository::set(const std::string &url,
+                              const std::vector<char> &vec, time_t expiry,
+                              uint32_t flags) {
   return mMemCacheClient->set(mPrefix + url, vec, expiryTime(expiry), flags);
 }
 
@@ -79,9 +85,13 @@ bool MemcachedRepository::get(const std::string &url, std::string &value) {
 // ----------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------
-bool MemcachedRepository::get(const std::string &url, std::vector<char> &vec) { return mMemCacheClient->get(mPrefix + url, vec); }
+bool MemcachedRepository::get(const std::string &url, std::vector<char> &vec) {
+  return mMemCacheClient->get(mPrefix + url, vec);
+}
 
 // ----------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------
-bool MemcachedRepository::remove(const std::string &url) { return mMemCacheClient->remove(mPrefix + url); }
+bool MemcachedRepository::remove(const std::string &url) {
+  return mMemCacheClient->remove(mPrefix + url);
+}

@@ -34,36 +34,43 @@
 
 class WebSocket;
 class WebServer {
-  pthread_t    threadWebServer;
-  SSL_CTX     *sslCtx;
-  int          s_server_session_id_context;
+  pthread_t threadWebServer;
+  SSL_CTX *sslCtx;
+  int s_server_session_id_context;
   static char *certpass;
 
-  int (*tokDecodeCallback)(const std::string &tokb64, std::string &secret, std::string &decoded);
+  int (*tokDecodeCallback)(const std::string &tokb64, std::string &secret,
+                           std::string &decoded);
   time_t (*authBearTokDecExpirationCb)(std::string &tokenDecoded);
-  int (*authBearTokDecScopesCb)(const std::string &tokenDecoded, const std::string &resourceUrl, std::string &errDescr);
-  std::string                  authBearerRealm;
-  bool                         authBearerEnabled;
-  std::string                  tokDecodeSecret;
+  int (*authBearTokDecScopesCb)(const std::string &tokenDecoded,
+                                const std::string &resourceUrl,
+                                std::string &errDescr);
+  std::string authBearerRealm;
+  bool authBearerEnabled;
+  std::string tokDecodeSecret;
   std::queue<ClientSockData *> clientsQueue;
-  pthread_cond_t               clientsQueue_cond;
-  pthread_mutex_t              clientsQueue_mutex;
+  pthread_cond_t clientsQueue_cond;
+  pthread_mutex_t clientsQueue_mutex;
 
-  void       initialize_ctx(const char *certfile, const char *cafile, const char *password);
+  void initialize_ctx(const char *certfile, const char *cafile,
+                      const char *password);
   static int password_cb(char *buf, int num, int rwflag, void *userdata);
 
   bool isUserAllowed(const std::string &logpassb64, std::string &username);
-  bool isTokenAllowed(const std::string &tokb64, const std::string &resourceUrl, std::string &respHeader);
+  bool isTokenAllowed(const std::string &tokb64, const std::string &resourceUrl,
+                      std::string &respHeader);
   bool isAuthorizedDN(const std::string str); // GLSR FIXME
 
-  size_t             recvLine(int client, char *bufLine, size_t);
-  bool               accept_request(ClientSockData *clientSockData, bool authSSL);
-  void               fatalError(const char *);
-  static std::string getHttpHeader(const char *messageType, const size_t len = 0, const bool keepAlive = true,
-                                   const char *authBearerAdditionalHeaders = nullptr, const bool zipped = false,
-                                   HttpResponse *response = nullptr);
+  size_t recvLine(int client, char *bufLine, size_t);
+  bool accept_request(ClientSockData *clientSockData, bool authSSL);
+  void fatalError(const char *);
+  static std::string
+  getHttpHeader(const char *messageType, const size_t len = 0,
+                const bool keepAlive = true,
+                const char *authBearerAdditionalHeaders = nullptr,
+                const bool zipped = false, HttpResponse *response = nullptr);
   static const char *get_mime_type(const char *name);
-  u_short            init();
+  u_short init();
 
   static std::string getNoContentErrorMsg();
   static std::string getBadRequestErrorMsg();
@@ -71,7 +78,7 @@ class WebServer {
   static std::string getInternalServerErrorMsg();
   static std::string getNotImplementedErrorMsg();
 
-  void                initPoolThreads();
+  void initPoolThreads();
   inline static void *startPoolThread(void *t) {
     static_cast<WebServer *>(t)->poolThreadProcessing();
     pthread_exit(nullptr);
@@ -81,58 +88,62 @@ class WebServer {
 
   bool httpdAuth;
 
-  bool   exiting;
+  bool exiting;
   size_t exitedThread;
-  int    server_sock[3];
+  int server_sock[3];
   size_t nbServerSock;
 
   const static char authStr[];
   const static char authBearerStr[];
 
   std::map<std::string, time_t> usersAuthHistory;
-  pthread_mutex_t               usersAuthHistory_mutex;
+  pthread_mutex_t usersAuthHistory_mutex;
   std::map<std::string, time_t> tokensAuthHistory;
-  pthread_mutex_t               tokensAuthHistory_mutex;
-  std::map<IpAddress, time_t>   peerIpHistory;
+  pthread_mutex_t tokensAuthHistory_mutex;
+  std::map<IpAddress, time_t> peerIpHistory;
   std::map<std::string, time_t> peerDnHistory;
-  pthread_mutex_t               peerDnHistory_mutex;
-  void                          updatePeerIpHistory(IpAddress &);
-  void                          updatePeerDnHistory(std::string);
-  static int                    verify_callback(int preverify_ok, X509_STORE_CTX *ctx);
-  static const int              verify_depth;
+  pthread_mutex_t peerDnHistory_mutex;
+  void updatePeerIpHistory(IpAddress &);
+  void updatePeerDnHistory(std::string);
+  static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx);
+  static const int verify_depth;
 
   static void *startThread(void *);
-  void         threadProcessing();
-  void         exit();
+  void threadProcessing();
+  void exit();
 
   static std::string webServerName;
-  bool               disableIpV4, disableIpV6;
-  ushort             socketTimeoutInSecond;
-  ushort             tcpPort;
-  size_t             threadsPoolSize;
-  std::string        device;
+  bool disableIpV4, disableIpV6;
+  ushort socketTimeoutInSecond;
+  ushort tcpPort;
+  size_t threadsPoolSize;
+  std::string device;
 
   std::string multipartTempDirForFileUpload;
-  long        multipartMaxCollectedDataLength;
+  long multipartMaxCollectedDataLength;
 
-  bool                               mIsSSLEnabled;
-  std::string                        sslCertFile, sslCaFile, sslCertPwd;
-  std::vector<std::string>           authLoginPwdList;
-  bool                               mIsAuthPeerSSL;
-  std::vector<std::string>           authDnList;
-  std::vector<IpNetwork>             hostsAllowed;
-  std::vector<WebRepository *>       webRepositories;
-  static inline bool                 is_base64(unsigned char c) { return (isalnum(c) || (c == '+') || (c == '/')); };
-  static const std::string           base64_chars;
-  static std::string                 base64_decode(const std::string &encoded_string);
-  static std::string                 base64_encode(unsigned char const *bytes_to_encode, unsigned int in_len);
-  static void                        closeSocket(ClientSockData *clientSockData);
+  bool mIsSSLEnabled;
+  std::string sslCertFile, sslCaFile, sslCertPwd;
+  std::vector<std::string> authLoginPwdList;
+  bool mIsAuthPeerSSL;
+  std::vector<std::string> authDnList;
+  std::vector<IpNetwork> hostsAllowed;
+  std::vector<WebRepository *> webRepositories;
+  static inline bool is_base64(unsigned char c) {
+    return (isalnum(c) || (c == '+') || (c == '/'));
+  };
+  static const std::string base64_chars;
+  static std::string base64_decode(const std::string &encoded_string);
+  static std::string base64_encode(unsigned char const *bytes_to_encode,
+                                   unsigned int in_len);
+  static void closeSocket(ClientSockData *clientSockData);
   std::map<std::string, WebSocket *> webSocketEndPoints;
-  static std::string                 SHA1_encode(const std::string &input);
-  static const std::string           webSocketMagicString;
-  static std::string                 generateWebSocketServerKey(std::string webSocketKey);
-  static std::string                 getHttpWebSocketHeader(const char *messageType, const char *webSocketClientKey,
-                                                            const bool webSocketDeflate);
+  static std::string SHA1_encode(const std::string &input);
+  static const std::string webSocketMagicString;
+  static std::string generateWebSocketServerKey(std::string webSocketKey);
+  static std::string getHttpWebSocketHeader(const char *messageType,
+                                            const char *webSocketClientKey,
+                                            const bool webSocketDeflate);
 
 public:
   WebServer();
@@ -141,13 +152,17 @@ public:
    * Set the web server name in the http header
    * @param name: the new name
    */
-  inline void setWebServerName(const std::string &name) { webServerName = name; }
+  inline void setWebServerName(const std::string &name) {
+    webServerName = name;
+  }
 
   /**
    * Set the size of the listener thread pool.
    * @param nbThread: the number of thread available (Default value: 64)
    */
-  inline void setThreadsPoolSize(const size_t nbThread) { threadsPoolSize = nbThread; };
+  inline void setThreadsPoolSize(const size_t nbThread) {
+    threadsPoolSize = nbThread;
+  };
 
   /**
    * Set the tcp port to listen.
@@ -160,7 +175,9 @@ public:
    * @param dur: the socket timeout in seconds. 0 for no timeout, or from 1 to
    * 65535 (Default value: 30)
    */
-  inline void setSocketTimeoutInSecond(const ushort dur) { socketTimeoutInSecond = dur; };
+  inline void setSocketTimeoutInSecond(const ushort dur) {
+    socketTimeoutInSecond = dur;
+  };
 
   /**
    * Set the device to use (work on linux only).
@@ -174,22 +191,25 @@ public:
    * @param certFile: the path to cert file
    * @param certPwd: optional certificat password
    */
-  inline void setUseSSL(bool ssl, const char *certFile = "", const char *certPwd = "") {
+  inline void setUseSSL(bool ssl, const char *certFile = "",
+                        const char *certPwd = "") {
     mIsSSLEnabled = ssl;
-    sslCertFile   = certFile;
-    sslCertPwd    = certPwd;
+    sslCertFile = certFile;
+    sslCertPwd = certPwd;
   };
 
   inline bool isUseSSL() { return mIsSSLEnabled; };
 
   /**
    * Enabled or disabled X509 authentification
-   * @param authPeerSSL: boolean. X509 authentification is required if a is true.
+   * @param authPeerSSL: boolean. X509 authentification is required if a is
+   * true.
    * @param caFile: the path to cachain file
    */
-  inline void setAuthPeerSSL(const bool authPeerSSL = true, const char *caFile = "") {
+  inline void setAuthPeerSSL(const bool authPeerSSL = true,
+                             const char *caFile = "") {
     mIsAuthPeerSSL = authPeerSSL;
-    sslCaFile      = caFile;
+    sslCaFile = caFile;
   };
 
   inline bool isAuthPeerSSL() { return mIsAuthPeerSSL; };
@@ -198,7 +218,9 @@ public:
    * Restricted X509 authentification to a DN user list. Add this given DN.
    * @param dn: user certificate DN
    */
-  inline void addAuthPeerDN(const char *dn) { authDnList.push_back(std::string(dn)); };
+  inline void addAuthPeerDN(const char *dn) {
+    authDnList.push_back(std::string(dn));
+  };
 
   /**
    * Enabled http authentification for a given login/password list
@@ -235,24 +257,30 @@ public:
    * sucess
    */
   inline void setAuthBearerDecodeCallbacks(
-      std::string &realm, int (*decodeCallback)(const std::string &tokb64, std::string &secret, std::string &decoded),
-      std::string  secret, // GLSR FIXME
+      std::string &realm,
+      int (*decodeCallback)(const std::string &tokb64, std::string &secret,
+                            std::string &decoded),
+      std::string secret, // GLSR FIXME
       time_t (*expirationCallback)(std::string &tokenDecoded),
-      int (*scopesCheckCallback)(const std::string &tokenDecoded, const std::string &resourceUrl,
+      int (*scopesCheckCallback)(const std::string &tokenDecoded,
+                                 const std::string &resourceUrl,
                                  std::string &errDescr)) {
-    authBearerRealm            = realm;
-    tokDecodeCallback          = decodeCallback;
-    tokDecodeSecret            = secret;
+    authBearerRealm = realm;
+    tokDecodeCallback = decodeCallback;
+    tokDecodeSecret = secret;
     authBearTokDecExpirationCb = expirationCallback;
-    authBearTokDecScopesCb     = scopesCheckCallback;
-    authBearerEnabled          = true;
+    authBearTokDecScopesCb = scopesCheckCallback;
+    authBearerEnabled = true;
   };
 
   /**
-   * Set the path to store uploaded files on disk. Used to set the MPFD function.
+   * Set the path to store uploaded files on disk. Used to set the MPFD
+   * function.
    * @param pathdir: path to a writtable directory
    */
-  inline void setMultipartTempDirForFileUpload(const std::string &pathdir) { multipartTempDirForFileUpload = pathdir; };
+  inline void setMultipartTempDirForFileUpload(const std::string &pathdir) {
+    multipartTempDirForFileUpload = pathdir;
+  };
 
   /**
    * Set the size of internal MPFD buffer.
@@ -264,7 +292,9 @@ public:
    * without any buffering.
    * @param max: the internal buffer size
    */
-  inline void setMultipartMaxCollectedDataLength(const long &max) { multipartMaxCollectedDataLength = max; };
+  inline void setMultipartMaxCollectedDataLength(const long &max) {
+    multipartMaxCollectedDataLength = max;
+  };
 
   /**
    * Add a web repository (containing web pages)
@@ -283,7 +313,8 @@ public:
    * @param endpoint : websocket endpoint
    * @param websocket : WebSocket instance
    */
-  void addWebSocket(const std::string endPoint, WebSocket *websocket) // GLSR FIXME
+  void addWebSocket(const std::string endPoint,
+                    WebSocket *websocket) // GLSR FIXME
   {
     if (websocket != nullptr) {
       webSocketEndPoints[endPoint] = websocket;
@@ -306,19 +337,25 @@ public:
    * set network access restriction to webserver.
    * @param ipnet: an IpNetwork of allowed web client to add
    */
-  inline void addHostsAllowed(const IpNetwork &ipnet) { hostsAllowed.push_back(ipnet); };
+  inline void addHostsAllowed(const IpNetwork &ipnet) {
+    hostsAllowed.push_back(ipnet);
+  };
 
   /**
    * Get the list of http client peer IP address.
    * @return a map of every IP address and last connection to the webserver
    */
-  inline std::map<IpAddress, time_t> &getPeerIpHistory() { return peerIpHistory; };
+  inline std::map<IpAddress, time_t> &getPeerIpHistory() {
+    return peerIpHistory;
+  };
 
   /**
    * Get the list of http client DN (work with X509 authentification)
    * @return a map of every DN and last connection to the webserver
    */
-  inline std::map<std::string, time_t> &getPeerDnHistory() { return peerDnHistory; };
+  inline std::map<std::string, time_t> &getPeerDnHistory() {
+    return peerDnHistory;
+  };
 
   /**
    * startService: the webserver starts

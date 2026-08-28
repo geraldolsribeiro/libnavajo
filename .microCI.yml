@@ -13,6 +13,17 @@ steps:
           files:
             - .clang-format
 
+  - name: "Format C++ code with clang-format"
+    description: "Standardizes code formatting using rules"
+    run_as: user
+    plugin:
+      name: "clang-format"
+      source:
+        - "src/*.cc"
+        - "include/libnavajo/*h"
+        - "include/MPFDParser/*h"
+        - "test/*.cc"
+
   - name: "Build libnavajo library"
     docker: "intmain/microci_intmain:latest"
     run_as: user

@@ -29,12 +29,12 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #define u_int32_t uint32_t
-#define u_int8_t  uint8_t
+#define u_int8_t uint8_t
 #define u_int16_t uint16_t
 #include "stdint.h"
 
-#define in_addr_t    DWORD
-#define index(s, c)  strchr((char *)s, c)
+#define in_addr_t DWORD
+#define index(s, c) strchr((char *)s, c)
 #define rindex(s, c) strrchr((char *)s, c)
 
 #define inet_ntop(f, b, l, o) inet_ntop(f, (PVOID)(b), l, o)
@@ -60,13 +60,13 @@ class IpAddress {
 public:
   typedef union {
     in_addr_t v4;
-    in6_addr  v6;
+    in6_addr v6;
   } IP;
 
-  IP       ip;
+  IP ip;
   u_int8_t ipversion;
   constexpr IpAddress(const IpAddress &) = default;
-  virtual ~IpAddress()                   = default;
+  virtual ~IpAddress() = default;
 
   void init() {
     ipversion = 0;
@@ -77,7 +77,9 @@ public:
 
   IpAddress(const in_addr_t &addrIPv4) : ipversion(4) { ip.v4 = addrIPv4; }
 
-  IpAddress(const in6_addr &addrIPv6) : ipversion(6) { memcpy((void *)&(ip.v6), (void *)(&addrIPv6), INET6_ADDRLEN); }
+  IpAddress(const in6_addr &addrIPv6) : ipversion(6) {
+    memcpy((void *)&(ip.v6), (void *)(&addrIPv6), INET6_ADDRLEN);
+  }
 
   IpAddress(const std::string &value) {
     init();
@@ -103,7 +105,7 @@ public:
 
   IpAddress &operator=(const in_addr_t &addrIPv4) {
     ipversion = 4;
-    ip.v4     = addrIPv4;
+    ip.v4 = addrIPv4;
     return *this;
   }
 
@@ -196,8 +198,8 @@ public:
   static pthread_mutex_t resolvIP_mutex;
 
   bool snresolve(char *hname, const size_t maxlength) const {
-    int                 error = 0;
-    struct sockaddr_in  sin;
+    int error = 0;
+    struct sockaddr_in sin;
     struct sockaddr_in6 sin6;
 
     pthread_mutex_lock(&resolvIP_mutex);
@@ -205,13 +207,15 @@ public:
     if (ipversion == 4) {
       sin.sin_family = AF_INET;
       struct in_addr addr;
-      addr.s_addr  = ip.v4;
+      addr.s_addr = ip.v4;
       sin.sin_addr = addr;
-      error        = getnameinfo((sockaddr *)&sin, sizeof sin, hname, maxlength, nullptr, 0, NI_NAMEREQD);
+      error = getnameinfo((sockaddr *)&sin, sizeof sin, hname, maxlength,
+                          nullptr, 0, NI_NAMEREQD);
     } else { // IPv6
       sin6.sin6_family = AF_INET6;
-      sin6.sin6_addr   = ip.v6;
-      error            = getnameinfo((sockaddr *)&sin6, sizeof sin6, hname, maxlength, nullptr, 0, NI_NAMEREQD);
+      sin6.sin6_addr = ip.v6;
+      error = getnameinfo((sockaddr *)&sin6, sizeof sin6, hname, maxlength,
+                          nullptr, 0, NI_NAMEREQD);
     }
 
     pthread_mutex_unlock(&resolvIP_mutex);
@@ -219,18 +223,20 @@ public:
     return (!error);
   }
 
-  static IpAddress *fromHostname(const std::string &hostname, bool preferIpv4 = true) {
-    int              status;
-    struct addrinfo  hints, *p;
+  static IpAddress *fromHostname(const std::string &hostname,
+                                 bool preferIpv4 = true) {
+    int status;
+    struct addrinfo hints, *p;
     struct addrinfo *servinfo;
-    IpAddress       *newIp4 = nullptr, *newIp6 = nullptr;
+    IpAddress *newIp4 = nullptr, *newIp6 = nullptr;
 
     memset(&hints, 0, sizeof hints);
-    hints.ai_family   = AF_UNSPEC;
+    hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags    = AI_PASSIVE;
+    hints.ai_flags = AI_PASSIVE;
 
-    if ((status = getaddrinfo(hostname.c_str(), nullptr, &hints, &servinfo)) != 0) {
+    if ((status = getaddrinfo(hostname.c_str(), nullptr, &hints, &servinfo)) !=
+        0) {
       return nullptr;
     }
 
@@ -296,7 +302,7 @@ public:
 class IpNetwork {
 public:
   IpAddress addr;
-  u_int8_t  mask;
+  u_int8_t mask;
 
   IpNetwork() = default;
   IpNetwork(const IpAddress &a) {
@@ -343,8 +349,8 @@ public:
         return true; // IpV6 > IpV4
       }
 
-      bool     res     = true;
-      int      i       = 0;
+      bool res = true;
+      int i = 0;
       u_int8_t netmask = 0, Anetmask = 0;
 
       for (; i < INET6_ADDRLEN - 1 && res; i++) {
@@ -357,7 +363,8 @@ public:
           }
         }
 
-        res = (addr.ip.v6.s6_addr[i] & netmask) == (A.addr.ip.v6.s6_addr[i] & Anetmask);
+        res = (addr.ip.v6.s6_addr[i] & netmask) ==
+              (A.addr.ip.v6.s6_addr[i] & Anetmask);
       }
       return res;
     }
@@ -366,7 +373,7 @@ public:
   }
 
   std::string strCIDR() const {
-    std::string       netCIDR = addr.str() + "/";
+    std::string netCIDR = addr.str() + "/";
     std::stringstream masklengthSs;
     masklengthSs << (int)mask;
     netCIDR += masklengthSs.str();
@@ -390,13 +397,13 @@ public:
           netmask |= 1 << (31 - j);
         }
         netmask = htonl(netmask);
-        res     = (addr.ip.v4 & netmask) == (ip.ip.v4 & netmask);
+        res = (addr.ip.v4 & netmask) == (ip.ip.v4 & netmask);
       }
     }
 
     if (ip.ipversion == 6) {
       if (addr.ipversion == 6) {
-        res   = true;
+        res = true;
         int i = 0;
 
         for (; i < INET6_ADDRLEN && res; i++) {
@@ -407,7 +414,8 @@ public:
             }
           }
 
-          res = ((addr.ip.v6.s6_addr[i] & netmask) == (ip.ip.v6.s6_addr[i] & netmask));
+          res = ((addr.ip.v6.s6_addr[i] & netmask) ==
+                 (ip.ip.v6.s6_addr[i] & netmask));
         }
       }
     }
@@ -416,9 +424,9 @@ public:
   }
 
   static IpNetwork *fromString(const std::string &value) {
-    IpNetwork  *ipNet = nullptr;
+    IpNetwork *ipNet = nullptr;
     std::string ipstr;
-    size_t      found = value.find_first_of('/');
+    size_t found = value.find_first_of('/');
     if (found == std::string::npos) {
       IpAddress *addr = IpAddress::fromString(value);
       if (addr == nullptr) {
@@ -435,11 +443,12 @@ public:
         return nullptr;
       }
 
-      u_int8_t    maskDec = 0;
+      u_int8_t maskDec = 0;
       std::string maskStr = value.substr(found + 1);
 
       // Mask
-      if (maskStr.find_first_of('.') != std::string::npos) // mask is formating like "w.x.y.z"
+      if (maskStr.find_first_of('.') !=
+          std::string::npos) // mask is formating like "w.x.y.z"
       {
         if (addr->ipversion == 6) {
           delete addr;
@@ -453,9 +462,9 @@ public:
           delete addr;
           return nullptr;
         } else {
-          u_int32_t netmask      = ntohl(tmp.s_addr);
-          bool      thisistheend = false;
-          maskDec                = 0;
+          u_int32_t netmask = ntohl(tmp.s_addr);
+          bool thisistheend = false;
+          maskDec = 0;
           for (u_int8_t j = 0; j < 32; j++) {
             if ((netmask >> (31 - j)) & 1) {
               if (!thisistheend) {
@@ -472,14 +481,16 @@ public:
       } else {
         size_t s = 0, e = 0, j = 0;
 
-        while ((maskStr[s] == ' ' || maskStr[s] == '\t') && s < maskStr.length()) {
+        while ((maskStr[s] == ' ' || maskStr[s] == '\t') &&
+               s < maskStr.length()) {
           s++;
         }
         e = s;
 
         if (e < maskStr.length()) {
 
-          while (e < maskStr.length() && maskStr[e] >= '0' && maskStr[e] <= '9') {
+          while (e < maskStr.length() && maskStr[e] >= '0' &&
+                 maskStr[e] <= '9') {
             e++;
           }
         }
@@ -487,7 +498,8 @@ public:
         j = e;
 
         while (j < maskStr.length() &&
-               (maskStr[j] == ' ' || maskStr[j] == '\t' || maskStr[j] == '\n' || maskStr[j] == '\r')) {
+               (maskStr[j] == ' ' || maskStr[j] == '\t' || maskStr[j] == '\n' ||
+                maskStr[j] == '\r')) {
           j++;
         }
 
@@ -498,7 +510,8 @@ public:
         maskDec = atoi(maskStr.substr(s, e - s + 1).c_str());
       }
 
-      if ((maskDec > 32 && addr->ipversion == 4) || (maskDec > 128 && addr->ipversion == 6)) {
+      if ((maskDec > 32 && addr->ipversion == 4) ||
+          (maskDec > 128 && addr->ipversion == 6)) {
         delete addr;
         return nullptr;
       }
@@ -525,10 +538,12 @@ public:
  * @return true if it belongs to local network, false otherwise
  */
 
-inline static bool isIpBelongToIpNetwork(const IpAddress &ip, const std::vector<IpNetwork> &net) {
+inline static bool isIpBelongToIpNetwork(const IpAddress &ip,
+                                         const std::vector<IpNetwork> &net) {
   bool res = false;
 
-  for (std::vector<IpNetwork>::const_iterator i = net.begin(); i != net.end() && !res; ++i) {
+  for (std::vector<IpNetwork>::const_iterator i = net.begin();
+       i != net.end() && !res; ++i) {
     res = i->isInside(ip);
   }
 

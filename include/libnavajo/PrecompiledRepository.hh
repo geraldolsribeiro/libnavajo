@@ -25,13 +25,13 @@ class PrecompiledRepository : public WebRepository {
 
   struct WebStaticPage {
     const unsigned char *data;
-    size_t               length;
+    size_t length;
     WebStaticPage(const unsigned char *d, size_t l) : data(d), length(l) {};
   };
 
   typedef std::map<std::string, const WebStaticPage> IndexMap;
-  static IndexMap                                    indexMap;
-  static std::string                                 location;
+  static IndexMap indexMap;
+  static std::string location;
 
 public:
   PrecompiledRepository(const std::string &l = "") {
@@ -80,7 +80,7 @@ public:
       url = "index.html";
     }
 
-    size_t         webpageLen;
+    size_t webpageLen;
     unsigned char *webpage;
     pthread_mutex_lock(&_mutex);
     IndexMap::const_iterator i = indexMap.find(url);
@@ -94,7 +94,7 @@ public:
       }
     }
 
-    webpage    = (unsigned char *)((i->second).data);
+    webpage = (unsigned char *)((i->second).data);
     webpageLen = (i->second).length;
     pthread_mutex_unlock(&_mutex);
     response->setContent(webpage, webpageLen);
