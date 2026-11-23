@@ -1485,7 +1485,7 @@ std::string WebServer::getHttpHeader(const char *messageType, const size_t len,
   strftime(timeBuf, 200, "Date: %a, %d %b %Y %H:%M:%S GMT", &timeinfo);
   header += std::string(timeBuf) + "\r\n";
 
-  header += webServerName + "\r\n";
+  header += "Server: " + webServerName + "\r\n";
 
   if (strncmp(messageType, "401", 3) == 0) {
     if (authBearerAdditionalHeaders) {
